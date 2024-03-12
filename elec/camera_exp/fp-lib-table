@@ -1,0 +1,5 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "Ikafly_lib")(type "KiCad")(uri "B:/Desktop/Doshisha/derc/ikafly/elec/lib/Ikafly_lib.pretty")(options "")(descr ""))
+  (lib (name "SamacSys_Parts")(type "KiCad")(uri "B:/Desktop/Doshisha/derc/ikafly/elec/lib/SamacSys_Parts.pretty")(options "")(descr ""))
+)
