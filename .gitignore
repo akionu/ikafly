@@ -3,4 +3,5 @@
 *ikafly_main-backups/
 *build/
 *tmp/
+*datasheet/
 *.vscode/

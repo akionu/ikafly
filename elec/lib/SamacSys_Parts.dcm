@@ -12,4 +12,16 @@ K
 F 
 $ENDCMP
 #
+$CMP W25Q32JVZPIQ
+D 32M-bit Serial Flash Memory with uniform 4KB sectors and Dual/Quad SPI
+K
+F https://www.winbond.com/hq/search-resource-file.jsp?partNo=W25Q32JVZPIQ&type=datasheet
+$ENDCMP
+#
+$CMP TS-1187A-B-A-B
+D tact switch 4x4X1.5 patch 160GF metal head waterproof
+K
+F http://www.helloxkb.com/public/images/pdf/TS-1187A-X-X-X.pdf
+$ENDCMP
+#
 #End Doc Library
