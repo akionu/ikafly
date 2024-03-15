@@ -2,4 +2,5 @@
   (version 7)
   (lib (name "Ikafly_lib")(type "KiCad")(uri "B:/Desktop/Doshisha/derc/ikafly/elec/lib/Ikafly_lib.kicad_sym")(options "")(descr ""))
   (lib (name "SamacSys_Parts")(type "KiCad")(uri "B:/Desktop/Doshisha/derc/ikafly/elec/lib/SamacSys_Parts.kicad_sym")(options "")(descr ""))
+  (lib (name "tanekonsat")(type "KiCad")(uri "B:/Desktop/Doshisha/derc/prometheus-elec/kicad2/prometheus-em/lib/tanekonsat.kicad_sym")(options "")(descr "")(disabled)(hidden))
 )

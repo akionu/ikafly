@@ -1,7 +1,7 @@
 (footprint "JX-F38P" (version 20221018) (generator pcbnew)
   (layer "F.Cu")
   (attr smd)
-  (fp_text reference "U**" (at -1.920495 -2.55373 unlocked) (layer "F.SilkS")
+  (fp_text reference "IC**" (at -1.920495 -2.55373 unlocked) (layer "F.SilkS")
       (effects (font (size 0.8 0.8) (thickness 0.1)))
     (tstamp 10b173c4-9e22-46ec-89d0-54b8214c6fa8)
   )

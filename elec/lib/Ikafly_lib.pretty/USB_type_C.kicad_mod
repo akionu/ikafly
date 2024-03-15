@@ -1,7 +1,7 @@
 (footprint "USB_type_C" (version 20221018) (generator pcbnew)
   (layer "F.Cu")
   (attr through_hole)
-  (fp_text reference "REF**" (at -2.5 -1.8 unlocked) (layer "F.SilkS")
+  (fp_text reference "J**" (at 1.49 6.36 unlocked) (layer "F.SilkS")
       (effects (font (size 1 1) (thickness 0.15)))
     (tstamp eaa0bd9a-d861-4278-acc9-286248faecf5)
   )
