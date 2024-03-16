@@ -60,4 +60,10 @@ K
 F https://www.wch-ic.com/downloads/file/359.html?time=2024-02-19%2021:36:49&code=g2fI0G6J0762wmPziIzNbHvSaSadYsJ5B8SPEtxL
 $ENDCMP
 #
+$CMP MST22D18G2_125
+D Brick nogging 50mA DPDT 12V 1 SMD,3.6x9.1mm Slide Switches ROHS
+K
+F https://datasheet.lcsc.com/lcsc/2110190930_SHOU-HAN-MST22D18G2-125_C2906280.pdf
+$ENDCMP
+#
 #End Doc Library

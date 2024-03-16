@@ -1,5 +1,6 @@
 (fp_lib_table
   (version 7)
-  (lib (name "Ikafly_lib")(type "KiCad")(uri "B:/Desktop/Doshisha/derc/ikafly/elec/lib/Ikafly_lib.pretty")(options "")(descr ""))
-  (lib (name "SamacSys_Parts")(type "KiCad")(uri "B:/Desktop/Doshisha/derc/ikafly/elec/lib/SamacSys_Parts.pretty")(options "")(descr ""))
+  (lib (name "Ikafly_lib")(type "KiCad")(uri "${KIPRJMOD}/../lib/Ikafly_lib.pretty")(options "")(descr ""))
+  (lib (name "SamacSys_Parts")(type "KiCad")(uri "${KIPRJMOD}/../lib/SamacSys_Parts.pretty")(options "")(descr ""))
+  (lib (name "kaguya-lib")(type "KiCad")(uri "B:/Desktop/Doshisha/derc/kaguya-elec/kaguya-lib.pretty")(options "")(descr "")(disabled))
 )
