@@ -514,22 +514,22 @@
     (uuid ffcc8cc2-0aa2-4089-ad93-6740c8b089f8)
   )
 
-  (symbol (lib_id "Connector:Conn_01x02_Pin") (at 185.42 130.81 180) (unit 1)
+  (symbol (lib_id "Connector:Conn_01x02_Pin") (at 185.42 128.27 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 0b2e6d09-0092-4c4a-83b1-80246d934530)
-    (property "Reference" "J3" (at 186.69 130.81 0)
+    (property "Reference" "J2" (at 186.69 128.27 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Value" "Motor_Conn" (at 186.69 128.27 0)
+    (property "Value" "Motor_Conn" (at 186.69 130.81 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Footprint" "Ikafly_lib:JST_ZH_2_Side" (at 185.42 130.81 0)
+    (property "Footprint" "Ikafly_lib:JST_ZH_2_Side" (at 185.42 128.27 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Datasheet" "~" (at 185.42 130.81 0)
+    (property "Datasheet" "~" (at 185.42 128.27 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "LCSC" "" (at 185.42 130.81 0)
+    (property "LCSC" "" (at 185.42 128.27 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid c35fc906-425b-427f-8092-b95832b27b92))
@@ -537,7 +537,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715"
-          (reference "J3") (unit 1)
+          (reference "J2") (unit 1)
         )
       )
     )
@@ -546,7 +546,7 @@
   (symbol (lib_id "Mechanical:MountingHole") (at 212.09 46.99 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 54050847-8be4-46c1-8f66-9eef7d4e3599)
-    (property "Reference" "H3" (at 214.63 45.72 0)
+    (property "Reference" "H1" (at 214.63 45.72 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "MountingHole" (at 214.63 48.26 0)
@@ -561,28 +561,28 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715"
-          (reference "H3") (unit 1)
+          (reference "H1") (unit 1)
         )
       )
     )
   )
 
-  (symbol (lib_id "Connector:Conn_01x02_Pin") (at 184.15 107.95 180) (unit 1)
+  (symbol (lib_id "Connector:Conn_01x02_Pin") (at 184.15 105.41 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 6b626b3d-9d27-4ef9-a9a4-a31835fe6b6a)
-    (property "Reference" "J2" (at 185.42 107.95 0)
+    (property "Reference" "J1" (at 185.42 105.41 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Value" "Motor_Conn" (at 185.42 105.41 0)
+    (property "Value" "Motor_Conn" (at 185.42 107.95 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Footprint" "Ikafly_lib:JST_ZH_2_Side" (at 184.15 107.95 0)
+    (property "Footprint" "Ikafly_lib:JST_ZH_2_Side" (at 184.15 105.41 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Datasheet" "~" (at 184.15 107.95 0)
+    (property "Datasheet" "~" (at 184.15 105.41 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "LCSC" "" (at 184.15 107.95 0)
+    (property "LCSC" "" (at 184.15 105.41 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid c55569de-0d78-46ba-9e3c-49f0f7724cb1))
@@ -590,7 +590,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715"
-          (reference "J2") (unit 1)
+          (reference "J1") (unit 1)
         )
       )
     )
@@ -599,7 +599,7 @@
   (symbol (lib_id "Mechanical:MountingHole") (at 231.14 46.99 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9498ac4d-df5b-47f1-b8d2-9dab85d9e4b5)
-    (property "Reference" "H5" (at 233.68 45.72 0)
+    (property "Reference" "H3" (at 233.68 45.72 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "MountingHole" (at 233.68 48.26 0)
@@ -614,7 +614,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715"
-          (reference "H5") (unit 1)
+          (reference "H3") (unit 1)
         )
       )
     )
@@ -623,7 +623,7 @@
   (symbol (lib_id "Device:Battery_Cell") (at 76.2 46.99 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 971c818f-6a41-4926-b9de-f1e906d0e720)
-    (property "Reference" "BT3" (at 80.01 43.8785 0)
+    (property "Reference" "BT1" (at 80.01 43.8785 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "AA_Cell" (at 80.01 46.4185 0)
@@ -640,7 +640,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715"
-          (reference "BT3") (unit 1)
+          (reference "BT1") (unit 1)
         )
       )
     )
@@ -649,7 +649,7 @@
   (symbol (lib_id "Mechanical:MountingHole") (at 212.09 52.07 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid bf9cde0f-3c05-43d3-a6e3-7acb62fbca90)
-    (property "Reference" "H4" (at 214.63 50.8 0)
+    (property "Reference" "H2" (at 214.63 50.8 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "MountingHole" (at 214.63 53.34 0)
@@ -664,7 +664,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715"
-          (reference "H4") (unit 1)
+          (reference "H2") (unit 1)
         )
       )
     )
@@ -673,7 +673,7 @@
   (symbol (lib_id "Mechanical:MountingHole") (at 231.14 52.07 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d3c06956-23a5-4326-bb84-5c1ee851f520)
-    (property "Reference" "H6" (at 233.68 50.8 0)
+    (property "Reference" "H4" (at 233.68 50.8 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "MountingHole" (at 233.68 53.34 0)
@@ -688,7 +688,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715"
-          (reference "H6") (unit 1)
+          (reference "H4") (unit 1)
         )
       )
     )
@@ -697,7 +697,7 @@
   (symbol (lib_id "power:GND") (at 76.2 50.8 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid fde1f4e1-88ba-4ba7-9acc-8f9a5318171e)
-    (property "Reference" "#PWR063" (at 76.2 57.15 0)
+    (property "Reference" "#PWR01" (at 76.2 57.15 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 76.2 54.61 0)
@@ -713,7 +713,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715"
-          (reference "#PWR063") (unit 1)
+          (reference "#PWR01") (unit 1)
         )
       )
     )

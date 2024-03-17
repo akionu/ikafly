@@ -265,11 +265,11 @@
     (uuid fcef57fe-448f-449d-aa19-69e069b6869a)
   )
 
-  (label "PWMB" (at 55.88 59.69 180) (fields_autoplaced)
+  (label "PWMB" (at 55.88 62.23 180) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify right bottom))
     (uuid ccee4531-ffce-406c-b49b-7fb4372a4983)
   )
-  (label "PWMA" (at 55.88 62.23 180) (fields_autoplaced)
+  (label "PWMA" (at 55.88 59.69 180) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify right bottom))
     (uuid e620b12f-9352-4036-b2cb-bc1cd570f6b2)
   )
@@ -306,7 +306,7 @@
   (symbol (lib_id "power:GND") (at 95.25 60.96 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 0998f953-9e9b-4a51-8691-637c5beb43a4)
-    (property "Reference" "#PWR0100" (at 95.25 67.31 0)
+    (property "Reference" "#PWR0106" (at 95.25 67.31 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 95.25 64.77 0)
@@ -322,10 +322,10 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/f73663a8-2807-4811-bf57-e0f2b842cf7a"
-          (reference "#PWR0100") (unit 1)
+          (reference "#PWR0106") (unit 1)
         )
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/f139080b-93e3-46a1-986a-69ce094db5f8"
-          (reference "#PWR0101") (unit 1)
+          (reference "#PWR0108") (unit 1)
         )
       )
     )
@@ -334,7 +334,7 @@
   (symbol (lib_id "Device:C") (at 95.25 54.61 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 17b702de-86c2-4a71-8efc-886af95b71e4)
-    (property "Reference" "C64" (at 97.79 53.34 0)
+    (property "Reference" "C52" (at 97.79 53.34 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "100n" (at 97.79 55.88 0)
@@ -354,10 +354,10 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/f73663a8-2807-4811-bf57-e0f2b842cf7a"
-          (reference "C64") (unit 1)
+          (reference "C52") (unit 1)
         )
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/f139080b-93e3-46a1-986a-69ce094db5f8"
-          (reference "C65") (unit 1)
+          (reference "C53") (unit 1)
         )
       )
     )
@@ -366,7 +366,7 @@
   (symbol (lib_id "Driver_Motor:DRV8837") (at 66.04 59.69 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 1eea0fcd-8e8c-46f7-ab43-a6c498baf4f8)
-    (property "Reference" "IC10" (at 69.85 45.72 0)
+    (property "Reference" "IC16" (at 69.85 45.72 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "DRV8837" (at 69.85 48.26 0)
@@ -393,10 +393,10 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/f73663a8-2807-4811-bf57-e0f2b842cf7a"
-          (reference "IC10") (unit 1)
+          (reference "IC16") (unit 1)
         )
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/f139080b-93e3-46a1-986a-69ce094db5f8"
-          (reference "IC12") (unit 1)
+          (reference "IC17") (unit 1)
         )
       )
     )
@@ -405,7 +405,7 @@
   (symbol (lib_id "power:GND") (at 66.04 72.39 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 6b0b9b16-ebaa-4cb1-9f1e-65683c410ba4)
-    (property "Reference" "#PWR042" (at 66.04 78.74 0)
+    (property "Reference" "#PWR0105" (at 66.04 78.74 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 66.04 76.2 0)
@@ -421,10 +421,10 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/f73663a8-2807-4811-bf57-e0f2b842cf7a"
-          (reference "#PWR042") (unit 1)
+          (reference "#PWR0105") (unit 1)
         )
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/f139080b-93e3-46a1-986a-69ce094db5f8"
-          (reference "#PWR045") (unit 1)
+          (reference "#PWR0107") (unit 1)
         )
       )
     )
@@ -433,7 +433,7 @@
   (symbol (lib_id "Device:R") (at 49.53 54.61 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid eccaf810-c52a-42d5-92b4-f4b5e6e88f91)
-    (property "Reference" "R15" (at 49.53 52.07 90)
+    (property "Reference" "R37" (at 49.53 52.07 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "10k" (at 49.53 54.61 90)
@@ -453,10 +453,10 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/f73663a8-2807-4811-bf57-e0f2b842cf7a"
-          (reference "R15") (unit 1)
+          (reference "R37") (unit 1)
         )
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/f139080b-93e3-46a1-986a-69ce094db5f8"
-          (reference "R16") (unit 1)
+          (reference "R38") (unit 1)
         )
       )
     )

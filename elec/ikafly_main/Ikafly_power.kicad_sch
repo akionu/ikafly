@@ -837,7 +837,7 @@
   (symbol (lib_id "power:PWR_FLAG") (at 237.49 59.69 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 103ebc2f-47c1-4cbd-a716-dc95bf915c75)
-    (property "Reference" "#FLG06" (at 237.49 57.785 0)
+    (property "Reference" "#FLG010" (at 237.49 57.785 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "PWR_FLAG" (at 237.49 54.61 0)
@@ -853,7 +853,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-          (reference "#FLG06") (unit 1)
+          (reference "#FLG010") (unit 1)
         )
       )
     )
@@ -862,7 +862,7 @@
   (symbol (lib_id "power:GND") (at 63.5 67.31 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 10dafdb0-dac1-4498-82a2-dd72b9aedb1f)
-    (property "Reference" "#PWR049" (at 63.5 73.66 0)
+    (property "Reference" "#PWR085" (at 63.5 73.66 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 63.5 71.12 0)
@@ -878,7 +878,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-          (reference "#PWR049") (unit 1)
+          (reference "#PWR085") (unit 1)
         )
       )
     )
@@ -887,7 +887,7 @@
   (symbol (lib_id "Regulator_Linear:XC6206PxxxMR") (at 77.47 59.69 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3df0b0b9-f6c9-4add-a261-44aa2025c1b2)
-    (property "Reference" "IC13" (at 77.47 53.34 0)
+    (property "Reference" "IC15" (at 77.47 53.34 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "XC6206P182MR" (at 77.47 55.88 0)
@@ -908,7 +908,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-          (reference "IC13") (unit 1)
+          (reference "IC15") (unit 1)
         )
       )
     )
@@ -917,7 +917,7 @@
   (symbol (lib_id "power:PWR_FLAG") (at 110.49 121.92 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 490cb4c3-2a0c-41bd-8bdf-73502ca039b0)
-    (property "Reference" "#FLG08" (at 110.49 120.015 0)
+    (property "Reference" "#FLG07" (at 110.49 120.015 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "PWR_FLAG" (at 110.49 118.11 0)
@@ -933,7 +933,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-          (reference "#FLG08") (unit 1)
+          (reference "#FLG07") (unit 1)
         )
       )
     )
@@ -942,7 +942,7 @@
   (symbol (lib_id "Device:R") (at 172.72 64.77 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 4979db77-8c0e-4fbf-a82c-caf1fbe60f2a)
-    (property "Reference" "R28" (at 173.99 63.5 0)
+    (property "Reference" "R27" (at 173.99 63.5 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "100k" (at 173.99 66.04 0)
@@ -962,7 +962,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-          (reference "R28") (unit 1)
+          (reference "R27") (unit 1)
         )
       )
     )
@@ -971,7 +971,7 @@
   (symbol (lib_id "power:PWR_FLAG") (at 68.58 121.92 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 4c86992a-eb5c-4991-882f-a7da2a85a4c1)
-    (property "Reference" "#FLG01" (at 68.58 120.015 0)
+    (property "Reference" "#FLG06" (at 68.58 120.015 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "PWR_FLAG" (at 68.58 118.11 0)
@@ -987,7 +987,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-          (reference "#FLG01") (unit 1)
+          (reference "#FLG06") (unit 1)
         )
       )
     )
@@ -996,7 +996,7 @@
   (symbol (lib_id "power:GND") (at 125.73 78.74 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 5c339efe-63eb-4d01-833b-870a1d91a155)
-    (property "Reference" "#PWR075" (at 125.73 85.09 0)
+    (property "Reference" "#PWR088" (at 125.73 85.09 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 125.73 82.55 0)
@@ -1012,7 +1012,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-          (reference "#PWR075") (unit 1)
+          (reference "#PWR088") (unit 1)
         )
       )
     )
@@ -1021,7 +1021,7 @@
   (symbol (lib_id "power:GND") (at 171.45 86.36 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 6c776394-04e0-41e6-baa4-35a80c5f0fa2)
-    (property "Reference" "#PWR083" (at 171.45 92.71 0)
+    (property "Reference" "#PWR089" (at 171.45 92.71 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 171.45 90.17 0)
@@ -1037,7 +1037,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-          (reference "#PWR083") (unit 1)
+          (reference "#PWR089") (unit 1)
         )
       )
     )
@@ -1046,7 +1046,7 @@
   (symbol (lib_id "Device:C") (at 63.5 63.5 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 6e0f3b29-b3d1-4d39-98a3-7d5736dd12f2)
-    (property "Reference" "C42" (at 66.04 62.23 0)
+    (property "Reference" "C38" (at 66.04 62.23 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "10u" (at 66.04 64.77 0)
@@ -1066,7 +1066,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-          (reference "C42") (unit 1)
+          (reference "C38") (unit 1)
         )
       )
     )
@@ -1075,7 +1075,7 @@
   (symbol (lib_id "Device:D") (at 146.05 80.01 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 77997ece-321c-4b19-9461-d1579492de65)
-    (property "Reference" "D4" (at 146.05 73.66 0)
+    (property "Reference" "D8" (at 146.05 73.66 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "CUS10S30" (at 146.05 76.2 0)
@@ -1101,7 +1101,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-          (reference "D4") (unit 1)
+          (reference "D8") (unit 1)
         )
       )
     )
@@ -1110,7 +1110,7 @@
   (symbol (lib_id "Transistor_FET:IRLML6402") (at 146.05 67.31 90) (mirror x) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 8573603b-7c23-41ee-8bac-576e12a5b567)
-    (property "Reference" "Q1" (at 149.86 63.5 90)
+    (property "Reference" "Q2" (at 149.86 63.5 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "CJ2301-ES" (at 153.67 66.04 90)
@@ -1131,7 +1131,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-          (reference "Q1") (unit 1)
+          (reference "Q2") (unit 1)
         )
       )
     )
@@ -1140,7 +1140,7 @@
   (symbol (lib_id "power:PWR_FLAG") (at 194.31 59.69 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 924fad30-ddc0-4ebd-9f4c-87961ce5be6f)
-    (property "Reference" "#FLG05" (at 194.31 57.785 0)
+    (property "Reference" "#FLG09" (at 194.31 57.785 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "PWR_FLAG" (at 194.31 54.61 0)
@@ -1156,7 +1156,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-          (reference "#FLG05") (unit 1)
+          (reference "#FLG09") (unit 1)
         )
       )
     )
@@ -1165,7 +1165,7 @@
   (symbol (lib_id "Transistor_FET:IRLML6402") (at 182.88 62.23 270) (mirror x) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 97c3f72c-a490-43da-99bb-485afa0879be)
-    (property "Reference" "Q2" (at 182.88 53.34 90)
+    (property "Reference" "Q3" (at 182.88 53.34 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "CJ2301-ES" (at 182.88 55.88 90)
@@ -1186,7 +1186,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-          (reference "Q2") (unit 1)
+          (reference "Q3") (unit 1)
         )
       )
     )
@@ -1195,7 +1195,7 @@
   (symbol (lib_id "Device:D") (at 153.67 59.69 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9d71a968-c758-40e2-8bf2-6e7cf5bf14f5)
-    (property "Reference" "D3" (at 153.67 53.34 0)
+    (property "Reference" "D9" (at 153.67 53.34 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "CUS10S30" (at 153.67 55.88 0)
@@ -1221,7 +1221,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-          (reference "D3") (unit 1)
+          (reference "D9") (unit 1)
         )
       )
     )
@@ -1230,7 +1230,7 @@
   (symbol (lib_id "power:PWR_FLAG") (at 110.49 143.51 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid ae9d6346-adde-4fde-a721-bb686492cdea)
-    (property "Reference" "#FLG09" (at 110.49 141.605 0)
+    (property "Reference" "#FLG08" (at 110.49 141.605 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "PWR_FLAG" (at 110.49 139.7 0)
@@ -1246,7 +1246,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-          (reference "#FLG09") (unit 1)
+          (reference "#FLG08") (unit 1)
         )
       )
     )
@@ -1255,7 +1255,7 @@
   (symbol (lib_id "power:GND") (at 77.47 67.31 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid bc24b514-0b87-4f3e-aedb-177704e3579c)
-    (property "Reference" "#PWR057" (at 77.47 73.66 0)
+    (property "Reference" "#PWR086" (at 77.47 73.66 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 77.47 71.12 0)
@@ -1271,7 +1271,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-          (reference "#PWR057") (unit 1)
+          (reference "#PWR086") (unit 1)
         )
       )
     )
@@ -1280,7 +1280,7 @@
   (symbol (lib_id "Device:D") (at 125.73 74.93 270) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c166b037-2035-4f51-a1df-2d60b8b4cda4)
-    (property "Reference" "D5" (at 128.27 73.66 90)
+    (property "Reference" "D7" (at 128.27 73.66 90)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "CUS10S30" (at 128.27 76.2 90)
@@ -1306,7 +1306,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-          (reference "D5") (unit 1)
+          (reference "D7") (unit 1)
         )
       )
     )
@@ -1315,7 +1315,7 @@
   (symbol (lib_id "Device:C") (at 90.17 63.5 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid df026dd1-9ef6-4d3d-8123-3befbc7c2bd2)
-    (property "Reference" "C43" (at 92.71 62.23 0)
+    (property "Reference" "C39" (at 92.71 62.23 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "10u" (at 92.71 64.77 0)
@@ -1335,7 +1335,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-          (reference "C43") (unit 1)
+          (reference "C39") (unit 1)
         )
       )
     )
@@ -1344,7 +1344,7 @@
   (symbol (lib_id "power:GND") (at 90.17 67.31 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid e038fa86-166f-4c18-b24c-59a5c04087f5)
-    (property "Reference" "#PWR051" (at 90.17 73.66 0)
+    (property "Reference" "#PWR087" (at 90.17 73.66 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 90.17 71.12 0)
@@ -1360,7 +1360,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-          (reference "#PWR051") (unit 1)
+          (reference "#PWR087") (unit 1)
         )
       )
     )
@@ -1445,7 +1445,7 @@
   (symbol (lib_id "power:GND") (at 62.23 97.79 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ee1bd547-b286-4d34-873d-207503a38bfa)
-    (property "Reference" "#PWR0107" (at 62.23 104.14 0)
+    (property "Reference" "#PWR084" (at 62.23 104.14 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 62.23 102.87 0)
@@ -1461,7 +1461,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-          (reference "#PWR0107") (unit 1)
+          (reference "#PWR084") (unit 1)
         )
       )
     )
@@ -1470,7 +1470,7 @@
   (symbol (lib_id "power:PWR_FLAG") (at 62.23 97.79 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid f676d819-68dc-4375-a9d3-c8c564e73bb7)
-    (property "Reference" "#FLG07" (at 62.23 95.885 0)
+    (property "Reference" "#FLG05" (at 62.23 95.885 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "PWR_FLAG" (at 62.23 93.98 0)
@@ -1486,7 +1486,7 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-          (reference "#FLG07") (unit 1)
+          (reference "#FLG05") (unit 1)
         )
       )
     )

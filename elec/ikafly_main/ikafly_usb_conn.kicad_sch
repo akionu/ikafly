@@ -302,7 +302,7 @@
   (symbol (lib_id "power:GND") (at 140.97 74.93 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 033b3da3-4d75-44cc-a1aa-875846b9c111)
-    (property "Reference" "#PWR010" (at 140.97 81.28 0)
+    (property "Reference" "#PWR?" (at 140.97 81.28 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 140.97 78.74 0)
@@ -318,10 +318,10 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/0fe4d34b-47fc-4302-aa18-fefa776a4b4c"
-          (reference "#PWR010") (unit 1)
+          (reference "#PWR?") (unit 1)
         )
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/598b6d9f-2530-49db-9ee3-1e1dd00d8025"
-          (reference "#PWR011") (unit 1)
+          (reference "#PWR026") (unit 1)
         )
       )
     )
@@ -330,7 +330,7 @@
   (symbol (lib_id "power:GND") (at 140.97 97.79 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 2b013b6b-6df7-4009-9d5d-3f6e17f17fae)
-    (property "Reference" "#PWR012" (at 140.97 104.14 0)
+    (property "Reference" "#PWR?" (at 140.97 104.14 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 140.97 101.6 0)
@@ -346,10 +346,10 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/0fe4d34b-47fc-4302-aa18-fefa776a4b4c"
-          (reference "#PWR012") (unit 1)
+          (reference "#PWR?") (unit 1)
         )
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/598b6d9f-2530-49db-9ee3-1e1dd00d8025"
-          (reference "#PWR013") (unit 1)
+          (reference "#PWR028") (unit 1)
         )
       )
     )
@@ -358,7 +358,7 @@
   (symbol (lib_id "power:GND") (at 140.97 90.17 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 2cb75da8-0311-425b-8253-25444da1cb09)
-    (property "Reference" "#PWR011" (at 140.97 96.52 0)
+    (property "Reference" "#PWR?" (at 140.97 96.52 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 140.97 93.98 0)
@@ -374,10 +374,10 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/0fe4d34b-47fc-4302-aa18-fefa776a4b4c"
-          (reference "#PWR011") (unit 1)
+          (reference "#PWR?") (unit 1)
         )
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/598b6d9f-2530-49db-9ee3-1e1dd00d8025"
-          (reference "#PWR012") (unit 1)
+          (reference "#PWR027") (unit 1)
         )
       )
     )
@@ -386,7 +386,7 @@
   (symbol (lib_id "Device:R") (at 135.89 74.93 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 52a1890a-e0ce-4186-b420-278f7c55448f)
-    (property "Reference" "R3" (at 135.89 72.39 90)
+    (property "Reference" "R?" (at 135.89 72.39 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "5.1k" (at 135.89 74.93 90)
@@ -406,10 +406,10 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/0fe4d34b-47fc-4302-aa18-fefa776a4b4c"
-          (reference "R3") (unit 1)
+          (reference "R?") (unit 1)
         )
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/598b6d9f-2530-49db-9ee3-1e1dd00d8025"
-          (reference "R3") (unit 1)
+          (reference "R12") (unit 1)
         )
       )
     )
@@ -418,7 +418,7 @@
   (symbol (lib_id "Ikafly_lib:USB_type_C") (at 110.49 80.01 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 69d8229f-069c-4fc5-998d-8c8ed55645d5)
-    (property "Reference" "J1" (at 110.49 59.69 0)
+    (property "Reference" "J?" (at 110.49 59.69 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "USB_type_C" (at 110.49 62.23 0)
@@ -449,10 +449,10 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/0fe4d34b-47fc-4302-aa18-fefa776a4b4c"
-          (reference "J1") (unit 1)
+          (reference "J?") (unit 1)
         )
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/598b6d9f-2530-49db-9ee3-1e1dd00d8025"
-          (reference "J1") (unit 1)
+          (reference "J4") (unit 1)
         )
       )
     )
@@ -461,7 +461,7 @@
   (symbol (lib_id "Device:R") (at 135.89 90.17 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid c5186071-5687-4257-b09f-c585ac606f13)
-    (property "Reference" "R4" (at 135.89 87.63 90)
+    (property "Reference" "R?" (at 135.89 87.63 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "5.1k" (at 135.89 90.17 90)
@@ -481,10 +481,10 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/0fe4d34b-47fc-4302-aa18-fefa776a4b4c"
-          (reference "R4") (unit 1)
+          (reference "R?") (unit 1)
         )
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/598b6d9f-2530-49db-9ee3-1e1dd00d8025"
-          (reference "R4") (unit 1)
+          (reference "R13") (unit 1)
         )
       )
     )
@@ -493,7 +493,7 @@
   (symbol (lib_id "power:GND") (at 140.97 67.31 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid d320f9de-63f0-45ca-ac53-a2f31e4f645d)
-    (property "Reference" "#PWR013" (at 140.97 73.66 0)
+    (property "Reference" "#PWR?" (at 140.97 73.66 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 140.97 71.12 0)
@@ -509,10 +509,10 @@
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/0fe4d34b-47fc-4302-aa18-fefa776a4b4c"
-          (reference "#PWR013") (unit 1)
+          (reference "#PWR?") (unit 1)
         )
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/598b6d9f-2530-49db-9ee3-1e1dd00d8025"
-          (reference "#PWR010") (unit 1)
+          (reference "#PWR025") (unit 1)
         )
       )
     )
