@@ -899,12 +899,12 @@
     (property "Datasheet" "https://www.torexsemi.com/file/xc6206/XC6206.pdf" (at 77.47 59.69 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "LCSC" "" (at 77.47 59.69 0)
+    (property "LCSC" "C347373" (at 77.47 59.69 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 6a0299a4-889b-488a-bc01-891e6e4d9acb))
-    (pin "2" (uuid af015e3d-fdc9-4902-b994-f27678023b22))
-    (pin "3" (uuid 8b627d6b-2e94-44e7-b2d3-56ba07b8d740))
+    (pin "1" (uuid 32942e11-53cd-4410-86f7-39d079336001))
+    (pin "2" (uuid de6ce2cd-6014-4d82-beb9-60fa899a1b35))
+    (pin "3" (uuid bc3df64f-f11c-4a5e-b41c-05fbe390c4d9))
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
@@ -954,11 +954,11 @@
     (property "Datasheet" "~" (at 172.72 64.77 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "LCSC" "" (at 172.72 64.77 0)
+    (property "LCSC" "C60491" (at 172.72 64.77 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 14fe8aae-6d92-4347-acd0-70940862ce0f))
-    (pin "2" (uuid 1dec666d-997e-41cb-9af2-efec6a7cb5ab))
+    (pin "1" (uuid a4cb447b-f133-4a6d-8a20-f0fe454b6a4f))
+    (pin "2" (uuid a8264374-4ced-4a24-bb55-e87b56240687))
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
@@ -1058,11 +1058,11 @@
     (property "Datasheet" "~" (at 63.5 63.5 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "LCSC" "" (at 63.5 63.5 0)
+    (property "LCSC" "C1691" (at 63.5 63.5 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 19f4a00f-f4ee-49d2-8223-8221738b40b3))
-    (pin "2" (uuid da17f0fa-4e50-4c82-9616-0d0dfec79900))
+    (pin "1" (uuid cd2fafd5-ec21-4e69-86e3-08a25b410087))
+    (pin "2" (uuid 7a6b617b-a047-464e-98b9-d5a5e0443c44))
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
@@ -1093,11 +1093,11 @@
     (property "Sim.Pins" "1=K 2=A" (at 146.05 80.01 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "LCSC" "" (at 146.05 80.01 0)
+    (property "LCSC" "C146335" (at 146.05 80.01 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid a171d944-ae98-4022-8099-2e816d7ab432))
-    (pin "2" (uuid 185d0929-40ba-4876-9242-ae793c73430e))
+    (pin "1" (uuid 792a920d-8d66-4523-94b0-933d6c103acf))
+    (pin "2" (uuid fd6c39d1-a3b7-441e-ad25-26bc7cc5e9b8))
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
@@ -1122,12 +1122,12 @@
     (property "Datasheet" "https://www.infineon.com/dgdl/irlml6402pbf.pdf?fileId=5546d462533600a401535668d5c2263c" (at 146.05 67.31 0)
       (effects (font (size 1.27 1.27)) (justify left) hide)
     )
-    (property "LCSC" "" (at 146.05 67.31 0)
+    (property "LCSC" "C5224170" (at 146.05 67.31 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid e5a167bf-1d4f-4b22-99a0-a9f6953f487e))
-    (pin "2" (uuid b2f9e582-85b7-4f4e-9b78-66171b139758))
-    (pin "3" (uuid eef324f0-cc13-47e4-a25d-0aae404b7d50))
+    (pin "1" (uuid 123aadf1-5aef-4422-9105-0129080ca284))
+    (pin "2" (uuid 2dc0e08d-08e2-4aa8-9963-38d934bc7af9))
+    (pin "3" (uuid 01c52ea3-7329-4a4c-b893-5e5193ff211a))
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
@@ -1177,12 +1177,12 @@
     (property "Datasheet" "https://www.infineon.com/dgdl/irlml6402pbf.pdf?fileId=5546d462533600a401535668d5c2263c" (at 182.88 62.23 0)
       (effects (font (size 1.27 1.27)) (justify left) hide)
     )
-    (property "LCSC" "" (at 182.88 62.23 0)
+    (property "LCSC" "C5224170" (at 182.88 62.23 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 657b82a0-57ae-4cb6-91d6-cfed8eac9a0c))
-    (pin "2" (uuid 52460fb8-38e6-43c5-b8c0-709b3a39b87a))
-    (pin "3" (uuid 52e27ab0-24d1-40aa-a20a-bb8a0e5c4d6b))
+    (pin "1" (uuid 740f58b1-54d5-4615-b578-7522c54e860f))
+    (pin "2" (uuid 612e54b7-0782-4a6e-994f-644a417e096f))
+    (pin "3" (uuid 112fce89-8c9f-483a-bb4a-a6d5aa0f9e5b))
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
@@ -1213,11 +1213,11 @@
     (property "Sim.Pins" "1=K 2=A" (at 153.67 59.69 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "LCSC" "" (at 153.67 59.69 0)
+    (property "LCSC" "C146335" (at 153.67 59.69 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 1b47e176-78b9-4d93-aac5-041c8bb66c5c))
-    (pin "2" (uuid 0b33b272-8cd2-4d8b-a0ce-86b33ec60041))
+    (pin "1" (uuid 20cba42a-b5ca-471b-9431-7c2a87c13488))
+    (pin "2" (uuid e66122bb-123f-4cbb-9e90-abd8d4ade78a))
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
@@ -1298,11 +1298,11 @@
     (property "Sim.Pins" "1=K 2=A" (at 125.73 74.93 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "LCSC" "" (at 125.73 74.93 0)
+    (property "LCSC" "C146335" (at 125.73 74.93 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid ebc81edf-9ff0-4b4d-9ad6-44305db9645d))
-    (pin "2" (uuid eb3dc585-6c43-497f-a585-5499ba204ba4))
+    (pin "1" (uuid 90818387-2a1e-4e69-9b6c-71f733f4d37f))
+    (pin "2" (uuid 7d58a78c-aecc-4e09-9381-4712b62063a6))
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
@@ -1327,11 +1327,11 @@
     (property "Datasheet" "~" (at 90.17 63.5 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "LCSC" "" (at 90.17 63.5 0)
+    (property "LCSC" "C1691" (at 90.17 63.5 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 0de14ec4-dcee-4ef8-bac9-f1bbc248a692))
-    (pin "2" (uuid 7da5e241-e896-47e6-9cba-4c0d8543f7c9))
+    (pin "1" (uuid 8f68c3c3-c60b-43a7-9bf8-fe419f335164))
+    (pin "2" (uuid e9a6840d-3f7b-4e8f-92d4-c7d5f9a11a3d))
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
@@ -1402,12 +1402,15 @@
     (property "Arrow Price/Stock" "" (at 1172.72 102.87 0)
       (effects (font (size 1.27 1.27)) (justify left top) hide)
     )
-    (pin "1" (uuid a9b012ce-fa23-4be9-b064-47a53e49d43e))
-    (pin "2" (uuid e3fb5943-8c32-46bd-ac93-f069d58e2830))
-    (pin "3" (uuid b5fcf1f0-2310-469b-997e-ac271aab73a5))
-    (pin "4" (uuid 60b27aac-2331-4ac7-8ee9-f0b79a777283))
-    (pin "5" (uuid 51bbd047-18c7-4651-bf99-ce210d9626dd))
-    (pin "6" (uuid dc326c5a-157e-4dea-8f7f-d95f2e3b88c1))
+    (property "LCSC" "C2906280" (at 177.8 86.36 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (pin "1" (uuid 8a341cfe-217e-4c43-9569-39e2ea0da892))
+    (pin "2" (uuid 4d65e672-25e3-4576-b667-066e37bbcab4))
+    (pin "3" (uuid 675b9181-f723-4bc5-96b2-f0c057257970))
+    (pin "4" (uuid 01bbf3b4-caaa-4903-aa36-dad9348514be))
+    (pin "5" (uuid 3c1b5122-79c4-4c79-92c4-b5c98dade63b))
+    (pin "6" (uuid 974c270b-0110-435d-a4b8-1e9d72862cb5))
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
@@ -1507,11 +1510,11 @@
     (property "Datasheet" "~" (at 118.11 69.85 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "LCSC" "" (at 118.11 69.85 0)
+    (property "LCSC" "C210357" (at 118.11 69.85 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid f9137399-ca8a-4c7b-9be1-899896cf3f92))
-    (pin "2" (uuid 2c2b32e7-353c-4dcd-8b57-98149117aee2))
+    (pin "1" (uuid ccc76c21-71c1-4635-9679-57a13ecf0469))
+    (pin "2" (uuid 1e50c6cf-75d9-4126-9c4f-a2d6e9279f2a))
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"

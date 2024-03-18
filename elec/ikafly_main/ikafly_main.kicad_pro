@@ -526,8 +526,8 @@
       "GND": "Power",
       "Net-(AE1-A)": "RF50",
       "Net-(C13-Pad2)": "RF50",
-      "Net-(IC4-RFIN)": "RF50",
-      "Net-(IC4-RFOUT)": "RF50"
+      "Net-(IC18-RFIN)": "RF50",
+      "Net-(IC18-RFOUT)": "RF50"
     },
     "netclass_patterns": [
       {

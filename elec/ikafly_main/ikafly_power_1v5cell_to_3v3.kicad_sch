@@ -467,17 +467,17 @@
     (property "Manufacturer_Part_Number" "PAM2401SCADJ" (at 115.57 650.8 0)
       (effects (font (size 1.27 1.27)) (justify left top) hide)
     )
-    (property "LCSC" "" (at 91.44 55.88 0)
+    (property "LCSC" "C508238" (at 91.44 55.88 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid a0f6a9c4-979b-4fa6-8a57-c2de31edfa2f))
-    (pin "2" (uuid f709f2e8-3b96-4847-b33c-b2fd7fb65ab6))
-    (pin "3" (uuid f918f18f-4199-498a-908c-917815d02900))
-    (pin "4" (uuid ac3713cb-a6ca-4711-8c16-16970f3e5639))
-    (pin "5" (uuid 2ad548ab-f628-4ac7-aadd-e7fdbea09eec))
-    (pin "6" (uuid a9810a20-dd7c-40ef-a1c6-b9e947c288cf))
-    (pin "7" (uuid c2828841-1eaa-4ab0-a71b-22c61cde4076))
-    (pin "8" (uuid 3fbb0f89-42d1-4573-a168-60bc250de557))
+    (pin "1" (uuid 67598d73-47a3-4c6a-bc8a-9001ca7fd684))
+    (pin "2" (uuid b5cd8c2d-5540-4076-959d-f970cbd5205d))
+    (pin "3" (uuid 862478bc-f1c4-4d4c-b1a7-16fb828146c8))
+    (pin "4" (uuid 3e6fe2b8-bf9e-4f91-8dce-2600e3bdc955))
+    (pin "5" (uuid 2d87b4d9-d57a-42d0-8277-70c55e3160ee))
+    (pin "6" (uuid 3454a5fc-d0b2-4b1a-ab64-71074d47b78f))
+    (pin "7" (uuid 6c0fab51-14cb-478b-8b94-298b276f90b2))
+    (pin "8" (uuid a8085605-ebd6-4ac0-aa89-a86992e8aca7))
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
@@ -511,11 +511,11 @@
     (property "Datasheet" "~" (at 81.28 64.77 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "LCSC" "" (at 81.28 64.77 0)
+    (property "LCSC" "C59461" (at 81.28 64.77 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 39bd9b74-7b79-49de-b866-771a106700ad))
-    (pin "2" (uuid 65fad153-da1b-4fbb-8709-608b66ea1df1))
+    (pin "1" (uuid 3b3f40ce-30f3-4ee8-8096-6241cd9d814c))
+    (pin "2" (uuid fe0944c0-92c2-4adf-9945-46564ebbc6c2))
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
@@ -549,11 +549,11 @@
     (property "Datasheet" "~" (at 86.36 58.42 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "LCSC" "" (at 86.36 58.42 0)
+    (property "LCSC" "C2906885" (at 86.36 58.42 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 6d7d473b-91a8-4ee3-994f-7b12165b4192))
-    (pin "2" (uuid 520e8498-23b9-4a1b-aa59-b540d4058f4f))
+    (pin "1" (uuid 3a62bf0e-d2a4-479c-b946-cc19e76dce91))
+    (pin "2" (uuid 694632b8-45f2-4010-9abd-2c833981d8ce))
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
@@ -587,11 +587,11 @@
     (property "Datasheet" "~" (at 148.59 63.5 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "LCSC" "" (at 148.59 63.5 0)
+    (property "LCSC" "C59461" (at 148.59 63.5 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 2da74d8a-fcc3-4ce6-be36-1f237502c146))
-    (pin "2" (uuid d6a458b6-d3d1-4362-a0ae-66bc9623e501))
+    (pin "1" (uuid 5e07894c-04fe-423c-b677-5bf66548ee9b))
+    (pin "2" (uuid 46615515-7503-46a8-98f0-c3d4f1d5c0de))
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
@@ -659,11 +659,11 @@
     (property "Datasheet" "~" (at 139.7 63.5 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "LCSC" "" (at 139.7 63.5 0)
+    (property "LCSC" "C59461" (at 139.7 63.5 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid db817a6d-9cd8-4495-a7f9-dbd039f30d28))
-    (pin "2" (uuid 6e4c2be0-3cab-4ae6-9598-d8b983eb9d72))
+    (pin "1" (uuid 9c31c670-cbfc-403c-a736-66344c2219e0))
+    (pin "2" (uuid c1d7cc3a-e9ad-4c6c-8954-72e71d706b6b))
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
@@ -697,11 +697,11 @@
     (property "Datasheet" "~" (at 127 71.12 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "LCSC" "" (at 127 71.12 0)
+    (property "LCSC" "C2909320" (at 127 71.12 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid f7b460ca-625c-42e3-897f-3d11e8975c5c))
-    (pin "2" (uuid 5121a511-c71c-40a2-ac3e-1c7535b39839))
+    (pin "1" (uuid eb41a7bf-93c6-4fb6-8d4d-e9a989802c08))
+    (pin "2" (uuid ca19e504-1e8e-4539-9262-c2a6e9fbf61b))
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
@@ -803,11 +803,11 @@
     (property "Datasheet" "~" (at 127 62.23 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "LCSC" "" (at 127 62.23 0)
+    (property "LCSC" "C2909377" (at 127 62.23 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 08c122a2-a755-4284-b88d-d7ee91f89160))
-    (pin "2" (uuid ca32755d-3595-4fb0-a1f6-41358f150fb3))
+    (pin "1" (uuid 8994f54d-0f30-46a7-8633-e374a7acf641))
+    (pin "2" (uuid 3260dc01-aae9-43c6-ba92-975ec258a0be))
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
@@ -878,8 +878,8 @@
     (property "LCSC" "C5159663" (at 86.36 53.34 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 8e2a8927-6380-4c1d-8399-eca2cb2f4093))
-    (pin "2" (uuid 28c39df2-775b-4b0a-9aea-33bf51f8dcdc))
+    (pin "1" (uuid 233b8da7-db80-4a6e-bd84-6b9924c39321))
+    (pin "2" (uuid efea7958-29df-42ca-a096-760c29d6f75a))
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
@@ -913,11 +913,11 @@
     (property "Datasheet" "~" (at 72.39 64.77 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "LCSC" "" (at 72.39 64.77 0)
+    (property "LCSC" "C59461" (at 72.39 64.77 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid 1b4b3d72-b252-48ce-b3e4-5e6cc676783d))
-    (pin "2" (uuid 20d77559-9437-4beb-8d27-6d3121ef71f8))
+    (pin "1" (uuid dba6abb9-1dc3-4430-81b2-c5215063e91e))
+    (pin "2" (uuid 43ef2118-eb8e-4b32-af01-ffb8b16c771f))
     (instances
       (project "ikafly_main"
         (path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
