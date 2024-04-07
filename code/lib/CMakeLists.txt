@@ -1,0 +1,5 @@
+# add_subdirectory(cam)
+# add_subdirectory(gnss)
+add_subdirectory(imu)
+# add_subdirectory(press)
+# add_subdirectory(rf)
