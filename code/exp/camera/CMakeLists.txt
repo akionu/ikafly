@@ -1,0 +1,1 @@
+add_subdirectory(rp2040_ov2640)

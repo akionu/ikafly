@@ -23,12 +23,10 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
-#include "hardware/pwm.h"
 
 #define I2C i2c1
 #define SDA 14
 #define SCL 15
-#define EXCLK 0
 
 // I2C reserves some addresses for special purposes. We exclude these from the scan.
 // These are any addresses of the form 000 0xxx or 111 1xxx
@@ -40,15 +38,6 @@ int main() {
     // Enable UART so we can print status output
     stdio_init_all();
     sleep_ms(2000);
-
-	// for OV2640
-	// XCLK generation (~20.83 MHz)
-	gpio_set_function(EXCLK, GPIO_FUNC_PWM);
-	uint slice_num = pwm_gpio_to_slice_num(EXCLK);
-	// 6 cycles (0 to 5), 125 MHz / 6 = ~20.83 MHz wrap rate
-	pwm_set_wrap(slice_num, 5);
-	pwm_set_gpio_level(EXCLK, 3);
-	pwm_set_enabled(slice_num, true);
 
     i2c_init(I2C, 100 * 1000);
     gpio_set_function(SDA, GPIO_FUNC_I2C);
