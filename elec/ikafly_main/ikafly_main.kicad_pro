@@ -551,8 +551,12 @@
       "plot": "",
       "pos_files": "",
       "specctra_dsn": "",
+<<<<<<< Updated upstream
       "step": "",
       "svg": "",
+=======
+      "step": "ikafly_main.step",
+>>>>>>> Stashed changes
       "vrml": ""
     },
     "page_layout_descr_file": ""
