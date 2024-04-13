@@ -8,9 +8,9 @@ import sys
 
 CMD_REG_WRITE = 0xAA
 CMD_REG_READ = 0xBB
-CMD_CAPTURE = 0xCC
+CMD_CAPTURE = 0x63 # 'c'
 
-ser = serial.Serial(sys.argv[1], 1000000)
+ser = serial.Serial(sys.argv[1], 115200)
 atexit.register(lambda: ser.close())
 
 # ======================

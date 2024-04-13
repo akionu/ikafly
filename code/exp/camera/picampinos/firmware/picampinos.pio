@@ -1,0 +1,73 @@
+.program picampinos
+
+; pin8=vsync,pin9=href,pin10=pclk,pin0-pin7=D[2:9]
+start0:
+    out     x, 32       ; X <= TX_FIFO(32bit) : X must be zero 
+    out     y, 32       ; Y <= TX_FIFO(32bit) : num of trans(in words:32bit)
+
+start1:
+    wait 0  pin 8       ; wait intil VSYNC=0
+    wait 1  pin 8       ; wait until VSYNC=1
+
+; loop forever mode (for bit reverse mode)
+loop0:
+    mov     x, y        ; x = y (y: number of total pixel(in words:32bit) in an image)
+    wait 0  pin 9
+
+loop1:
+    wait 1  pin 9
+    ; 8bit
+    wait 1  pin 10      ; wait until PCLK = 1
+    in      pins, 8     ; get camera RGB data-> ISR
+    wait 0  pin 10
+    ; 16bit
+    wait 1  pin 10      ; wait until PCLK = 1
+    in      pins, 8     ; get camera RGB data-> ISR
+    wait 0  pin 10
+    ; 24bit
+    wait 1  pin 10      ; wait until PCLK = 1
+    in      pins, 8     ; get camera RGB data-> ISR
+    wait 0  pin 10
+    ; 32bit
+    wait 1  pin 10      ; wait until PCLK = 1
+    in      pins, 8     ; get camera RGB data-> ISR
+    wait 0  pin 10
+    mov     isr, ::isr  ; bit reverse (Comment out if you don't need this)
+    push                ; RX_FIFO <= ISR    
+    jmp     x--, loop1
+    
+    jmp     start1
+
+
+% c-sdk {
+static inline void picampinos_program_init( PIO pio, uint32_t sm, uint32_t offset, uint32_t in_base ,uint32_t in_pin_num )
+{
+    pio_sm_config c = picampinos_program_get_default_config( offset );
+
+    sm_config_set_set_pins(&c, in_base, in_pin_num);
+    sm_config_set_in_pins( &c, in_base );
+ 
+    sm_config_set_in_shift( &c, false, false, 32); // auto push : false
+    sm_config_set_out_shift( &c, false, true, 32); // auto pull : true
+
+    //sm_config_set_fifo_join( &c, PIO_FIFO_JOIN_RX);
+    
+    {
+        uint32_t pin_offset;
+        for ( pin_offset = 0; pin_offset < in_pin_num; pin_offset++ )
+        {
+            pio_gpio_init( pio, in_base + pin_offset );
+        }
+
+    }
+
+    pio_sm_set_consecutive_pindirs( pio, sm, in_base, in_pin_num, false );
+
+    sm_config_set_clkdiv( &c, 1 );
+
+    pio_sm_init( pio, sm, offset, &c );
+
+    pio_sm_set_enabled( pio, sm, true );
+}
+%}
+

@@ -1,0 +1,7 @@
+*.cmake
+.vscode-server
+.vscode
+/build/
+add_git.sh
+
+
