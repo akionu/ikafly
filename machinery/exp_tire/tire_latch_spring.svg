@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
+   sodipodi:docname="tire_latch_spring.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="5.3267141"
+     inkscape:cx="56.789231"
+     inkscape:cy="50.40631"
+     inkscape:window-width="1920"
+     inkscape:window-height="1111"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.205165;stroke-dasharray:none;stroke-opacity:1"
+       id="rect1"
+       width="2.8671529"
+       height="19.515686"
+       x="13.102583"
+       y="4.4920149" />
+    <rect
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.205165;stroke-dasharray:none;stroke-opacity:1"
+       id="rect1-0"
+       width="2.8671529"
+       height="19.515686"
+       x="3.6387081"
+       y="-29.471239"
+       transform="rotate(120)" />
+    <rect
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.205165;stroke-dasharray:none;stroke-opacity:1"
+       id="rect1-1"
+       width="2.8671529"
+       height="19.515686"
+       x="18.174868"
+       y="-15.221813"
+       transform="rotate(60)" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.0497237;stroke-dasharray:none;stroke-opacity:1"
+       id="path1"
+       cx="14.499999"
+       cy="14.499999"
+       r="4.4751382" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-dasharray:none;stroke-opacity:1"
+       id="path2"
+       cx="14.55"
+       cy="14.55"
+       r="7.5" />
+    <text
+       xml:space="preserve"
+       style="font-size:1.41111px;font-family:'BIZ UDGothic';-inkscape-font-specification:'BIZ UDGothic';fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-dasharray:none;stroke-opacity:1"
+       x="17.235844"
+       y="16.788805"
+       id="text2"><tspan
+         sodipodi:role="line"
+         id="tspan2"
+         style="font-size:1.41111px;fill:#000000;fill-opacity:1;stroke-width:0.1"
+         x="17.235844"
+         y="16.788805">9</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:1.41111px;fill:#000000;fill-opacity:1;stroke-width:0.1"
+         x="17.235844"
+         y="18.552692"
+         id="tspan3" /></text>
+    <text
+       xml:space="preserve"
+       style="font-size:1.41111px;font-family:'BIZ UDGothic';-inkscape-font-specification:'BIZ UDGothic';fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-dasharray:none;stroke-opacity:1"
+       x="19.596073"
+       y="18.262337"
+       id="text2-9"><tspan
+         sodipodi:role="line"
+         id="tspan2-5"
+         style="font-size:1.41111px;fill:#000000;fill-opacity:1;stroke-width:0.1"
+         x="19.596073"
+         y="18.262337">15</tspan></text>
+  </g>
+</svg>

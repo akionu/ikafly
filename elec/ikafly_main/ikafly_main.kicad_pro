@@ -3,7 +3,7 @@
     "3dviewports": [],
     "design_settings": {
       "defaults": {
-        "board_outline_line_width": 0.09999999999999999,
+        "board_outline_line_width": 0.049999999999999996,
         "copper_line_width": 0.19999999999999998,
         "copper_text_italic": false,
         "copper_text_size_h": 1.5,
@@ -27,7 +27,7 @@
         "fab_text_size_v": 1.0,
         "fab_text_thickness": 0.15,
         "fab_text_upright": false,
-        "other_line_width": 0.15,
+        "other_line_width": 0.09999999999999999,
         "other_text_italic": false,
         "other_text_size_h": 1.0,
         "other_text_size_v": 1.0,
@@ -38,28 +38,17 @@
           "height": 1.524,
           "width": 1.524
         },
-        "silk_line_width": 0.15,
+        "silk_line_width": 0.09999999999999999,
         "silk_text_italic": false,
         "silk_text_size_h": 1.0,
         "silk_text_size_v": 1.0,
-        "silk_text_thickness": 0.15,
+        "silk_text_thickness": 0.09999999999999999,
         "silk_text_upright": false,
         "zones": {
-          "min_clearance": 0.19999999999999998
+          "min_clearance": 0.5
         }
       },
-      "diff_pair_dimensions": [
-        {
-          "gap": 0.0,
-          "via_gap": 0.0,
-          "width": 0.0
-        },
-        {
-          "gap": 0.2,
-          "via_gap": 0.0,
-          "width": 0.285
-        }
-      ],
+      "diff_pair_dimensions": [],
       "drc_exclusions": [],
       "meta": {
         "version": 2
@@ -118,8 +107,8 @@
         "max_error": 0.005,
         "min_clearance": 0.0,
         "min_connection": 0.0,
-        "min_copper_edge_clearance": 0.3,
-        "min_hole_clearance": 0.16999999999999998,
+        "min_copper_edge_clearance": 0.5,
+        "min_hole_clearance": 0.25,
         "min_hole_to_hole": 0.25,
         "min_microvia_diameter": 0.19999999999999998,
         "min_microvia_drill": 0.09999999999999999,
@@ -129,10 +118,8 @@
         "min_text_thickness": 0.08,
         "min_through_hole_diameter": 0.3,
         "min_track_width": 0.0,
-        "min_via_annular_width": 0.075,
-        "min_via_diameter": 0.44999999999999996,
-        "solder_mask_clearance": 0.0,
-        "solder_mask_min_width": 0.0,
+        "min_via_annular_width": 0.09999999999999999,
+        "min_via_diameter": 0.5,
         "solder_mask_to_copper_clearance": 0.0,
         "use_height_for_length_calcs": true
       },
@@ -176,49 +163,9 @@
           "td_width_to_size_filter_ratio": 0.9
         }
       ],
-      "track_widths": [
-        0.0,
-        0.1,
-        0.12,
-        0.16,
-        0.2,
-        0.3,
-        0.35,
-        0.5,
-        0.8,
-        1.0,
-        2.0
-      ],
-      "via_dimensions": [
-        {
-          "diameter": 0.0,
-          "drill": 0.0
-        },
-        {
-          "diameter": 0.45,
-          "drill": 0.3
-        },
-        {
-          "diameter": 0.6,
-          "drill": 0.35
-        },
-        {
-          "diameter": 0.7,
-          "drill": 0.35
-        },
-        {
-          "diameter": 0.8,
-          "drill": 0.4
-        }
-      ],
+      "track_widths": [],
+      "via_dimensions": [],
       "zones_allow_external_fillets": false
-    },
-    "ipc2581": {
-      "dist": "",
-      "distpn": "",
-      "internal_id": "",
-      "mfg": "",
-      "mpn": ""
     },
     "layer_presets": [],
     "viewports": []
@@ -428,7 +375,7 @@
       "no_connect_dangling": "warning",
       "pin_not_connected": "error",
       "pin_not_driven": "error",
-      "pin_to_pin": "error",
+      "pin_to_pin": "warning",
       "power_pin_not_driven": "error",
       "similar_labels": "warning",
       "simulation_model_issue": "ignore",
@@ -438,11 +385,9 @@
       "wire_dangling": "error"
     }
   },
+  "legacy": [],
   "libraries": {
-    "pinned_footprint_libs": [
-      "Ikafly_lib",
-      "SamacSys_Parts"
-    ],
+    "pinned_footprint_libs": [],
     "pinned_symbol_libs": []
   },
   "meta": {
@@ -464,59 +409,8 @@
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.2,
-        "via_diameter": 0.8,
-        "via_drill": 0.4,
-        "wire_width": 6
-      },
-      {
-        "bus_width": 12,
-        "clearance": 0.2,
-        "diff_pair_gap": 0.25,
-        "diff_pair_via_gap": 0.25,
-        "diff_pair_width": 0.2,
-        "line_style": 0,
-        "microvia_diameter": 0.3,
-        "microvia_drill": 0.1,
-        "name": "Power",
-        "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.35,
-        "via_diameter": 0.8,
-        "via_drill": 0.4,
-        "wire_width": 6
-      },
-      {
-        "bus_width": 12,
-        "clearance": 0.2,
-        "diff_pair_gap": 0.25,
-        "diff_pair_via_gap": 0.25,
-        "diff_pair_width": 0.2,
-        "line_style": 0,
-        "microvia_diameter": 0.3,
-        "microvia_drill": 0.1,
-        "name": "RF50",
-        "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.35,
-        "via_diameter": 0.8,
-        "via_drill": 0.4,
-        "wire_width": 6
-      },
-      {
-        "bus_width": 12,
-        "clearance": 0.2,
-        "diff_pair_gap": 0.2,
-        "diff_pair_via_gap": 0.25,
-        "diff_pair_width": 0.286,
-        "line_style": 0,
-        "microvia_diameter": 0.3,
-        "microvia_drill": 0.1,
-        "name": "USB",
-        "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.2,
-        "via_diameter": 0.8,
-        "via_drill": 0.4,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
         "wire_width": 6
       }
     ],
@@ -536,91 +430,21 @@
       "Net-(IC18-RFIN)": "RF50",
       "Net-(IC18-RFOUT)": "RF50"
     },
-    "netclass_patterns": [
-      {
-        "netclass": "Default",
-        "pattern": ""
-      }
-    ]
+    "netclass_patterns": []
   },
   "pcbnew": {
     "last_paths": {
       "gencad": "",
       "idf": "",
       "netlist": "",
-      "plot": "",
-      "pos_files": "",
       "specctra_dsn": "",
-<<<<<<< Updated upstream
       "step": "",
-      "svg": "",
-=======
-      "step": "ikafly_main.step",
->>>>>>> Stashed changes
       "vrml": ""
     },
     "page_layout_descr_file": ""
   },
   "schematic": {
     "annotate_start_num": 0,
-    "bom_fmt_presets": [],
-    "bom_fmt_settings": {
-      "field_delimiter": ",",
-      "keep_line_breaks": false,
-      "keep_tabs": false,
-      "name": "CSV",
-      "ref_delimiter": ",",
-      "ref_range_delimiter": "",
-      "string_delimiter": "\""
-    },
-    "bom_presets": [],
-    "bom_settings": {
-      "exclude_dnp": false,
-      "fields_ordered": [
-        {
-          "group_by": false,
-          "label": "Reference",
-          "name": "Reference",
-          "show": true
-        },
-        {
-          "group_by": true,
-          "label": "Value",
-          "name": "Value",
-          "show": true
-        },
-        {
-          "group_by": false,
-          "label": "Datasheet",
-          "name": "Datasheet",
-          "show": true
-        },
-        {
-          "group_by": false,
-          "label": "Footprint",
-          "name": "Footprint",
-          "show": true
-        },
-        {
-          "group_by": false,
-          "label": "Qty",
-          "name": "${QUANTITY}",
-          "show": true
-        },
-        {
-          "group_by": true,
-          "label": "DNP",
-          "name": "${DNP}",
-          "show": true
-        }
-      ],
-      "filter_string": "",
-      "group_symbols": true,
-      "name": "Grouped By Value",
-      "sort_asc": true,
-      "sort_field": "Reference"
-    },
-    "connection_grid_size": 50.0,
     "drawing": {
       "dashed_lines_dash_length_ratio": 12.0,
       "dashed_lines_gap_length_ratio": 3.0,
@@ -633,14 +457,9 @@
       "intersheets_ref_show": false,
       "intersheets_ref_suffix": "",
       "junction_size_choice": 3,
-      "label_size_ratio": 0.375,
-      "operating_point_overlay_i_precision": 3,
-      "operating_point_overlay_i_range": "~A",
-      "operating_point_overlay_v_precision": 3,
-      "operating_point_overlay_v_range": "~V",
-      "overbar_offset_ratio": 1.23,
-      "pin_symbol_size": 25.0,
-      "text_offset_ratio": 0.15
+      "label_size_ratio": 0.25,
+      "pin_symbol_size": 0.0,
+      "text_offset_ratio": 0.08
     },
     "legacy_lib_dir": "",
     "legacy_lib_list": [],
@@ -654,68 +473,10 @@
     "spice_external_command": "spice \"%I\"",
     "spice_model_current_sheet_as_root": true,
     "spice_save_all_currents": false,
-    "spice_save_all_dissipations": false,
     "spice_save_all_voltages": false,
     "subpart_first_id": 65,
     "subpart_id_separator": 0
   },
-  "sheets": [
-    [
-      "9928bc66-f9db-441a-9c18-b277bb905715",
-      ""
-    ],
-    [
-      "0fe4d34b-47fc-4302-aa18-fefa776a4b4c",
-      "Ikafly_MCU"
-    ],
-    [
-      "598b6d9f-2530-49db-9ee3-1e1dd00d8025",
-      "Ikafly_USB_Conn"
-    ],
-    [
-      "bad612bb-b998-4059-ae93-f70c16064997",
-      "Ikafly_GNSS"
-    ],
-    [
-      "9dc57c27-85e4-45cf-ae31-d76f746507fc",
-      "Ikafly_Camera"
-    ],
-    [
-      "e6f37e07-a69b-46ef-b868-19c1db11f2bc",
-      "Ikafly_Sensor"
-    ],
-    [
-      "0802fded-e9e7-4470-890e-8dc2db2f910d",
-      "Ikafly_RF"
-    ],
-    [
-      "86cb8957-622c-482f-9ec5-d60722b4ae91",
-      "Ikafly_Separation_Board"
-    ],
-    [
-      "780f2ee1-6707-4fcf-875f-cbf791e9c9fb",
-      "Ikafly_Power"
-    ],
-    [
-      "04f62f42-f0ad-4257-bcce-3f6e0b1debaa",
-      "Ikafly_Power_DCDC_Logic"
-    ],
-    [
-      "b92ec84e-345f-458d-b66a-a1ddcae4936b",
-      "Ikafly_Power_DCDC_Motor1"
-    ],
-    [
-      "544f548e-18c7-435c-a787-f1261d28d459",
-      "Ikafly_Power_DCDC_Motor2"
-    ],
-    [
-      "f73663a8-2807-4811-bf57-e0f2b842cf7a",
-      "Ikafly_Motor1"
-    ],
-    [
-      "f139080b-93e3-46a1-986a-69ce094db5f8",
-      "Ikafly_Motor2"
-    ]
-  ],
+  "sheets": [],
   "text_variables": {}
 }
