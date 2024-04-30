@@ -48,7 +48,13 @@
           "min_clearance": 0.5
         }
       },
-      "diff_pair_dimensions": [],
+      "diff_pair_dimensions": [
+        {
+          "gap": 0.0,
+          "via_gap": 0.0,
+          "width": 0.0
+        }
+      ],
       "drc_exclusions": [],
       "meta": {
         "version": 2
@@ -163,8 +169,35 @@
           "td_width_to_size_filter_ratio": 0.9
         }
       ],
-      "track_widths": [],
-      "via_dimensions": [],
+      "track_widths": [
+        0.0,
+        0.12,
+        0.16,
+        0.2,
+        0.25,
+        0.3,
+        0.35,
+        0.5,
+        1.0
+      ],
+      "via_dimensions": [
+        {
+          "diameter": 0.0,
+          "drill": 0.0
+        },
+        {
+          "diameter": 0.45,
+          "drill": 0.3
+        },
+        {
+          "diameter": 0.6,
+          "drill": 0.35
+        },
+        {
+          "diameter": 0.8,
+          "drill": 0.4
+        }
+      ],
       "zones_allow_external_fillets": false
     },
     "layer_presets": [],
@@ -375,7 +408,7 @@
       "no_connect_dangling": "warning",
       "pin_not_connected": "error",
       "pin_not_driven": "error",
-      "pin_to_pin": "warning",
+      "pin_to_pin": "error",
       "power_pin_not_driven": "error",
       "similar_labels": "warning",
       "simulation_model_issue": "ignore",
@@ -419,7 +452,7 @@
     },
     "net_colors": null,
     "netclass_assignments": {
-      "/3V3": "Power",
+      "/Ikafly_GNSS/3V3_GNSS": "Power",
       "/Ikafly_MCU/USB.D_N": "USB",
       "/Ikafly_MCU/USB.D_P": "USB",
       "/Ikafly_MCU/USB_BD_N": "USB",
@@ -477,6 +510,59 @@
     "subpart_first_id": 65,
     "subpart_id_separator": 0
   },
-  "sheets": [],
+  "sheets": [
+    [
+      "9928bc66-f9db-441a-9c18-b277bb905715",
+      ""
+    ],
+    [
+      "0fe4d34b-47fc-4302-aa18-fefa776a4b4c",
+      "Ikafly_MCU"
+    ],
+    [
+      "598b6d9f-2530-49db-9ee3-1e1dd00d8025",
+      "Ikafly_USB_Conn"
+    ],
+    [
+      "bad612bb-b998-4059-ae93-f70c16064997",
+      "Ikafly_GNSS"
+    ],
+    [
+      "9dc57c27-85e4-45cf-ae31-d76f746507fc",
+      "Ikafly_Camera"
+    ],
+    [
+      "e6f37e07-a69b-46ef-b868-19c1db11f2bc",
+      "Ikafly_Sensor"
+    ],
+    [
+      "0802fded-e9e7-4470-890e-8dc2db2f910d",
+      "Ikafly_RF"
+    ],
+    [
+      "e14e7eef-7c14-4bd0-885d-7f36321d00aa",
+      "Ikafly_Nichrome2"
+    ],
+    [
+      "780f2ee1-6707-4fcf-875f-cbf791e9c9fb",
+      "Ikafly_Power"
+    ],
+    [
+      "04f62f42-f0ad-4257-bcce-3f6e0b1debaa",
+      "Ikafly_Power_DCDC_Logic"
+    ],
+    [
+      "1c8d54e3-05d9-4727-a89d-65552a3edbf6",
+      "Ikafly_Nichrome1"
+    ],
+    [
+      "f73663a8-2807-4811-bf57-e0f2b842cf7a",
+      "Ikafly_Motor1"
+    ],
+    [
+      "f139080b-93e3-46a1-986a-69ce094db5f8",
+      "Ikafly_Motor2"
+    ]
+  ],
   "text_variables": {}
 }
