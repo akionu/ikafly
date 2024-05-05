@@ -811,7 +811,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "0ba19d53-bbbf-4c7a-b946-22d235cdc3df")
-		(property "Reference" "Q2"
+		(property "Reference" "Q4"
 			(at 85.09 43.18 0)
 			(effects
 				(font
@@ -868,11 +868,11 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/1c8d54e3-05d9-4727-a89d-65552a3edbf6"
-					(reference "Q2")
+					(reference "Q4")
 					(unit 1)
 				)
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/e14e7eef-7c14-4bd0-885d-7f36321d00aa"
-					(reference "Q4")
+					(reference "Q2")
 					(unit 1)
 				)
 			)
@@ -959,7 +959,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "6fb9d0a0-df6b-4f28-8be8-6bad240e92d8")
-		(property "Reference" "R23"
+		(property "Reference" "R26"
 			(at 77.47 49.53 90)
 			(effects
 				(font
@@ -1011,11 +1011,11 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/1c8d54e3-05d9-4727-a89d-65552a3edbf6"
-					(reference "R23")
+					(reference "R26")
 					(unit 1)
 				)
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/e14e7eef-7c14-4bd0-885d-7f36321d00aa"
-					(reference "R11")
+					(reference "R20")
 					(unit 1)
 				)
 			)
@@ -1030,7 +1030,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "771a2078-e4d8-421e-9abc-35c1b6923b41")
-		(property "Reference" "#PWR022"
+		(property "Reference" "#PWR086"
 			(at 81.28 62.23 0)
 			(effects
 				(font
@@ -1080,11 +1080,11 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/1c8d54e3-05d9-4727-a89d-65552a3edbf6"
-					(reference "#PWR022")
+					(reference "#PWR086")
 					(unit 1)
 				)
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/e14e7eef-7c14-4bd0-885d-7f36321d00aa"
-					(reference "#PWR03")
+					(reference "#PWR071")
 					(unit 1)
 				)
 			)
@@ -1099,7 +1099,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "9506a486-6c1c-4c3b-a78b-408c0aa6cf09")
-		(property "Reference" "R22"
+		(property "Reference" "R25"
 			(at 68.58 41.91 90)
 			(effects
 				(font
@@ -1151,11 +1151,11 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/1c8d54e3-05d9-4727-a89d-65552a3edbf6"
-					(reference "R22")
+					(reference "R25")
 					(unit 1)
 				)
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/e14e7eef-7c14-4bd0-885d-7f36321d00aa"
-					(reference "R10")
+					(reference "R19")
 					(unit 1)
 				)
 			)

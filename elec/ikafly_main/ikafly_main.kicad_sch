@@ -1379,7 +1379,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "02f3517c-ee6a-4722-ae3c-9eaa10fc2e74")
-		(property "Reference" "J8"
+		(property "Reference" "J4"
 			(at 157.48 154.94 0)
 			(effects
 				(font
@@ -1442,7 +1442,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715"
-					(reference "J8")
+					(reference "J4")
 					(unit 1)
 				)
 			)
@@ -1951,7 +1951,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "f7c8805b-36ba-42b7-870b-9724d4cf049e")
-		(property "Reference" "J7"
+		(property "Reference" "J3"
 			(at 157.48 135.89 0)
 			(effects
 				(font
@@ -2014,7 +2014,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715"
-					(reference "J7")
+					(reference "J3")
 					(unit 1)
 				)
 			)

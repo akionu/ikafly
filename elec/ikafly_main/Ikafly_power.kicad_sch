@@ -1907,7 +1907,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "063f116e-b4d4-4a27-8f0c-6c791f566d61")
-		(property "Reference" "C35"
+		(property "Reference" "C37"
 			(at 255.27 135.89 0)
 			(effects
 				(font
@@ -1970,7 +1970,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-					(reference "C35")
+					(reference "C37")
 					(unit 1)
 				)
 			)
@@ -1986,7 +1986,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "103ebc2f-47c1-4cbd-a716-dc95bf915c75")
-		(property "Reference" "#FLG010"
+		(property "Reference" "#FLG06"
 			(at 222.25 57.785 0)
 			(effects
 				(font
@@ -2036,7 +2036,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-					(reference "#FLG010")
+					(reference "#FLG06")
 					(unit 1)
 				)
 			)
@@ -2051,7 +2051,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "10dafdb0-dac1-4498-82a2-dd72b9aedb1f")
-		(property "Reference" "#PWR085"
+		(property "Reference" "#PWR073"
 			(at 78.74 73.66 0)
 			(effects
 				(font
@@ -2101,7 +2101,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-					(reference "#PWR085")
+					(reference "#PWR073")
 					(unit 1)
 				)
 			)
@@ -2117,7 +2117,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "2f9c2d23-117b-4dde-8527-6ed0abe6e06c")
-		(property "Reference" "S3"
+		(property "Reference" "S2"
 			(at 236.22 95.25 90)
 			(effects
 				(font
@@ -2264,7 +2264,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-					(reference "S3")
+					(reference "S2")
 					(unit 1)
 				)
 			)
@@ -2279,7 +2279,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "32353290-28e9-4f86-8b41-954560811928")
-		(property "Reference" "C37"
+		(property "Reference" "C38"
 			(at 265.43 135.89 0)
 			(effects
 				(font
@@ -2342,7 +2342,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-					(reference "C37")
+					(reference "C38")
 					(unit 1)
 				)
 			)
@@ -2358,7 +2358,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "3df0b0b9-f6c9-4add-a261-44aa2025c1b2")
-		(property "Reference" "IC15"
+		(property "Reference" "IC12"
 			(at 92.71 53.34 0)
 			(effects
 				(font
@@ -2423,7 +2423,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-					(reference "IC15")
+					(reference "IC12")
 					(unit 1)
 				)
 			)
@@ -2438,7 +2438,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "5c339efe-63eb-4d01-833b-870a1d91a155")
-		(property "Reference" "#PWR088"
+		(property "Reference" "#PWR076"
 			(at 146.05 83.82 0)
 			(effects
 				(font
@@ -2488,7 +2488,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-					(reference "#PWR088")
+					(reference "#PWR076")
 					(unit 1)
 				)
 			)
@@ -2503,7 +2503,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "6e0f3b29-b3d1-4d39-98a3-7d5736dd12f2")
-		(property "Reference" "C38"
+		(property "Reference" "C35"
 			(at 81.28 62.23 0)
 			(effects
 				(font
@@ -2566,7 +2566,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-					(reference "C38")
+					(reference "C35")
 					(unit 1)
 				)
 			)
@@ -2581,7 +2581,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "74b34197-c399-4112-b3d5-e8360b7ea081")
-		(property "Reference" "#PWR064"
+		(property "Reference" "#PWR077"
 			(at 233.68 92.71 0)
 			(effects
 				(font
@@ -2631,7 +2631,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-					(reference "#PWR064")
+					(reference "#PWR077")
 					(unit 1)
 				)
 			)
@@ -2646,7 +2646,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "780b3eae-c90d-4eb1-b1ce-fcc039d6afe2")
-		(property "Reference" "R20"
+		(property "Reference" "R21"
 			(at 236.22 63.5 0)
 			(effects
 				(font
@@ -2709,7 +2709,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-					(reference "R20")
+					(reference "R21")
 					(unit 1)
 				)
 			)
@@ -2725,7 +2725,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "924fad30-ddc0-4ebd-9f4c-87961ce5be6f")
-		(property "Reference" "#FLG09"
+		(property "Reference" "#FLG05"
 			(at 179.07 57.785 0)
 			(effects
 				(font
@@ -2775,7 +2775,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-					(reference "#FLG09")
+					(reference "#FLG05")
 					(unit 1)
 				)
 			)
@@ -2791,7 +2791,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "9d71a968-c758-40e2-8bf2-6e7cf5bf14f5")
-		(property "Reference" "D9"
+		(property "Reference" "D4"
 			(at 153.67 53.34 0)
 			(effects
 				(font
@@ -2870,7 +2870,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-					(reference "D9")
+					(reference "D4")
 					(unit 1)
 				)
 			)
@@ -2885,7 +2885,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "aa6bc753-0901-4b77-b414-f0b5cd7b6902")
-		(property "Reference" "#PWR076"
+		(property "Reference" "#PWR079"
 			(at 262.89 147.32 0)
 			(effects
 				(font
@@ -2935,7 +2935,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-					(reference "#PWR076")
+					(reference "#PWR079")
 					(unit 1)
 				)
 			)
@@ -2950,7 +2950,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "bc24b514-0b87-4f3e-aedb-177704e3579c")
-		(property "Reference" "#PWR086"
+		(property "Reference" "#PWR074"
 			(at 92.71 73.66 0)
 			(effects
 				(font
@@ -3000,7 +3000,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-					(reference "#PWR086")
+					(reference "#PWR074")
 					(unit 1)
 				)
 			)
@@ -3016,7 +3016,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "c166b037-2035-4f51-a1df-2d60b8b4cda4")
-		(property "Reference" "D7"
+		(property "Reference" "D3"
 			(at 148.59 72.39 90)
 			(effects
 				(font
@@ -3097,7 +3097,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-					(reference "D7")
+					(reference "D3")
 					(unit 1)
 				)
 			)
@@ -3112,7 +3112,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "c5cff8ce-513c-4756-8a54-80cb13ba477d")
-		(property "Reference" "#PWR074"
+		(property "Reference" "#PWR078"
 			(at 252.73 147.32 0)
 			(effects
 				(font
@@ -3162,7 +3162,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-					(reference "#PWR074")
+					(reference "#PWR078")
 					(unit 1)
 				)
 			)
@@ -3177,7 +3177,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "df026dd1-9ef6-4d3d-8123-3befbc7c2bd2")
-		(property "Reference" "C39"
+		(property "Reference" "C36"
 			(at 107.95 62.23 0)
 			(effects
 				(font
@@ -3240,7 +3240,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-					(reference "C39")
+					(reference "C36")
 					(unit 1)
 				)
 			)
@@ -3255,7 +3255,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "e038fa86-166f-4c18-b24c-59a5c04087f5")
-		(property "Reference" "#PWR087"
+		(property "Reference" "#PWR075"
 			(at 105.41 73.66 0)
 			(effects
 				(font
@@ -3305,7 +3305,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-					(reference "#PWR087")
+					(reference "#PWR075")
 					(unit 1)
 				)
 			)
@@ -3387,7 +3387,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "ee1bd547-b286-4d34-873d-207503a38bfa")
-		(property "Reference" "#PWR084"
+		(property "Reference" "#PWR072"
 			(at 62.23 104.14 0)
 			(effects
 				(font
@@ -3437,7 +3437,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-					(reference "#PWR084")
+					(reference "#PWR072")
 					(unit 1)
 				)
 			)
@@ -3452,7 +3452,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "f676d819-68dc-4375-a9d3-c8c564e73bb7")
-		(property "Reference" "#FLG05"
+		(property "Reference" "#FLG03"
 			(at 62.23 95.885 0)
 			(effects
 				(font
@@ -3502,7 +3502,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-					(reference "#FLG05")
+					(reference "#FLG03")
 					(unit 1)
 				)
 			)
@@ -3518,7 +3518,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "f89e8ecd-344d-4331-9bab-f6551789e301")
-		(property "Reference" "Q1"
+		(property "Reference" "Q3"
 			(at 245.11 53.34 90)
 			(effects
 				(font
@@ -3585,7 +3585,7 @@
 		(instances
 			(project "ikafly_main"
 				(path "/9928bc66-f9db-441a-9c18-b277bb905715/780f2ee1-6707-4fcf-875f-cbf791e9c9fb"
-					(reference "Q1")
+					(reference "Q3")
 					(unit 1)
 				)
 			)

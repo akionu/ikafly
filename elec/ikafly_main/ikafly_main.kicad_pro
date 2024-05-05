@@ -129,7 +129,7 @@
         "min_through_hole_diameter": 0.3,
         "min_track_width": 0.0,
         "min_via_annular_width": 0.075,
-        "min_via_diameter": 0.5,
+        "min_via_diameter": 0.45,
         "solder_mask_to_copper_clearance": 0.0,
         "use_height_for_length_calcs": true
       },
@@ -503,7 +503,9 @@
       "Net-(AE1-A)": "RF50",
       "Net-(C13-Pad2)": "RF50",
       "Net-(IC18-RFIN)": "RF50",
-      "Net-(IC18-RFOUT)": "RF50"
+      "Net-(IC18-RFOUT)": "RF50",
+      "Net-(IC3-RFIN)": "RF50",
+      "Net-(IC3-RFOUT)": "RF50"
     },
     "netclass_patterns": []
   },
