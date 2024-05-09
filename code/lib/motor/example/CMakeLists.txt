@@ -1,12 +1,11 @@
-add_executable(motor_ex motor_ex.c)
+add_executable(ex_motor_cpp ex_motor.cpp)
 
-target_link_libraries(motor_ex
-        pico_stdlib
-        hardware_pwm
-		motor
+target_link_libraries(ex_motor_cpp
+	pico_stdlib
+	umotor
 )
 
-pico_enable_stdio_usb(motor_ex 1)
-pico_enable_stdio_uart(motor_ex 0)
+pico_enable_stdio_usb(ex_motor_cpp 1)
+pico_enable_stdio_uart(ex_motor_cpp 0)
 
-pico_add_extra_outputs(motor_ex)
+pico_add_extra_outputs(ex_motor_cpp)

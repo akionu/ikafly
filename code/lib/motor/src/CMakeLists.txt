@@ -1,11 +1,10 @@
-add_library(motor INTERFACE)
+add_library(umotor INTERFACE)
 
-
-target_sources(motor INTERFACE
-    ${CMAKE_CURRENT_LIST_DIR}/motor.c
+target_sources(umotor INTERFACE
+    ${CMAKE_CURRENT_LIST_DIR}/umotor.cpp
 )
 
-target_link_libraries(motor
+target_link_libraries(umotor
         INTERFACE
         pico_stdlib
         hardware_pwm

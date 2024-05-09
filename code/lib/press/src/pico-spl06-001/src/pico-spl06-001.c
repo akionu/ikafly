@@ -192,6 +192,7 @@ int8_t spl06_config_temp(spl06_config_t *config, uint8_t rate, uint8_t oversampl
         i2c_write_blocking(config->i2c, config->addr, tmp, 2, false);
     }
 
+	return 0;
 }
 
 int8_t spl06_read_coef(spl06_config_t *config, spl06_coef_t *coef) {
@@ -205,7 +206,6 @@ int8_t spl06_read_coef(spl06_config_t *config, spl06_coef_t *coef) {
 #ifndef NDEBUG
     printf("spl06: coef ready!\n");
 #endif
-
 
     reg = SPL06_COEF;
     i2c_write_blocking(config->i2c, config->addr, &reg, 1, true);
@@ -266,6 +266,8 @@ int8_t spl06_read_coef(spl06_config_t *config, spl06_coef_t *coef) {
     printf("coef:\nc0: %d\nc1: %d\nc00: %d\nc10: %d\nc01: %d\nc11: %d\nc20: %d\nc21: %d\nc30: %d\n", 
             coef->c0, coef->c1, coef->c00, coef->c10, coef->c01, coef->c11, coef->c20, coef->c21, coef->c30);
 #endif
+
+	return 0;
 }
 
 static int32_t oversample2k(uint8_t oversample) {
