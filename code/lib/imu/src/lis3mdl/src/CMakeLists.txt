@@ -1,3 +1,4 @@
+
 add_library(lis3mdl INTERFACE)
 
 target_sources(lis3mdl INTERFACE
