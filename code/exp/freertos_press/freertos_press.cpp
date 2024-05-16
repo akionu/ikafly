@@ -1,4 +1,4 @@
-//#include "FreeRTOSConfig.h"
+#include "FreeRTOSConfig.h"
 #include "../../lib/freertos/FreeRTOS-Kernel/include/FreeRTOS.h"
 #include "../../lib/freertos/FreeRTOS-Kernel/include/task.h"
 #include "pico/stdlib.h"
@@ -6,7 +6,6 @@
 
 
 #include "../../lib/press/src/uprs.h"
-//#include "./ikafly/code/lib/motor/src/umotor.h"
 
 #define I2C i2c1
 
@@ -14,10 +13,6 @@ const uint i2c_sda_pin = 14;
 const uint i2c_scl_pin = 15;
 
 Press prs(I2C, 0x77);
-
-//onst uint pin_left_begin = 18;
-//const uint pin_right_begin = 20;
-
 
 
 void press_task(void *){
