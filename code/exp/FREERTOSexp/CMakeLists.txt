@@ -1,0 +1,3 @@
+add_subdirectory(freertos_imu)
+add_subdirectory(freertos_imu_press)
+add_subdirectory(freertos_press)

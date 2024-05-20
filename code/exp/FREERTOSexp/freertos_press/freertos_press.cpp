@@ -1,11 +1,11 @@
 #include "FreeRTOSConfig.h"
-#include "../../lib/freertos/FreeRTOS-Kernel/include/FreeRTOS.h"
-#include "../../lib/freertos/FreeRTOS-Kernel/include/task.h"
+#include "../../../lib/freertos/FreeRTOS-Kernel/include/FreeRTOS.h"
+#include "../../../lib/freertos/FreeRTOS-Kernel/include/task.h"
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 
 
-#include "../../lib/press/src/uprs.h"
+#include "../../../lib/press/src/uprs.h"
 
 #define I2C i2c1
 

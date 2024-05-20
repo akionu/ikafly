@@ -7,12 +7,12 @@
 #include "hardware/i2c.h"
 
 #include "FreeRTOSConfig.h"
-#include "../../lib/freertos/FreeRTOS-Kernel/include/FreeRTOS.h"
-#include "../../lib/freertos/FreeRTOS-Kernel/include/task.h"
+#include "../../../lib/freertos/FreeRTOS-Kernel/include/FreeRTOS.h"
+#include "../../../lib/freertos/FreeRTOS-Kernel/include/task.h"
 
 
-#include "../../lib/press/src/uprs.h"
-#include "../../lib/imu/src/imu.h"
+#include "../../../lib/press/src/uprs.h"
+#include "../../../lib/imu/src/imu.h"
 
 #define I2C i2c1
 #define SDA 14
