@@ -19,17 +19,11 @@ static void on_uart_rx() {
 
 int main(void) {
 	stdio_init_all();
-<<<<<<< Updated upstream
-    gpio_init(25);
-    gpio_set_dir(25,GPIO_OUT);
-    gpio_put(25,0);
-=======
 
 	gpio_init(25);
 	gpio_set_dir(25, GPIO_OUT);
 	gpio_put(25, 0);
 
->>>>>>> Stashed changes
     // uart setting
     uart_init(UART, 9600);
     gpio_set_function(MOSI, GPIO_FUNC_UART);
