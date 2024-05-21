@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
 
+# set FreeRTOS Kernel Path
+set(FREERTOS_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib/freertos)
+set(FREERTOS_KERNEL_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib/freertos/FreeRTOS-Kernel)
+
 # Pull in SDK (must be before project)
 include(pico_sdk_import.cmake)
 include(FreeRTOS_Kernel_import.cmake)
@@ -12,10 +16,6 @@ set(CMAKE_CXX_STANDARD 17)
 if (PICO_SDK_VERSION_STRING VERSION_LESS "1.3.0")
     message(FATAL_ERROR "Raspberry Pi Pico SDK version 1.3.0 (or later) required. Your version is ${PICO_SDK_VERSION_STRING}")
 endif()
-
-# set FreeRTOS Kernel Path
-set(FREERTOS_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib/freertos)
-set(FREERTOS_KERNEL_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib/freertos/FreeRTOS-Kernel)
 
 # Initialize the SDK
 pico_sdk_init()
