@@ -1,0 +1,15 @@
+.program image
+.wrap_target
+start:
+	wait 0 pin 8 // wait for vsync
+	wait 1 pin 8
+loop:
+	wait 1 pin 9 // wait for hsync
+	wait 1 pin 10// wait for rising pclk
+	in pins 8
+	wait 0 pin 10
+	jmp loop
+.wrap
+
+//% c-sdk {
+//%}
