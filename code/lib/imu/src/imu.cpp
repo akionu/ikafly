@@ -161,7 +161,7 @@ void IMU::getAttEuler(float euler[3]) {
 	getAttQuat(quat);
 	q2e(quat, euler);
 }
-
+		
 void IMU::getAccel_g(float accel[3]) {
 	accel[0] = accel_g[0];
 	accel[1] = accel_g[1];
