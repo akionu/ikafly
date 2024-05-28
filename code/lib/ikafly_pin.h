@@ -23,6 +23,10 @@ const uint8_t pin_motor1_b = 19;
 const uint8_t pin_motor2_a = 20;
 const uint8_t pin_motor2_b = 21;
 
+// Radio
+const uint8_t pin_rf_mosi = 24; // tx
+const uint8_t pin_rf_miso = 22; // rx
+
 // LED
 const uint8_t pin_led = 29;
 
