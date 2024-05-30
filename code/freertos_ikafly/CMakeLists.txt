@@ -1,2 +1,1 @@
 add_subdirectory(freertos_ikafly_press)
-add_subdirectory(freertos_ikafly_gnss)

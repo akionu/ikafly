@@ -1,4 +1,4 @@
-#include "imu.h"
+#include "./imu.h"
 #include "MadgwickAHRS/MadgwickAHRS.h"
 #include "FreeRTOSConfig.h"
 #include "../../../../lib/freertos/FreeRTOS-Kernel/include/FreeRTOS.h"
@@ -89,47 +89,80 @@ bool IMU::init() {
 	return true;
 }
 
-double co[3];
+int16_t *magx_av;
+int16_t *magy_av; 
+int16_t *magz_av;
+
+
 void IMU::calibration(){
-	printf("start calibration\n");
-    double dx, dy, dz, f;
-	double lr=0.000000001;
+	int16_t max(int16_t k[10]);
+	int16_t min(int16_t k[10]);
+	int16_t magx_cal[10];
+	int16_t magy_cal[10];
+ 	int16_t magz_cal[10];
 	int i;
-	co[0]=0.0;
-	co[1]=0.0;
-	co[2]=0.0;
-	co[3]=1.0;
-	for(i=0;i<=150000;i++){	
-	memset(mag_raw, 0x00, 3 * sizeof(int16_t));
+	uint8_t reg;
+	lis3mdl_mag_data_ready_get(&lis3mdl, &reg);
+	for(i=0;i<=10;i++){	
 	lis3mdl_magnetic_raw_get(&lis3mdl, mag_raw);
+	magx_cal[i]=mag_raw[0];
+	magy_cal[i]=mag_raw[1];
+	magz_cal[i]=mag_raw[2];
+	vTaskDelay(100);
+	}
+	*magx_av={(max(magx_cal)+min(magx_cal))/2};
+	*magy_av={(max(magy_cal)+min(magy_cal))/2}; 
+	*magz_av={(max(magz_cal)+min(magz_cal))/2};
 
-	dx=mag_raw[0]-co[0];
-	dy=mag_raw[1]-co[1];
-	dz=mag_raw[2]-co[2];
+}
 
-  f = dx*dx + dy*dy + dz*dz - co[3]*co[3];
-  co[0] = co[0] + 4 * lr * f * dx;
-  co[1] = co[1] + 4 * lr * f * dy;
-  co[2] = co[2] + 4 * lr * f * dz;
-  co[3] = co[3] + 4 * lr * f * co[3];   
+
+int16_t max(int16_t k[10]){
+	int16_t maxmum=0;
+	int l;
+	for(l=0;l<=10;l++)
+	{
+	if(maxmum<=k[l]){
+		maxmum=k[l];
+		
+	}	
+	}
+	return maxmum;
 }
-printf("done calibration");
+
+int16_t min(int16_t k[10]){
+	int16_t minmum;
+	int l;
+	for(l=0;l<=10;l++)
+	{
+		if(l==1){
+			minmum=k[1];
+		}else if(minmum>=k[l]){
+			minmum=k[l];
+		}
+	};
+	return minmum;
 }
+
+
+
+
 void IMU::update() {
 	uint8_t reg;
 	// LIS3MDL
 	/* Read output only if new value is available */
 	lis3mdl_mag_data_ready_get(&lis3mdl, &reg);
+	calibration();
 	if (reg) {
 		/* Read magnetic field data */
 		memset(mag_raw, 0x00, 3 * sizeof(int16_t));
 		lis3mdl_magnetic_raw_get(&lis3mdl, mag_raw);
 		mag_mG[1] = -1000 * lis3mdl_from_fs16_to_gauss(
-				mag_raw[0]-co[0]);
+				mag_raw[0]-*magx_av);
 		mag_mG[0] = -1000 * lis3mdl_from_fs16_to_gauss(
-				mag_raw[1]-co[1]);
+				mag_raw[1]-*magy_av);
 		mag_mG[2] = 1000 * lis3mdl_from_fs16_to_gauss(
-				mag_raw[2]-co[2]);
+				mag_raw[2]-*magz_av);
 		//		printf("Magnetic field [mG]:%4.2f %4.2f %4.2f\n", mag_mG[0], mag_mG[1], mag_mG[2]);
 	}
 
@@ -189,7 +222,7 @@ void IMU::getAttEuler(float euler[3]) {
 	getAttQuat(quat);
 	q2e(quat, euler);
 }
-		
+
 void IMU::getAccel_g(float accel[3]) {
 	accel[0] = accel_g[0];
 	accel[1] = accel_g[1];

@@ -1,17 +1,16 @@
-set(TargetName freertos_ikafly_gnss)
+
+set(TargetName freertos_gnss)
 
 add_executable(${TargetName}
-    freertos_ikafly_gnss.cpp
+    freertos_gnss.cpp
 )
 
 target_link_libraries(${TargetName} 
-    freertos
+    pico_stdlib 
     pico_multicore
-    hardware_pwm
-    pico_stdlib
+    freertos
     hardware_uart
     gnss
-    
 )
 
 pico_enable_stdio_usb(${TargetName} 1)

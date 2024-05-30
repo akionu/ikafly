@@ -28,6 +28,7 @@
 #include "hardware/i2c.h"
 #include "../src/lis3mdl.h"
 
+
 #define I2C i2c1
 #define SDA 14
 #define SCL 15

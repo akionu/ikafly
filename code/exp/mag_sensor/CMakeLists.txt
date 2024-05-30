@@ -1,21 +1,16 @@
-set(TargetName flight.cpp)
+set(TargetName mag)
 
 add_executable(${TargetName}
-    flight.cpp
+    mag.cpp
 )
 
 target_link_libraries(${TargetName} 
     pico_stdlib 
     pico_multicore
-    pico_platform
-    hardware_uart
     freertos
     hardware_i2c
-    uprs
-    hardware_pwm
-    gnss
     imu
-
+    hardware_pwm
 )
 
 pico_enable_stdio_usb(${TargetName} 1)
