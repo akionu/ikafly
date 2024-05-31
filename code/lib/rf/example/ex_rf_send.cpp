@@ -15,10 +15,18 @@ int main(void) {
 	// dummy packet
 	for (int8_t i = 0; i < 32; i++) {
 		packet[i] = 'A'+i;
+//		packet[i] = 0x00;
 	}
+//	for (int8_t i = 0; i < 32; i+=8) {
+//		for (int8_t j = 0; j < 8; j++) {
+//			packet[i+j] = (1<<(7-j));
+//		}
+//	}
 
 	while (1) {
-		printf("%d ms: ", time_us_32()/1000);
+		printf("%dms: ", time_us_32()/1000);
+		for (int8_t i = 0; i < 32; i++) printf("%x", packet[i]);
+		printf("\n");
 		radio.send(packet);
 		sleep_ms(1000);
 	}

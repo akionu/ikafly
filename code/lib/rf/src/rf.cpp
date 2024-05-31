@@ -1,4 +1,6 @@
 #include "rf.h"
+#include "hardware/timer.h"
+#include "pico/platform.h"
 #include <cstdint>
 
 Radio::Radio(uint8_t pin_mosi, uint8_t pin_miso) {
@@ -14,55 +16,86 @@ void Radio::init() {
 }
 
 bool Radio::is_air_clear() {
-	return ((gpio_get(pin_miso) == 0)?true:false);
+	int8_t n = 0;
+	for (int8_t i = 0; i < 32; i++) {
+		if (receiveBit() == 0x00) n++;
+	}
+	return (n==32);
 }
 
 void Radio::send(uint8_t packet[32]) {
-	for (int8_t i = 0; i < 32; i++) {
-		printf("%c", packet[i]);
-	}
-	printf("\n");
-	// send start signal 11110
-	for (int8_t i = 0; i < 4; i++) {
-		gpio_put(pin_mosi, 1);
-		sleep_ms(1);
-	}
-	gpio_put(pin_mosi, 0);
-	sleep_ms(1);
+	// send start signal
+	sendByte(0x01); // wakeup
+	sendByte(0x01);
+	sendByte(0x66);
+	sendByte(0x99);
 
-	for (int16_t i = 0; i < 32; i++) {
-//		printf("[i]: %c: 0x%02x: 0b", packet[i], packet[i]);
-		for (int8_t j = 0; j < 8; j++) {
-//			printf("%c", (packet[i] & (1<<j))==0?'0':'1');
-			gpio_put(pin_mosi, (packet[i] & (1<<j)));
-			sleep_ms(1);
-		}
-//		printf("\n");
+	for (uint8_t i = 0; i < 32; i++) {
+		//		printf("[i]: %c: %d_10: 0x%02x: 0b", packet[i], packet[i], packet[i]);
+		sendByte(packet[i]);
+		//		printf("\n");
+	}
+	sendByte(0x00);
+}
+
+void Radio::sendByte(uint8_t data) {
+	uint32_t before = 0;
+	for (int8_t i = 7; i >= 0; i--) {
+		before = time_us_32() + 1000;
+//		printf("%c", (packet[i] & (1<<i))==0?'0':'1');
+		gpio_put(pin_mosi, (data & (1<<i)));
+		while (time_us_32() < before) tight_loop_contents();
 	}
 }
 
 void Radio::receive(uint8_t packet[32]) {
-	int8_t n = 0;
-	// 11110 => start signal
+	// デフォルトは1、ビットは反転してない
+	uint8_t r[16] = {0x7f}; // 簡単のため富豪的
+	uint8_t detect[2] = {0};
 	while (1) {
-		if (gpio_get(pin_miso) != 0) n++;
-		else if (n == 4) break;
-		sleep_ms(1);
+		detect[0] = 0; detect[1] = 0;
+
+		// fifo
+		for (int8_t i = 1; i < 16; i++) {
+			r[i-1] = r[i];
+		}
+		r[15] = receiveBit();
+	
+		for (int8_t i = 0; i < 8; i++) {
+			detect[0] |= (r[i]<<(7-i));
+			detect[1] |= (r[8+i]<<(7-i));
+		}
+
+		if (detect[0] == 0x66 && detect[1] == 0x99) break;
 	}
-	printf("detect signal:\n");
 
 	for (int16_t i = 0; i < 32; i++) {
-		packet[i] = receiveChar();
+		packet[i] = receiveByte();
 	}
+	printf("detect signal:\n");
 }
 
-uint8_t Radio::receiveChar() {
+uint8_t Radio::receiveByte() {
 	uint8_t c = 0;
-	for (int8_t j = 0; j < 8; j++) {
-		uint8_t st = gpio_get(pin_miso);
-		printf("%c", (st==0)?'0':'1');
-		c |= (1<<j);
-		sleep_ms(1);
+	for (int8_t j = 7; j >= 0; j--) {
+		//		printf("%c", (st==0)?'0':'1');
+		c |= (receiveBit()<<j);
 	}
+	//	printf("0x%x", c);
 	return c;
+}
+
+// return 0x00 or 0x01
+uint8_t Radio::receiveBit() {
+	uint8_t s = 0;
+	uint8_t st = 0;
+	uint32_t before = 0;
+	for (int8_t k = 0; k < 5; k++) {
+		before = time_us_32()+200;
+		st = gpio_get(pin_miso);
+		s += (st==0)?0:1; // ビット反転してない
+		while (time_us_32() < before) tight_loop_contents();
+	}
+	s = (s>=3)?1:0; // 多数決符号
+	return s;
 }
