@@ -16,7 +16,7 @@ class Cam {
 		void capture();
 		uint16_t getJpegSize();
 		bool isCaptureFinished();
-		uint8_t image_buf[1024*2+512]; // 2.5kB should be enough
+		uint8_t image_buf[1024*3]; // 3kB should be enough
 
 	private:
 		uint8_t reg_read(uint8_t reg);
