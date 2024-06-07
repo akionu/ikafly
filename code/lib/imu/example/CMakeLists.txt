@@ -3,6 +3,7 @@ add_executable(imu_euler imu_euler.cpp)
 target_link_libraries(imu_euler 
 	pico_stdlib
 	hardware_i2c
+	freertos
 	imu)
 
 pico_enable_stdio_usb(imu_euler 1)

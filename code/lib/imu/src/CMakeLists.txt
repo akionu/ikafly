@@ -18,6 +18,7 @@ target_link_libraries(imu
     pico_stdlib
     hardware_i2c
 	MadgwickAHRS
+	freertos
 	lis3mdl
 	lsm6dso
 )

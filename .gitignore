@@ -6,4 +6,5 @@
 *datasheet/
 *.vscode/
 *.cache/
+*.lck
 references/

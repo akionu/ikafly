@@ -16,10 +16,11 @@ class IMU
 	public:
 		IMU(i2c_inst_t* i2c);
 		bool init(); // return true if success, false if fail
-		
+		void calibration();//calibration
 		void update(); // call this 50ms each for get attitude
 		void getAttQuat(float q[4]);
 		void getAttEuler(float euler[3]); // roll, pitch, yaw
+		float getAttEulerRoll();
 
 		void getAccel_g(float accel[3]); // x,y,z
 		void getGyro_dps(float gyro[3]); // x,y,z
