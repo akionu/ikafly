@@ -12121,7 +12121,7 @@
 		(descr "Resistor SMD 0402 (1005 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
 		(tags "resistor")
 		(property "Reference" "R12"
-			(at -2.13 0.11 90)
+			(at 0.05 1.1 90)
 			(layer "F.SilkS")
 			(uuid "3f1da1a0-aef2-423f-87e9-827f24891541")
 			(effects
@@ -14124,7 +14124,7 @@
 		(descr "SOT, 3 Pin (https://www.jedec.org/system/files/docs/to-236h.pdf variant AB), generated with kicad-footprint-generator ipc_gullwing_generator.py")
 		(tags "SOT TO_SOT_SMD")
 		(property "Reference" "Q1"
-			(at 0 -2.4 -90)
+			(at 1.5625 1.13 -90)
 			(layer "F.SilkS")
 			(uuid "d3261362-cbaf-498e-929e-1004f1963778")
 			(effects
