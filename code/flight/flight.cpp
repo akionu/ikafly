@@ -54,33 +54,36 @@ void motor_init(){
 }
 
 void motor_foward(){
-	gpio_put(pin_motor1_a,);
-	gpio_put(pin_motor1_b,);
-	gpio_put(pin_motor2_a,);
-	gpio_put(pin_motor2_b,);
+	gpio_put(pin_motor1_a,1);
+	gpio_put(pin_motor1_b,0);
+	gpio_put(pin_motor2_a,1);
+	gpio_put(pin_motor2_b,0);
 }
 
 void motor_back(){
-	gpio_put(pin_motor1_a,);
-	gpio_put(pin_motor1_b,);
-	gpio_put(pin_motor2_a,);
-	gpio_put(pin_motor2_b,);
+	gpio_put(pin_motor1_a,0);
+	gpio_put(pin_motor1_b,1);
+	gpio_put(pin_motor2_a,0);
+	gpio_put(pin_motor2_b,1);
 }
 
 void motor_r_rotate(){
-	gpio_put(pin_motor1_a,);
-	gpio_put(pin_motor1_b,);
-	gpio_put(pin_motor2_a,);
-	gpio_put(pin_motor2_b,);
+	gpio_put(pin_motor1_a,0);
+	gpio_put(pin_motor1_b,1);
+	gpio_put(pin_motor2_a,0);
+	gpio_put(pin_motor2_b,0);
 }
 
 void motor_l_rotate(){
-	gpio_put(pin_motor1_a,);
-	gpio_put(pin_motor1_b,);
-	gpio_put(pin_motor2_a,);
-	gpio_put(pin_motor2_b,);
+	gpio_put(pin_motor1_a,0);
+	gpio_put(pin_motor1_b,0);
+	gpio_put(pin_motor2_a,1);
+	gpio_put(pin_motor2_b,0);
 }
 
+void nichrom(){
+
+}
 
 
 void task_landing(void *landing){
@@ -107,8 +110,8 @@ void task_landing(void *landing){
 		if(alt_cm-alt_av<=5 || alt_av-alt_cm<=5){
 			printf("ground");
 			if(p>=10){
-				nichrom()
-				vTaskDelete(&landing);
+				nichrom();
+				vTaskDelete(xTaskGetCurrentTaskHandle());
 			}
 		}else if(alt_cm-alt_old>=3.0){
 			printf("up");
@@ -120,7 +123,7 @@ void task_landing(void *landing){
 		alt_old=alt_cm;
 	
 		if(alt_cm-alt_av>=50){
-			p++
+			p++;
 		};
 		
 		vTaskDelay(100);
@@ -161,8 +164,6 @@ void task_gnss(void *gnss)
     {
         ch = uart_getc(UART);
         nmeap_parse(&nmea, ch);
-		imu.update();
-		imu.getAttEuler(euler);
 		printf("%f,%f",gga.latitude,gga.longitude);
         
     }
@@ -181,18 +182,33 @@ while(1){
 }
 }
 
+float calc_distance_g(){
+	double RX = 6378.137; 
+double RY = 6356.752; 
+
+  double dx = goal_long - gga.longitude, dy = goal_lat - gga.latitude;
+  double mu = (goal_lat +gga.latitude ) / 2.0; 
+  double E = sqrt(1 - pow(RY / RX, 2.0));
+  double W = sqrt(1 - pow(E * sin(mu), 2.0));
+  double M = RX * (1 - pow(E, 2.0)) / pow(W, 3.0)/pow(W,3.0);
+  double N = RX / W;
+  return sqrt(pow(M * dy, 2.0) + pow(N * dx * cos(mu), 2.0)); 
+}
+
+
+
 
 void task_gnss_control(void *gc){
 	float arctan;
-	float distance_g2;
-	distance_g2=goal_long*goal_long+goal_lat*goal_lat;
-	distance_g=sqrt(distance_g2);
+	distance_g=calc_distance_g()*1000;
 while(1){
 	arctan=atan2(gga.latitude,gga.longitude);
-	if(euler_yaw-arctan<=10 || arctan-euler_yaw<=10){
+
+	if(distance_g<=2.0){vTaskSuspend(xTaskGetCurrentTaskHandle());
+	}else if(euler_yaw-arctan<=10 || arctan-euler_yaw<=10){
 		motor_foward();
 		vTaskDelay(5000);
-	}else if()
+	};
 
 }
 
@@ -210,10 +226,11 @@ int main(void)
 
 
 
-    xTaskCreate(task_landing,"task_landing",256,NULL,2,&landing);
+    xTaskCreate(task_landing,"task_landing",256,NULL,2,NULL);
 	xTaskCreate(task_gnss,"task_gnss",256,NULL,1,NULL);
 	xTaskCreate(task_imu,"task_imu",256,NULL,3,NULL);
-	xTaskCreate(task_gnss_control,"task_gnss_control",256,NULL.4,NULL);
+	xTaskCreate(task_gnss_control,"task_gnss_control",256,NULL,4,NULL);
+
     vTaskStartScheduler();
     while(1){};
     
