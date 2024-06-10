@@ -35,10 +35,9 @@ void task_imu(void *){
 		//imu.getAccel_mg(accel);
 		//printf("%3.2f %3.2f %3.2f\n", accel[0], accel[1], accel[2]);
 		imu.getAttEuler(euler);
-		//imu.getMag_mG(mag);
+		//imu.getMag_mg(mag);
 		printf("%+03.2f %+03.2f %+03.2f\n", euler[0]*RAD2DEG, euler[1]*RAD2DEG, euler[2]*RAD2DEG);
-		//printf("%f,%f,%f\n",mag[0],mag[1],mag[2]);
-		vTaskDelay(49);
+	   // printf("%f,%f,%f\n",mag[0],mag[1],mag[2]);
 	}
 }
 

@@ -1,4 +1,5 @@
 #include "imu.h"
+#include "math.h"
 #include "MadgwickAHRS/MadgwickAHRS.h"
 #include "FreeRTOSConfig.h"
 #include "../../../../lib/freertos/FreeRTOS-Kernel/include/FreeRTOS.h"
@@ -111,12 +112,13 @@ void IMU::calibration(){
   co[0] = co[0] + 4 * lr * f * dx;
   co[1] = co[1] + 4 * lr * f * dy;
   co[2] = co[2] + 4 * lr * f * dz;
-  co[3] = co[3] + 4 * lr * f * co[3];   
+  co[3] = co[3] + 4 * lr * f * co[3];
 }
 printf("done calibration");
 }
 void IMU::update() {
 	uint8_t reg;
+	double distance_2,distance;
 	// LIS3MDL
 	/* Read output only if new value is available */
 	lis3mdl_mag_data_ready_get(&lis3mdl, &reg);
@@ -124,12 +126,17 @@ void IMU::update() {
 		/* Read magnetic field data */
 		memset(mag_raw, 0x00, 3 * sizeof(int16_t));
 		lis3mdl_magnetic_raw_get(&lis3mdl, mag_raw);
-		mag_mG[1] = -1000 * lis3mdl_from_fs16_to_gauss(
-				mag_raw[0]-co[0]);
-		mag_mG[0] = -1000 * lis3mdl_from_fs16_to_gauss(
-				mag_raw[1]-co[1]);
-		mag_mG[2] = 1000 * lis3mdl_from_fs16_to_gauss(
-				mag_raw[2]-co[2]);
+
+		distance_2=(mag_raw[0]-co[0])*(mag_raw[0]-co[0])+(mag_raw[1]-co[1])*(mag_raw[1]-co[1])+(mag_raw[2]-co[2])*(mag_raw[2]-co[2]);
+
+		distance=sqrt(distance_2);
+
+		mag_mG[1] =  lis3mdl_from_fs16_to_gauss((
+				mag_raw[0]-co[0])*co[3]/distance);
+		mag_mG[0] = - lis3mdl_from_fs16_to_gauss((
+				mag_raw[1]-co[1])*co[3]/distance);
+		mag_mG[2] =  lis3mdl_from_fs16_to_gauss((
+				mag_raw[2]-co[2])*co[3]/distance);
 		//		printf("Magnetic field [mG]:%4.2f %4.2f %4.2f\n", mag_mG[0], mag_mG[1], mag_mG[2]);
 	}
 
@@ -214,14 +221,14 @@ void IMU::setDebugPrint(bool enable) {
 
 // private:
 void IMU::q2e(float q[4], float euler[3]) {
-//	// 0: roll, 1: pitch, 2: yaw
-//	euler[0] = -1.0f * asinf(2.0f * (q[1]) * (q[3]) + 2.0f * (q[0]) * (q[2]));
-//	euler[1] = atan2f(2.0f * (q[2]) * (q[3]) - 2.0f * (q[0]) * (q[1]), 2.0f * (q[0]) * (q[0]) + 2.0f * (q[3]) * (q[3]) - 1.0f);
-//	euler[2] = atan2f(2.0f * (q[1]) * (q[2]) - 2.0f * (q[0]) * (q[3]), 2.0f * (q[0]) * (q[0]) + 2.0f * (q[1]) * (q[1]) - 1.0f);
-//	return;
-//
+		// 0: roll, 1: pitch, 2: yaw
+	euler[0] = -1.0f * asinf(2.0f * (q[1]) * (q[3]) + 2.0f * (q[0]) * (q[2]));
+	euler[1] = atan2f(2.0f * (q[2]) * (q[3]) - 2.0f * (q[0]) * (q[1]), 2.0f * (q[0]) * (q[0]) + 2.0f * (q[3]) * (q[3]) - 1.0f);
+	euler[2] = atan2f(2.0f * (q[1]) * (q[2]) - 2.0f * (q[0]) * (q[3]), 2.0f * (q[0]) * (q[0]) + 2.0f * (q[1]) * (q[1]) - 1.0f);
+	return;
+/*
 
-	float dqw = madgwick_data.q[0];
+float dqw = madgwick_data.q[0];
 	float dqx = madgwick_data.q[1];
 	float dqy = madgwick_data.q[2];
 	float dqz = madgwick_data.q[3];
@@ -252,6 +259,6 @@ void IMU::q2e(float q[4], float euler[3]) {
 
 	euler[0] = roll;
 	euler[1] = pitch;
-	euler[2] = yaw;
+	euler[2] = yaw;  */
 }
 

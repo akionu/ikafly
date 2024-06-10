@@ -235,7 +235,7 @@ void IMU::getGyro_dps(float gyro[3]) {
 	gyro[2] = gyro_dps[2];
 }
 
-void IMU::getMag_mG(float mag[3]) {
+void IMU::magMG_mg(float mag[3]) {
 	mag[0] = mag_mG[0];
 	mag[1] = mag_mG[1];
 	mag[2] = mag_mG[2];

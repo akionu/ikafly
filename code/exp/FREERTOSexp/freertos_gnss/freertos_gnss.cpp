@@ -16,24 +16,8 @@ extern "C"
 #define MOSI 12
 #define MISO 13
 
-static nmeap_context_t nmea;
-static nmeap_gga_t gga;
-
-static void print_gga(nmeap_gga_t *gga)
-{
-     printf("found GPGGA message %.6f %.6f %.0f %lu %d %d %f %f\n",
-            gga->latitude  ,
-            gga->longitude, 
-            gga->altitude , 
-            gga->time     , 
-            gga->satellites,
-            gga->quality   ,
-            gga->hdop      ,
-            gga->geoid     
-            );
-
-    printf("%.6f,%.6f\n",gga->latitude,gga->longitude);
-}
+ nmeap_context_t nmea;
+ nmeap_gga_t gga;
 
 
 /** called when a gpgga message is received and parsed */
@@ -70,6 +54,7 @@ int main(void)
     {
         ch = uart_getc(UART);
         nmeap_parse(&nmea, ch);
-        print_gga(&gga);
+        printf("%f,%f",gga.latitude,gga.longitude);
+        printf("受信中");
     }
 }
