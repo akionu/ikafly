@@ -1,7 +1,7 @@
-set(TargetName flight.cpp)
+set(TargetName distance_ikfly.cpp)
 
 add_executable(${TargetName}
-    flight.cpp
+    distance_ikafly.cpp
 )
 
 target_link_libraries(${TargetName} 

@@ -6,7 +6,7 @@
 #include "../../../../lib/freertos/FreeRTOS-Kernel/include/task.h"
 
 IMU::IMU(i2c_inst_t* i2c) {
-	madgwick_data.beta = 0.5f;
+	madgwick_data.beta = 1;
 	madgwick_data.q[0] = 1.0f;
 	madgwick_data.q[1] = 0.0f;
 	madgwick_data.q[2] = 0.0f;
@@ -79,7 +79,7 @@ bool IMU::init() {
 	/* Enable Block Data Update */
 	lis3mdl_block_data_update_set(&lis3mdl, PROPERTY_ENABLE);
 	/* Set Output Data Rate */
-	lis3mdl_data_rate_set(&lis3mdl, LIS3MDL_HP_40Hz);
+	lis3mdl_data_rate_set(&lis3mdl, LIS3MDL_HP_80Hz);
 	/* Set full scale */
 	lis3mdl_full_scale_set(&lis3mdl, LIS3MDL_16_GAUSS);
 	/* Enable temperature sensor */
@@ -90,7 +90,7 @@ bool IMU::init() {
 	return true;
 }
 
-double co[3];
+double co[4];
 void IMU::calibration(){
 	printf("start calibration\n");
     double dx, dy, dz, f;
@@ -100,8 +100,9 @@ void IMU::calibration(){
 	co[1]=0.0;
 	co[2]=0.0;
 	co[3]=1.0;
-	for(i=0;i<=150000;i++){	
-	memset(mag_raw, 0x00, 3 * sizeof(int16_t));
+	
+	for(i=0;i<=150000;i++){
+    memset(mag_raw, 0x00, 3 * sizeof(int16_t));
 	lis3mdl_magnetic_raw_get(&lis3mdl, mag_raw);
 
 	dx=mag_raw[0]-co[0];
@@ -113,9 +114,12 @@ void IMU::calibration(){
   co[1] = co[1] + 4 * lr * f * dy;
   co[2] = co[2] + 4 * lr * f * dz;
   co[3] = co[3] + 4 * lr * f * co[3];
+
 }
 printf("done calibration");
 }
+
+
 void IMU::update() {
 	uint8_t reg;
 	double distance_2,distance;
@@ -131,11 +135,11 @@ void IMU::update() {
 
 		distance=sqrt(distance_2);
 
-		mag_mG[1] =  lis3mdl_from_fs16_to_gauss((
+		mag_mG[0] = 1000*lis3mdl_from_fs16_to_gauss((
 				mag_raw[0]-co[0])*co[3]/distance);
-		mag_mG[0] = - lis3mdl_from_fs16_to_gauss((
+		mag_mG[1] =-1000*lis3mdl_from_fs16_to_gauss((
 				mag_raw[1]-co[1])*co[3]/distance);
-		mag_mG[2] =  lis3mdl_from_fs16_to_gauss((
+		mag_mG[2] = 1000*lis3mdl_from_fs16_to_gauss((
 				mag_raw[2]-co[2])*co[3]/distance);
 		//		printf("Magnetic field [mG]:%4.2f %4.2f %4.2f\n", mag_mG[0], mag_mG[1], mag_mG[2]);
 	}
@@ -149,11 +153,11 @@ void IMU::update() {
 		memset(accel_raw, 0x00, 3 * sizeof(int16_t));
 		lsm6dso_acceleration_raw_get(&lsm6dso, accel_raw);
 		accel_g[0] =
-			-1000*lsm6dso_from_fs2_to_mg(accel_raw[0])/1000.0f;
+			-lsm6dso_from_fs2_to_mg(accel_raw[0])/1000.0f;
 		accel_g[1] =
-			1000*lsm6dso_from_fs2_to_mg(accel_raw[1])/1000.0f;
+			lsm6dso_from_fs2_to_mg(accel_raw[1])/1000.0f;
 		accel_g[2] =
-			1000*lsm6dso_from_fs2_to_mg(accel_raw[2])/1000.0f;
+			lsm6dso_from_fs2_to_mg(accel_raw[2])/1000.0f;
 		//		printf("Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n", accel_g[0], accel_g[1], accel_g[2]);
 	}
 
@@ -221,12 +225,12 @@ void IMU::setDebugPrint(bool enable) {
 
 // private:
 void IMU::q2e(float q[4], float euler[3]) {
-		// 0: roll, 1: pitch, 2: yaw
+		/* 0: roll, 1: pitch, 2: yaw
 	euler[0] = -1.0f * asinf(2.0f * (q[1]) * (q[3]) + 2.0f * (q[0]) * (q[2]));
 	euler[1] = atan2f(2.0f * (q[2]) * (q[3]) - 2.0f * (q[0]) * (q[1]), 2.0f * (q[0]) * (q[0]) + 2.0f * (q[3]) * (q[3]) - 1.0f);
 	euler[2] = atan2f(2.0f * (q[1]) * (q[2]) - 2.0f * (q[0]) * (q[3]), 2.0f * (q[0]) * (q[0]) + 2.0f * (q[1]) * (q[1]) - 1.0f);
-	return;
-/*
+	return; */
+
 
 float dqw = madgwick_data.q[0];
 	float dqx = madgwick_data.q[1];
@@ -259,6 +263,6 @@ float dqw = madgwick_data.q[0];
 
 	euler[0] = roll;
 	euler[1] = pitch;
-	euler[2] = yaw;  */
+	euler[2] = yaw;  
 }
 

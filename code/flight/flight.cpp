@@ -1,6 +1,7 @@
 #include "FreeRTOSConfig.h"
 #include "../lib/freertos/FreeRTOS-Kernel/include/FreeRTOS.h"
 #include "../lib/freertos/FreeRTOS-Kernel/include/task.h"
+#include "../lib/rf/src/rf.h"
 #include "pico/stdlib.h"
 #include "pico/platform.h"
 #include "pico/stdio.h"
@@ -37,10 +38,10 @@ const uint i2c_scl_pin = 15;
  nmeap_context_t nmea;
  nmeap_gga_t gga;
 
-float euler_yaw;
-float distance_g;
+float euler_yaw,euler_yaw_old;
+float distance_g,distance_old;
 
-//init gpio
+//init mootor gpio
 void motor_init(){
 	gpio_init(pin_motor1_a);
 	gpio_init(pin_motor1_b);
@@ -82,6 +83,19 @@ void motor_l_rotate(){
 }
 
 void nichrom(){
+	gpio_init(pin_nichrome_left);
+	gpio_init(pin_nichrome_right);
+
+	gpio_set_dir(pin_nichrome_left,0);
+	gpio_set_dir(pin_nichrome_right,0);
+
+	gpio_put(pin_nichrome_left,1);
+	gpio_put(pin_nichrome_right,1);
+
+	vTaskDelay(500);
+
+	gpio_put(pin_nichrome_left,0);
+	gpio_put(pin_nichrome_right,0);
 
 }
 
@@ -162,9 +176,11 @@ void task_gnss(void *gnss)
 
     while (1)
     {
+
         ch = uart_getc(UART);
         nmeap_parse(&nmea, ch);
 		printf("%f,%f",gga.latitude,gga.longitude);
+	    vTaskDelay(400);
         
     }
 }
@@ -200,37 +216,59 @@ double RY = 6356.752;
 
 void task_gnss_control(void *gc){
 	float arctan;
+
+	while(1){
 	distance_g=calc_distance_g()*1000;
-while(1){
 	arctan=atan2(gga.latitude,gga.longitude);
 
 	if(distance_g<=2.0){vTaskSuspend(xTaskGetCurrentTaskHandle());
 	}else if(euler_yaw-arctan<=10 || arctan-euler_yaw<=10){
 		motor_foward();
 		vTaskDelay(5000);
-	};
+	}else if(arctan-euler_yaw>=0 || arctan-euler_yaw<=180){
+		motor_r_rotate();
+		vTaskDelay(300);
+	}else if(arctan-euler_yaw<=0 || arctan-euler_yaw>=180){
+		motor_l_rotate();
+		vTaskDelay(300);
+	}
+
+
+	distance_old=distance_g;
 
 }
 
 
 }
+
+void task_stack(void *stack){
+	if(distance_g-distance_old<=0.01 && euler_yaw-euler_yaw_old<=2 &&euler_yaw_old-euler_yaw<=2)
+	{
+		motor_back();
+		vTaskDelay(500);
+		motor_r_rotate();
+		vTaskDelay(500);
+		motor_foward();
+		vTaskDelay(500);
+	}
+}
+
 
 int main(void)
 {
 
 	stdio_init_all();
 	i2c_init(I2C, 400*1000);
-	gpio_set_function(i2c_sda_pin, GPIO_FUNC_I2C);
-	gpio_set_function(i2c_scl_pin, GPIO_FUNC_I2C);
 	motor_init();
 
+	gpio_set_function(i2c_sda_pin, GPIO_FUNC_I2C);
+	gpio_set_function(i2c_scl_pin, GPIO_FUNC_I2C);
 
-
-    xTaskCreate(task_landing,"task_landing",256,NULL,2,NULL);
-	xTaskCreate(task_gnss,"task_gnss",256,NULL,1,NULL);
+    xTaskCreate(task_landing,"task_landing",256,NULL,5,NULL);
+	xTaskCreate(task_gnss,"task_gnss",256,NULL,4,NULL);
 	xTaskCreate(task_imu,"task_imu",256,NULL,3,NULL);
-	xTaskCreate(task_gnss_control,"task_gnss_control",256,NULL,4,NULL);
-
+	xTaskCreate(task_gnss_control,"task_gnss_control",256,NULL,2,NULL);
+	xTaskCreate(task_stack,"task_stack",256,NULL,1,NULL);
     vTaskStartScheduler();
     while(1){};
     

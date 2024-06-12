@@ -1,22 +1,14 @@
-set(TargetName flight.cpp)
+set(TargetName radio)
 
 add_executable(${TargetName}
-    flight.cpp
+    radio.cpp
 )
 
 target_link_libraries(${TargetName} 
     pico_stdlib 
-    pico_multicore
-    pico_platform
     hardware_uart
-    freertos
-    hardware_i2c
-    uprs
-    hardware_pwm
     gnss
-    imu
     rf
-
 )
 
 pico_enable_stdio_usb(${TargetName} 1)

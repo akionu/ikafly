@@ -29,7 +29,7 @@ void task_imu(void *){
 	gpio_set_function(SDA, GPIO_FUNC_I2C);
 	gpio_set_function(SCL, GPIO_FUNC_I2C);
 
-	imu.setDebugPrint(false);
+	imu.setDebugPrint(true);
 
 	bool st = imu.init();
 	if (st) printf("IMU init success");
@@ -37,7 +37,7 @@ void task_imu(void *){
 
 	float euler[3];//, accel[3], gyro[3], mag[3];
 	printf("roll pitch yaw\n");
-	while (1) {
+		while (1) {
 		imu.update(); // should call this 50ms each(20Hz), refer MadgwickAHRS.c and sensor output frequency in init() in imu.cpp
 		//imu.getAccel_mg(accel);
 		//printf("%3.2f %3.2f %3.2f\n", accel[0], accel[1], accel[2]);

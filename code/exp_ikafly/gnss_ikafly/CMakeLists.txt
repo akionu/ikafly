@@ -1,7 +1,7 @@
-set(TargetName flight.cpp)
+set(TargetName gnss_ikfly.cpp)
 
 add_executable(${TargetName}
-    flight.cpp
+    gnss_ikafly.cpp
 )
 
 target_link_libraries(${TargetName} 
