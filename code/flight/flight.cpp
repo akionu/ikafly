@@ -102,8 +102,6 @@ void nichrom(){
 
 void task_landing(void *landing){
     int p;
-	gpio_init(pin_nichrome_right);
-	gpio_init(pin_nichrome_left);
 
 	prs.init();
 	float alt_cm,alt_con[52],alt_av,alt_old;

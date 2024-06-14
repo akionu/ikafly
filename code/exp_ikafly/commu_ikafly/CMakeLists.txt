@@ -1,0 +1,2 @@
+add_subdirectory(send_ikafly)
+add_subdirectory(receive_ikafly)

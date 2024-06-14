@@ -1,7 +1,7 @@
-set(TargetName imu_ikfly.cpp)
+set(TargetName receive_ikfly.cpp)
 
 add_executable(${TargetName}
-    imu_ikafly.cpp
+    receive_ikafly.cpp
 )
 
 target_link_libraries(${TargetName} 
@@ -9,11 +9,8 @@ target_link_libraries(${TargetName}
     pico_multicore
     pico_platform
     hardware_uart
-    freertos
     hardware_i2c
-    uprs
     hardware_pwm
-    gnss
     imu
     rf
 
