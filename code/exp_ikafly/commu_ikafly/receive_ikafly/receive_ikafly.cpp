@@ -5,6 +5,7 @@
 
 Radio radio(24, 22);
 uint8_t packet[32] = {0};
+float latitude_ot;
 
 int main(void) {
 	stdio_init_all();
@@ -20,11 +21,18 @@ int main(void) {
 		printf("%dms: ", time_us_32()/1000);
 		for (int8_t i = 0; i < 32; i++) {
 			printf("%x", packet[i]);
+			asemble_lat();
 		}
 		printf("\n");
-
 	}
 
+}
 
-	return 0;
+void assemmble_lat(uint8_t atai[32]){
+  latitude_ot=0;
+  int atai_digit=8;
+  int i;
+  for(i=0;i<=7;i++){
+	latitude_ot=latitude_ot+ati[i]*pow((double)10,(double)atai_digit-i-1);
+  }
 }

@@ -19,9 +19,6 @@
 #define MOSI 12
 #define MISO 13
 #define RAD2DEG 57.2958
-#define goal_long
-#define goal_lat
-
 
  nmeap_context_t nmea;
  nmeap_gga_t gga;
@@ -62,8 +59,6 @@ static void gpgga_callout(nmeap_context_t *context, void *data, void *user_data)
         if(uart_is_readable(UART)){
         ch = uart_getc(UART);
         nmeap_parse(&nmea, ch);
-		printf("%f,%f",gga.latitude,gga.longitude);
         }
-        
     }
 }

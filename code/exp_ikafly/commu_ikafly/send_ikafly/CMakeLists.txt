@@ -5,14 +5,17 @@ add_executable(${TargetName}
 )
 
 target_link_libraries(${TargetName} 
-    pico_stdlib 
-    pico_multicore
-    pico_platform
-    hardware_uart
-    hardware_i2c
-    hardware_pwm
-    imu
-    rf
+pico_stdlib 
+pico_multicore
+pico_platform
+hardware_uart
+freertos
+hardware_i2c
+uprs
+hardware_pwm
+gnss
+imu
+rf
 
 )
 
