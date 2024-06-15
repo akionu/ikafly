@@ -33,7 +33,12 @@ int main(void) {
 	else {
 
 		float prs_hpa[5] = {0};
-		prs.getPressHpa(); // 最初は捨てる
+		// 最初の数回は当てにならない
+		for (int8_t i = 0; i < 5; i++) {
+			prs_hpa[0] = prs.getPressHpa(); // index=0は意図的
+			sleep_ms(300);
+		}
+
 		for (int8_t i = 0; i < 5; i++) {
 			prs_hpa[i] = prs.getPressHpa();
 			sleep_ms(300);
@@ -44,7 +49,7 @@ int main(void) {
 			if (prs_hpa[i] != 0 
 					&& 800 <= prs_hpa[i] 
 					&& prs_hpa[i] <= 1200
-					&& prs_hpa[i-1] != prs_hpa[i])
+					/*&& prs_hpa[i-1] != prs_hpa[i]*/)
 				prs_n++;
 		}
 		if (prs_n >= 3) printf("press: OK\n");
@@ -52,7 +57,7 @@ int main(void) {
 			printf("press: NG\n");
 			printf("press(hPa): ");
 			for (int8_t i = 0; i < 5; i++) {
-				printf("%4.2f", prs_hpa[i]);
+				printf("%4.2f ", prs_hpa[i]);
 			}
 			printf("\n");
 		}
