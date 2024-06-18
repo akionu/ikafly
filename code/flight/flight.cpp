@@ -63,6 +63,7 @@ nmeap_gga_t gga;
 IMU imu(I2C);
 Press prs(I2C, 0x77);
 Motor motor;
+Radio radio(24, 22);
 
 
 
@@ -172,7 +173,7 @@ void task_send(void *send){
         if(gga.latitude !=0.0 && gga.latitude>=9){
 
         latitude_s=gga.latitude;
-		longitude_s=gga.longitude_s;
+		longitude_s=gga.longitude;
 
         latitude_s=latitude_s*1000000;
 		longitude_s=longitude_s*1000000;
@@ -180,7 +181,7 @@ void task_send(void *send){
             packet[i]=(int)latitude_s/(int)pow((double)10,(double)latitude_digit-i-1);
             latitude_s=(int)latitude_s%(int)pow((double)10,(double)latitude_digit-i-1);
             }
-		for(i=8,i<=16;i++){
+		for(i=8;i<=16;i++){
 			packet[i]=(int)longitude_s/(int)pow((double)10,(double)longitude_digit-i+7);
             longitude_s=(int)longitude_s%(int)pow((double)10,(double)longitude_digit-i-1);
 		}
@@ -195,7 +196,7 @@ void task_send(void *send){
 
 
 
-oid assemble_lat(uint8_t packet_r[32]){
+void assemble_lat(uint8_t packet_r[32]){
 	while(1){
   latitude_ot=0;
   longitude_ot=0;
@@ -205,9 +206,11 @@ oid assemble_lat(uint8_t packet_r[32]){
 	latitude_ot=latitude_ot+packet_r[i]*pow((double)10,(double)latitude_digit-i-1);
   }
   for(i=8;i<=16;i++){
-	longitude_ot=longitude_ot+packet_r[i]**pow((double)10,(double)longitude_digit-i-7);
+	longitude_ot=longitude_ot+packet_r[i]*pow((double)10,(double)longitude_digit-i-7);
   }
 }
+
+
 }
 
 void task_recieve(void *recieve){
@@ -399,7 +402,7 @@ int main(void){
     xTaskCreate(task_get_imu,"task_get_imu",256,NULL,3,NULL);
 	xTaskCreate(task_stack,"task_stack",256,NULL,2,NULL);
 	xTaskCreate(task_g_motor_control,"task_g_motor_control",256,NULL,1,NULL);
-	xTaskCreate(task_send,"task_send",256,NULL,5,NULL)
+	xTaskCreate(task_send,"task_send",256,NULL,5,NULL);
     vTaskStartScheduler();
     while(1);
 }
