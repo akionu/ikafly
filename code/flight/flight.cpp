@@ -34,8 +34,8 @@
 #define IRQ UART0_IRQ
 #define MOSI 12
 #define MISO 13
-#define goal_latitude
-#define goal_longitude
+#define goal_latitude 40.2121
+#define goal_longitude 140.0266
 
 
 
@@ -50,8 +50,8 @@ float yaw;
 uint8_t packet[32];
 int latitude_digit=8;
 int longitude_digit=9;
-float latitude_ot;
-float longitude_ot;
+float latitude_ot=0;
+float longitude_ot=0;
 
 
 
@@ -67,7 +67,14 @@ Radio radio(24, 22);
 
 
 
-
+	SemaphoreHandle_t xMutex;
+	TaskHandle_t  landing_h;
+	TaskHandle_t  get_gnss_h;
+	TaskHandle_t  get_imu_h;
+	TaskHandle_t  stack_h;
+	TaskHandle_t  g_motor_control_h;
+	TaskHandle_t  send_h;
+	TaskHandle_t  receive_h;
 
 
 
@@ -92,38 +99,52 @@ void nichrom(){
 void task_landing(void *landing){
      int p;
 
+	vTaskSuspend(g_motor_control_h);
+	vTaskSuspend(stack_h);
+	vTaskSuspend(get_imu_h);
+	vTaskSuspend(get_gnss_h);
+	vTaskSuspend(receive_h);
+
+	printf("press init");
 	prs.init();
 	float alt_cm,alt_con[52],alt_av,alt_old;
 	int i;
 	for(i=0;i<=50;i++){
 	alt_con[i]=prs.getAltM();
-	sleep_ms(100);
+	vTaskDelay(100);
 	};
-	for(i=0;i<=50;i++){
+	for(i=10;i<=50;i++){
 		alt_con[51]+=alt_con[i];
 	};
 
-	alt_av=alt_con[51]/50;
+	vTaskResume(get_imu_h);
+	vTaskSuspend(NULL);
+
+	alt_av=alt_con[51]/41;
 	alt_old=alt_av;
 	printf("done geting altitude");
 	while(1){
 		alt_cm=prs.getAltM();
-		if(alt_cm-alt_av<=5 || alt_av-alt_cm<=5){
+		if(alt_cm-alt_av<=0.1 && alt_av-alt_cm<=0.1){
 			printf("ground");
 			if(p>=10){
 				nichrom();
-		
+				vTaskResume(get_imu_h);
+				vTaskResume(g_motor_control_h);
+				vTaskResume(stack_h);
+				vTaskResume(receive_h);
+
 			}
-		}else if(alt_cm-alt_old>=3.0){
+		}else if(alt_cm-alt_old>=0.1){
 			printf("up");
-		}else if(alt_old-alt_cm>=3.0){
+		}else if(alt_old-alt_cm>=0.1){
 			printf("down");
 		}else {
 			printf("hovering");
 		};
 		alt_old=alt_cm;
 	
-		if(alt_cm-alt_av>=50){
+		if(alt_cm-alt_av>=0){
 			p++;
 		};
 		
@@ -138,17 +159,14 @@ void task_landing(void *landing){
 
 
 
-
 void task_get_imu(void *get_imu){
-    stdio_init_all();
-	sleep_ms(2000);
-	i2c_init(I2C, 400*1000);
 
-	gpio_set_function(i2c_sda_pin, GPIO_FUNC_I2C);
-	gpio_set_function(i2c_scl_pin, GPIO_FUNC_I2C);
     imu.init();
 	imu.setDebugPrint(false);
     imu.calibration();
+
+	vTaskResume(landing_h);
+
 	float euler[3];
 
 while(1){
@@ -160,7 +178,7 @@ while(1){
 		}
 }
 
-void task_send(void *send){
+void send(){
 	radio.init();
     int latitude_digit=8;
 	int longitude_digit=9;
@@ -169,8 +187,7 @@ void task_send(void *send){
 	float longitude_s;
 
 
-    while(1){
-        if(gga.latitude !=0.0 && gga.latitude>=9){
+        if(gga.latitude !=0.0){
 
         latitude_s=gga.latitude;
 		longitude_s=gga.longitude;
@@ -188,8 +205,6 @@ void task_send(void *send){
 
             radio.send(packet);
             vTaskDelay(1000);
-        }
-        vTaskDelay(1000);
     }
 }
 
@@ -213,7 +228,7 @@ void assemble_lat(uint8_t packet_r[32]){
 
 }
 
-void task_recieve(void *recieve){
+void task_receieve(void *receieve){
 
 
 
@@ -225,6 +240,7 @@ void task_recieve(void *recieve){
 			assemble_lat(packet);
 		}
 		    printf("\n");
+			vTaskDelay(1000);
 	    }
 
 
@@ -237,11 +253,11 @@ void task_recieve(void *recieve){
 
 
 
-float distance(){
+float distance(float longitude, float latitude ,float longitude_self, float latitude_self){
 	double RX = 6378.137; 
     double RY = 6356.752; 
 
-  double dx = goal_longitude - gga.longitude, dy = goal_latitude - gga.latitude;
+  double dx = longitude - longitude_self, dy = latitude - latitude_self;
   double mu = (goal_latitude +gga.latitude ) / 2.0; 
   double E = sqrt(1 - pow(RY / RX, 2.0));
   double W = sqrt(1 - pow(E * sin(mu), 2.0));
@@ -258,6 +274,7 @@ static void gpgga_callout(nmeap_context_t *context, void *data, void *user_data)
 
 void task_get_gnss(void *get_gnss){
     int ch;
+	int i;
     gpio_init(25);
     gpio_set_dir(25, GPIO_OUT);
     gpio_put(25, 0);
@@ -285,8 +302,16 @@ void task_get_gnss(void *get_gnss){
         if(uart_is_readable(UART)){
         ch = uart_getc(UART);
         nmeap_parse(&nmea, ch);
-		dis=distance();
+		dis=distance(goal_longitude,goal_latitude,gga.longitude,gga.latitude);
+
+		if(i%5==0){
+		send();
+			if(i==10000){
+				i=0;
+			}
         }
+		}
+		i++;
 		
     }
 }
@@ -355,6 +380,8 @@ void task_stack(void *stack){
 
 void task_g_motor_control(void *g_mortor_control){
 float p;
+float dis_ot=100;
+float dis_ot_g;
 
 while(1){
 
@@ -371,13 +398,30 @@ while(1){
 	torig[2]=cos(yaw);
 	torig[3]=sin(yaw);
 
+	if(latitude_ot != 0)
+	dis_ot=distance(longitude_ot,latitude_ot,gga.longitude,gga.latitude);
+	dis_ot_g=distance(longitude_ot,latitude_ot,gga.longitude,gga.latitude);
+
 	arg=atan2(-torig[3]*torig[0]+torig[2]*torig[1],torig[2]*torig[0]+torig[3]*torig[1]);
 
-	p=arg*46.877;
-	motor.forward(800-p,800+p);
+	if(dis<2){
+		vTaskSuspend(NULL);
+	}else if(dis_ot>=2){
 
-}
+		p=arg*46.877;
+		motor.forward(800-p,800+p);
 
+	}else if(dis-dis_ot_g<=0){
+
+		p=arg*46.877;
+		motor.forward(800-p,800+p);
+
+	}else{
+
+		motor.stop();
+		vTaskDelay(1000);
+	}
+	}
 }
 
 
@@ -389,20 +433,26 @@ while(1){
 
 int main(void){
     stdio_init_all();
-    vTaskDelay(2000);
-	stdio_usb_init();
+    sleep_ms(2000);
 
 	motor.init(pin_left_begin, pin_right_begin);
 
-    SemaphoreHandle_t xMutex;
-    xMutex = xSemaphoreCreateMutex();
+	i2c_init(I2C, 400*1000);
 
-    xTaskCreate(task_landing,"task_landing",256,NULL,6,NULL);
-    xTaskCreate(task_get_gnss,"task_get_gnss",256,NULL,4,NULL);
-    xTaskCreate(task_get_imu,"task_get_imu",256,NULL,3,NULL);
-	xTaskCreate(task_stack,"task_stack",256,NULL,2,NULL);
-	xTaskCreate(task_g_motor_control,"task_g_motor_control",256,NULL,1,NULL);
-	xTaskCreate(task_send,"task_send",256,NULL,5,NULL);
+	gpio_set_function(i2c_sda_pin, GPIO_FUNC_I2C);
+	gpio_set_function(i2c_scl_pin, GPIO_FUNC_I2C);
+
+	xMutex = xSemaphoreCreateMutex();
+
+
+    xTaskCreate(task_landing,"task_landing",256,NULL,6,&landing_h);
+	xTaskCreate(task_g_motor_control,"task_g_motor_control",256,NULL,6,&g_motor_control_h);
+
+    xTaskCreate(task_get_gnss,"task_get_gnss",256,NULL,5,&get_gnss_h);
+	xTaskCreate(task_stack,"task_stack",256,NULL,4,&stack_h);
+
+    xTaskCreate(task_get_imu,"task_get_imu",256,NULL,3,&get_imu_h);
+	xTaskCreate(task_receieve,"task_receieve",256,NULL,2,&receive_h);
     vTaskStartScheduler();
     while(1);
 }

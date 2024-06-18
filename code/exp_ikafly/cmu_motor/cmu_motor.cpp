@@ -29,7 +29,7 @@ int main(void) {
 //		printf("%c", (st==0)?'0':'1');
 		radio.receive(packet);
 		printf("%dms: ", time_us_32()/1000);
-		for (int8_t i = 0; i < 32; i++) {
+		for (int8_t i = 0; i < 32; i++){
 			printf("%x", packet[i]);
 			//assemble_lat(packet);
 		}
