@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 #include "hardware/timer.h"
 #include "pico/stdio.h"
 #include "../../../lib/rf/src/rf.h"
@@ -8,6 +9,7 @@ Radio radio(24, 22);
 uint8_t packet[32] = {0};
 float latitude_ot;
 
+<<<<<<< HEAD
 void assemble_lat(uint8_t atai[32]){
   latitude_ot=0;
   int atai_digit=8;
@@ -16,6 +18,9 @@ void assemble_lat(uint8_t atai[32]){
 	latitude_ot=latitude_ot+atai[i]*pow((double)10,(double)atai_digit-i-1);
   }
 }
+=======
+void assemmble_lat(uint8_t atai[32]);
+>>>>>>> refs/remotes/origin/main
 
 int main(void) {
 	stdio_init_all();
@@ -31,11 +36,26 @@ int main(void) {
 		printf("%dms: ", time_us_32()/1000);
 		for (int8_t i = 0; i < 32; i++) {
 			printf("%x", packet[i]);
+<<<<<<< HEAD
 			//assemble_lat(packet);
+=======
+			assemmble_lat(packet);
+>>>>>>> refs/remotes/origin/main
 		}
 		    printf("\n");
 	    }
 
 }
 
+<<<<<<< HEAD
 
+=======
+void assemmble_lat(uint8_t atai[32]){
+  latitude_ot=0;
+  int atai_digit=8;
+  int i;
+  for(i=0;i<=7;i++){
+	latitude_ot=latitude_ot+atai[i]*pow((double)10,(double)atai_digit-i-1);
+  }
+}
+>>>>>>> refs/remotes/origin/main

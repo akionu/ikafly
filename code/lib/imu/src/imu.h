@@ -36,6 +36,8 @@ class IMU
 		float accel_g[3];
 		float gyro_dps[3];
 		float mag_mG[3];
+		double co[4]; // coefficient of mag
+		bool is_mag_calibrated = false;
 		int16_t accel_raw[3];
 		int16_t gyro_raw[3];
 		int16_t mag_raw[3];
