@@ -1,7 +1,7 @@
-set(TargetName flight.cpp)
+set(TargetName mortor1_ikfly.cpp)
 
 add_executable(${TargetName}
-    flight.cpp
+    motor1_ikafly.cpp
 )
 
 target_link_libraries(${TargetName} 
@@ -16,7 +16,7 @@ target_link_libraries(${TargetName}
     gnss
     imu
     rf
-    umotor
+
 )
 
 pico_enable_stdio_usb(${TargetName} 1)

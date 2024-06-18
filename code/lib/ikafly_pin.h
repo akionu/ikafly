@@ -34,3 +34,7 @@ const uint8_t pin_led = 29;
 const uint8_t pin_nichrome_left = 16;
 const uint8_t pin_nichrome_right = 17;
 
+const uint pin_left_begin = 18;
+const uint pin_right_begin = 20;
+
+

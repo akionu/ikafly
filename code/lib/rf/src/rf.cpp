@@ -24,6 +24,7 @@ bool Radio::is_air_clear() {
 }
 
 void Radio::send(uint8_t packet[32]) {
+
 	// send start signal
 	sendByte(0x01); // wakeup
 	sendByte(0x01);
@@ -39,12 +40,10 @@ void Radio::send(uint8_t packet[32]) {
 }
 
 void Radio::sendByte(uint8_t data) {
-	uint32_t before = 0;
 	for (int8_t i = 7; i >= 0; i--) {
-		before = time_us_32() + 1000;
-//		printf("%c", (packet[i] & (1<<i))==0?'0':'1');
+		printf("%d",i);
+  	//  printf("%c", (packet[i] & (1<<i))==0?'0':'1');
 		gpio_put(pin_mosi, (data & (1<<i)));
-		while (time_us_32() < before) tight_loop_contents();
 	}
 }
 
