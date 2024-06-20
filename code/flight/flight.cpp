@@ -151,9 +151,9 @@ void task_landing(void *landing){
 		};
 		alt_old=alt_cm;
 	
-		if(alt_cm-alt_av>=0){
+		//if(alt_cm-alt_av>=0){
 			p++;
-		};
+		//};
 
 		if(p>=10){
 				nichrom();
@@ -178,7 +178,7 @@ void task_get_imu(void *get_imu){
 
     imu.init();
 	imu.setDebugPrint(false);
-    //imu.calibration();
+    imu.calibration();
 
     TickType_t lastunblock_imu;
     lastunblock_imu=xTaskGetTickCount();
@@ -303,6 +303,7 @@ static void gpgga_callout(nmeap_context_t *context, void *data, void *user_data)
 
 void task_get_gnss(void *get_gnss){
     int ch;
+	int j=0;
 	TickType_t lastunblock_gnss;
     lastunblock_gnss=xTaskGetTickCount();
     gpio_init(25);
@@ -337,7 +338,15 @@ void task_get_gnss(void *get_gnss){
 
 			if(cgg_o != cgg){
 				vTaskDelayUntil(&lastunblock_gnss,pdMS_TO_TICKS(100));
-				printf("sus");
+				if(gga.latitude != 0 && gga.longitude != 0){
+				dis=distance(goal_longitude,goal_latitude,gga.longitude,gga.latitude);
+				if(j==0){
+					vTaskResume(g_motor_control_h);
+					j++;
+				}
+				printf("dis=%f\n",dis);
+				}
+				
 			}
 
 	
@@ -411,6 +420,7 @@ void task_stack(void *stack){
 
 void task_g_motor_control(void *g_mortor_control){
 float p;
+int j=0;
 float dis_ot=100;
 float dis_ot_g;
 
@@ -420,7 +430,8 @@ lastunblock_gmotor=xTaskGetTickCount();
 
 
 while(1){
-
+		if(gga.latitude != 0 && gga.longitude != 0){
+			printf("g_motor");
 	arctan=atan2(goal_latitude-gga.latitude,goal_latitude-gga.longitude);
 
 	torig[0]=cos(arctan);
@@ -429,30 +440,45 @@ while(1){
 	torig[2]=cos(yaw);
 	torig[3]=sin(yaw);
 
-	if(latitude_ot != 0)
+	if(latitude_ot != 0){
 	dis_ot=distance(longitude_ot,latitude_ot,gga.longitude,gga.latitude);
 	dis_ot_g=distance(longitude_ot,latitude_ot,gga.longitude,gga.latitude);
+	}
 
 	arg=atan2(-torig[3]*torig[0]+torig[2]*torig[1],torig[2]*torig[0]+torig[3]*torig[1]);
 
-	if(dis<2){
+	printf("arg=%f",arg);
+
+	/*if(dis<2){
 		vTaskSuspend(NULL);
 	}else if(dis_ot>=2){
 
 		p=arg*46.877;
 		motor.forward(800-p,800+p);
+		vTaskDelayUntil(&lastunblock_gmotor,pdMS_TO_TICKS(1000));
 
 	}else if(dis-dis_ot_g<=0){
 
 		p=arg*46.877;
 		motor.forward(800-p,800+p);
+		vTaskDelayUntil(&lastunblock_gmotor,pdMS_TO_TICKS(1000));
 
 	}else{
 
 		motor.stop();
 		vTaskDelayUntil(&lastunblock_gmotor,pdMS_TO_TICKS(1000));
-	}
-	}
+	}*/
+			if(j==0){
+				motor.setDirForward(1, -1);
+				j++;
+			}
+
+			p=arg*46.877;
+			motor.forward(800-p,800+p);
+			
+			vTaskDelayUntil(&lastunblock_gmotor,pdMS_TO_TICKS(500));
+		}
+}
 }
 
 

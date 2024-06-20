@@ -88,9 +88,7 @@ while(1){
 
 
 		yaw=euler[2];
-		printf("imu");
 		vTaskDelayUntil(&lastunblock_imu,pdMS_TO_TICKS(20));
-        printf("ooo");
 		}
 }
 
