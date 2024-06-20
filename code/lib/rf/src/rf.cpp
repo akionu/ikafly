@@ -41,7 +41,6 @@ void Radio::send(uint8_t packet[32]) {
 
 void Radio::sendByte(uint8_t data) {
 	for (int8_t i = 7; i >= 0; i--) {
-		printf("%d",i);
   	//  printf("%c", (packet[i] & (1<<i))==0?'0':'1');
 		gpio_put(pin_mosi, (data & (1<<i)));
 	}

@@ -1,7 +1,7 @@
-set(TargetName mortor1_ikfly.cpp)
+set(TargetName motor_p.cpp)
 
 add_executable(${TargetName}
-    motor1_ikafly.cpp
+    motor_p.cpp
 )
 
 target_link_libraries(${TargetName} 
@@ -13,11 +13,10 @@ target_link_libraries(${TargetName}
     hardware_i2c
     uprs
     hardware_pwm
-    umotor
     gnss
     imu
     rf
-
+    umotor
 )
 
 pico_enable_stdio_usb(${TargetName} 1)

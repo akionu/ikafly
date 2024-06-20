@@ -4,4 +4,6 @@ add_subdirectory(imu_ikafly)
 add_subdirectory(commu_ikafly)
 add_subdirectory(landing_ikafly)
 add_subdirectory(motor1_ikafly)
+add_subdirectory(motor_p)
+add_subdirectory(arg_ikafly)
 

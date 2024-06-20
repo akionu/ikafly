@@ -52,7 +52,8 @@ int latitude_digit=8;
 int longitude_digit=9;
 float latitude_ot=0;
 float longitude_ot=0;
-
+int cgg=0;
+int cgg_o;
 
 
 
@@ -67,14 +68,15 @@ Radio radio(24, 22);
 
 
 
-	SemaphoreHandle_t xMutex;
-	TaskHandle_t  landing_h;
-	TaskHandle_t  get_gnss_h;
-	TaskHandle_t  get_imu_h;
-	TaskHandle_t  stack_h;
-	TaskHandle_t  g_motor_control_h;
-	TaskHandle_t  send_h;
-	TaskHandle_t  receive_h;
+
+SemaphoreHandle_t xMutex;
+TaskHandle_t  landing_h;
+TaskHandle_t  get_gnss_h;
+TaskHandle_t  get_imu_h;
+TaskHandle_t  stack_h;
+TaskHandle_t  g_motor_control_h;
+TaskHandle_t  send_h;
+TaskHandle_t  receive_h;
 
 
 
@@ -97,16 +99,17 @@ void nichrom(){
 
 
 void task_landing(void *landing){
-     int p;
+     int p=0;
 
 	vTaskSuspend(g_motor_control_h);
-	vTaskSuspend(stack_h);
+	vTaskSuspend(stack_h);;
 	vTaskSuspend(get_imu_h);
-	vTaskSuspend(get_gnss_h);
 	vTaskSuspend(receive_h);
+	vTaskSuspend(get_gnss_h);
 
 	printf("press init");
 	prs.init();
+
 	float alt_cm,alt_con[52],alt_av,alt_old;
 	int i;
 	for(i=0;i<=50;i++){
@@ -117,27 +120,30 @@ void task_landing(void *landing){
 		alt_con[51]+=alt_con[i];
 	};
 
+	alt_av=alt_con[51]/41;
+	alt_old=alt_av;
+
+	printf("done geting altitude");
 	vTaskResume(get_imu_h);
 	vTaskSuspend(NULL);
 
-	alt_av=alt_con[51]/41;
-	alt_old=alt_av;
-	printf("done geting altitude");
+
 	while(1){
 		alt_cm=prs.getAltM();
 		if(alt_cm-alt_av<=0.1 && alt_av-alt_cm<=0.1){
 			printf("ground");
 			if(p>=10){
 				nichrom();
+
 				vTaskResume(get_imu_h);
-				vTaskResume(g_motor_control_h);
-				vTaskResume(stack_h);
-				vTaskResume(receive_h);
+				vTaskResume(get_gnss_h);
+				printf("landing_delete");
+				vTaskDelete(NULL);
 
 			}
-		}else if(alt_cm-alt_old>=0.1){
+		}else if(alt_cm-alt_old>0.1){
 			printf("up");
-		}else if(alt_old-alt_cm>=0.1){
+		}else if(alt_old-alt_cm>0.1){
 			printf("down");
 		}else {
 			printf("hovering");
@@ -147,8 +153,16 @@ void task_landing(void *landing){
 		if(alt_cm-alt_av>=0){
 			p++;
 		};
-		
-		vTaskDelay(100);
+
+		if(p>=10){
+				nichrom();
+
+				vTaskResume(get_imu_h);
+				vTaskResume(get_gnss_h);
+				printf("landing_delete");
+				vTaskDelete(NULL);
+		  		vTaskDelay(500);
+		}
 	}
 }
 
@@ -163,20 +177,30 @@ void task_get_imu(void *get_imu){
 
     imu.init();
 	imu.setDebugPrint(false);
-    imu.calibration();
+   // imu.calibration();
 
 	vTaskResume(landing_h);
-
+	vTaskSuspend(NULL);
 	float euler[3];
 
 while(1){
+
         
         imu.update();
-		imu.getAttEuler(euler);;
+		imu.getAttEuler(euler);
+
+
 		yaw=euler[2];
+		printf("imu");
 		vTaskDelay(20);
 		}
 }
+
+
+
+
+
+
 
 void send(){
 	radio.init();
@@ -210,7 +234,6 @@ void send(){
 
 
 
-
 void assemble_lat(uint8_t packet_r[32]){
 	while(1){
   latitude_ot=0;
@@ -225,12 +248,9 @@ void assemble_lat(uint8_t packet_r[32]){
   }
 }
 
-
 }
 
 void task_receieve(void *receieve){
-
-
 
 	while (1) {
 		
@@ -243,8 +263,8 @@ void task_receieve(void *receieve){
 			vTaskDelay(1000);
 	    }
 
-
 }
+
 
 
 
@@ -266,15 +286,18 @@ float distance(float longitude, float latitude ,float longitude_self, float lati
   return sqrt(pow(M * dy, 2.0) + pow(N * dx * cos(mu), 2.0)); 
 }
 
-
 static void gpgga_callout(nmeap_context_t *context, void *data, void *user_data)
 {
     nmeap_gga_t *gga = (nmeap_gga_t *)data;
+	cgg++;
+
 }
+
+
+
 
 void task_get_gnss(void *get_gnss){
     int ch;
-	int i;
     gpio_init(25);
     gpio_set_dir(25, GPIO_OUT);
     gpio_put(25, 0);
@@ -296,24 +319,25 @@ void task_get_gnss(void *get_gnss){
     nmeap_init(&nmea, NULL);
     nmeap_addParser(&nmea, "GNGGA", nmeap_gpgga, gpgga_callout, &gga);
 
+
     while (1)
-    {
+    {	
 
-        if(uart_is_readable(UART)){
-        ch = uart_getc(UART);
-        nmeap_parse(&nmea, ch);
-		dis=distance(goal_longitude,goal_latitude,gga.longitude,gga.latitude);
+			cgg_o=cgg;
+			
+			ch = uart_getc(UART);
+      		nmeap_parse(&nmea, ch);
 
-		if(i%5==0){
-		send();
-			if(i==10000){
-				i=0;
+			if(cgg_o != cgg){
+				vTaskDelay(100);
+				printf("sus");
 			}
-        }
-		}
-		i++;
+
 		
-    }
+
+
+	}	
+		
 }
 
 
@@ -366,8 +390,6 @@ void task_stack(void *stack){
 		}
 	}
 
-		
-
 }
 
 
@@ -383,12 +405,9 @@ float p;
 float dis_ot=100;
 float dis_ot_g;
 
+
+
 while(1){
-
-	if(dis<=2){
-		vTaskDelete(NULL);
-	}
-
 
 	arctan=atan2(goal_latitude-gga.latitude,goal_latitude-gga.longitude);
 
@@ -448,11 +467,13 @@ int main(void){
     xTaskCreate(task_landing,"task_landing",256,NULL,6,&landing_h);
 	xTaskCreate(task_g_motor_control,"task_g_motor_control",256,NULL,6,&g_motor_control_h);
 
-    xTaskCreate(task_get_gnss,"task_get_gnss",256,NULL,5,&get_gnss_h);
-	xTaskCreate(task_stack,"task_stack",256,NULL,4,&stack_h);
+    xTaskCreate(task_get_gnss,"task_get_gnss",256,NULL,2,&get_gnss_h);
+	xTaskCreate(task_stack,"task_stack",256,NULL,3,&stack_h);
 
-    xTaskCreate(task_get_imu,"task_get_imu",256,NULL,3,&get_imu_h);
-	xTaskCreate(task_receieve,"task_receieve",256,NULL,2,&receive_h);
+    xTaskCreate(task_get_imu,"task_get_imu",256,NULL,1,&get_imu_h);
+	xTaskCreate(task_receieve,"task_receieve",256,NULL,5,&receive_h);
+
+	
     vTaskStartScheduler();
-    while(1);
+    while(1){};
 }

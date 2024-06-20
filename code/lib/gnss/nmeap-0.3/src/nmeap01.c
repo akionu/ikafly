@@ -34,6 +34,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ctype.h>
 #include "../inc/nmeap.h"
 
+
 /* this only works if you are sure you have an upper case hex digit */
 #define HEXTOBIN(ch) ((ch <= '9') ? ch - '0' : ch - ('A' - 10))
 
@@ -570,6 +571,7 @@ int nmeap_gpgga(nmeap_context_t *context,nmeap_sentence_t *sentence)
     if (sentence->callout != 0) {
         printf("gps ok: ");
         printf("lat: %f, long: %f\n", gga->latitude, gga->longitude);
+        
 
         (*sentence->callout)(context,gga,context->user_data);
     }
