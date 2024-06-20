@@ -31,6 +31,16 @@ endif()
 # generate compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# FreeRTOS Settings
+add_library(freertos_config INTERFACE)
+target_include_directories(freertos_config SYSTEM
+INTERFACE
+    lib/freertos/config
+)
+target_compile_definitions(freertos_config
+  INTERFACE
+    projCOVERAGE_TEST=0
+)
 
 
 add_subdirectory(exp)

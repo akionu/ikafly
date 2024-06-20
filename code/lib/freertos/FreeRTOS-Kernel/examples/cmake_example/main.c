@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * FreeRTOS Kernel V11.1.0
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
@@ -45,7 +45,7 @@
 
 /*-----------------------------------------------------------*/
 
-static void exampleTask( void * parameters ) __attribute__( ( noreturn ) );
+static void exampleTask( void * parameters );
 
 /*-----------------------------------------------------------*/
 
@@ -62,7 +62,7 @@ static void exampleTask( void * parameters )
 }
 /*-----------------------------------------------------------*/
 
-int main( void )
+void main( void )
 {
     static StaticTask_t exampleTaskTCB;
     static StackType_t exampleTaskStack[ configMINIMAL_STACK_SIZE ];
@@ -84,8 +84,6 @@ int main( void )
     {
         /* Should not reach here. */
     }
-
-    return 0;
 }
 /*-----------------------------------------------------------*/
 

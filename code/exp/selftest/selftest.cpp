@@ -22,6 +22,7 @@ int main(void) {
 	stdio_init_all();
 	sleep_ms(1000);
 	printf("Selftest Ikafly:\n");
+	printf("Press->IMU->Camera->GNSS->Motor->Nichrome\n");
 
 	i2c_init(bus_i2c, 400*1000);
 	gpio_set_function(pin_i2c1_scl, GPIO_FUNC_I2C);
@@ -29,7 +30,7 @@ int main(void) {
 
 	// pressure
 	bool prs_st = prs.init();
-	if (!prs_st) printf("press: NG\n");
+	if (!prs_st) printf("Press: NG\n");
 	else {
 
 		float prs_hpa[5] = {0};
@@ -52,10 +53,10 @@ int main(void) {
 					/*&& prs_hpa[i-1] != prs_hpa[i]*/)
 				prs_n++;
 		}
-		if (prs_n >= 3) printf("press: OK\n");
+		if (prs_n >= 3) printf("Press: OK\n");
 		else {
-			printf("press: NG\n");
-			printf("press(hPa): ");
+			printf("Press: NG\n");
+			printf("Press(hPa): ");
 			for (int8_t i = 0; i < 5; i++) {
 				printf("%4.2f ", prs_hpa[i]);
 			}
@@ -148,7 +149,7 @@ int main(void) {
 	motor.init(pin_motor1_a, pin_motor2_a);
 	motor.setDirForward(1, 1);
 	motor.forward(1023);
-	sleep_ms(3000);
+	sleep_ms(5000);
 	motor.stop();
 	printf("motor: OK?\n");
 

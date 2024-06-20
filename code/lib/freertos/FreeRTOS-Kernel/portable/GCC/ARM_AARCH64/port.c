@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * FreeRTOS Kernel V11.1.0
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
@@ -133,10 +133,6 @@
 #define portMAX_8_BIT_VALUE                       ( ( uint8_t ) 0xff )
 #define portBIT_0_SET                             ( ( uint8_t ) 0x01 )
 
-/* The space on the stack required to hold the FPU registers.
- * There are 32 128-bit registers.*/
-#define portFPU_REGISTER_WORDS     ( 32 * 2 )
-
 /*-----------------------------------------------------------*/
 
 /*
@@ -248,47 +244,23 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
     *pxTopOfStack = ( StackType_t ) 0x00;         /* XZR - has no effect, used so there are an even number of registers. */
     pxTopOfStack--;
     *pxTopOfStack = ( StackType_t ) 0x00;         /* R30 - procedure call link register. */
-
     pxTopOfStack--;
+
     *pxTopOfStack = portINITIAL_PSTATE;
-
     pxTopOfStack--;
+
     *pxTopOfStack = ( StackType_t ) pxCode; /* Exception return address. */
+    pxTopOfStack--;
 
-    #if ( configUSE_TASK_FPU_SUPPORT == 1 )
-    {
-        /* The task will start with a critical nesting count of 0 as interrupts are
-        * enabled. */
-        pxTopOfStack--;
-        *pxTopOfStack = portNO_CRITICAL_NESTING;
+    /* The task will start with a critical nesting count of 0 as interrupts are
+     * enabled. */
+    *pxTopOfStack = portNO_CRITICAL_NESTING;
+    pxTopOfStack--;
 
-        /* The task will start without a floating point context.  A task that
-         * uses the floating point hardware must call vPortTaskUsesFPU() before
-         * executing any floating point instructions. */
-        pxTopOfStack--;
-        *pxTopOfStack = portNO_FLOATING_POINT_CONTEXT;
-    }
-    #elif ( configUSE_TASK_FPU_SUPPORT == 2 )
-    {
-        /* The task will start with a floating point context.  Leave enough
-         * space for the registers - and ensure they are initialised to 0. */
-        pxTopOfStack -= portFPU_REGISTER_WORDS;
-        memset( pxTopOfStack, 0x00, portFPU_REGISTER_WORDS * sizeof( StackType_t ) );
-
-        /* The task will start with a critical nesting count of 0 as interrupts are
-        * enabled. */
-        pxTopOfStack--;
-        *pxTopOfStack = portNO_CRITICAL_NESTING;
-
-        pxTopOfStack--;
-        *pxTopOfStack = pdTRUE;
-        ullPortTaskHasFPUContext = pdTRUE;
-    }
-    #else /* if ( configUSE_TASK_FPU_SUPPORT == 1 ) */
-    {
-        #error "Invalid configUSE_TASK_FPU_SUPPORT setting - configUSE_TASK_FPU_SUPPORT must be set to 1, 2, or left undefined."
-    }
-    #endif /* if ( configUSE_TASK_FPU_SUPPORT == 1 ) */
+    /* The task will start without a floating point context.  A task that uses
+     * the floating point hardware must call vPortTaskUsesFPU() before executing
+     * any floating point instructions. */
+    *pxTopOfStack = portNO_FLOATING_POINT_CONTEXT;
 
     return pxTopOfStack;
 }
@@ -468,19 +440,15 @@ void FreeRTOS_Tick_Handler( void )
 }
 /*-----------------------------------------------------------*/
 
-#if ( configUSE_TASK_FPU_SUPPORT != 2 )
+void vPortTaskUsesFPU( void )
+{
+    /* A task is registering the fact that it needs an FPU context.  Set the
+     * FPU flag (which is saved as part of the task context). */
+    ullPortTaskHasFPUContext = pdTRUE;
 
-    void vPortTaskUsesFPU( void )
-    {
-        /* A task is registering the fact that it needs an FPU context.  Set the
-         * FPU flag (which is saved as part of the task context). */
-        ullPortTaskHasFPUContext = pdTRUE;
-
-        /* Consider initialising the FPSR here - but probably not necessary in
-         * AArch64. */
-    }
-
-#endif /* configUSE_TASK_FPU_SUPPORT */
+    /* Consider initialising the FPSR here - but probably not necessary in
+     * AArch64. */
+}
 /*-----------------------------------------------------------*/
 
 void vPortClearInterruptMask( UBaseType_t uxNewMaskValue )

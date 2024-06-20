@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * FreeRTOS Kernel V11.1.0
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
@@ -48,6 +48,12 @@
  *     in FreeRTOS/source/stdint.readme for more information.
  */
 #include <stdint.h> /* READ COMMENT ABOVE. */
+
+/* *INDENT-OFF* */
+#ifdef __cplusplus
+    extern "C" {
+#endif
+/* *INDENT-ON* */
 
 /* Acceptable values for configTICK_TYPE_WIDTH_IN_BITS. */
 #define TICK_TYPE_WIDTH_16_BITS    0
@@ -122,12 +128,6 @@
     #include "picolibc-freertos.h"
 
 #endif /* if ( configUSE_PICOLIBC_TLS == 1 ) */
-
-/* *INDENT-OFF* */
-#ifdef __cplusplus
-    extern "C" {
-#endif
-/* *INDENT-ON* */
 
 #ifndef configUSE_C_RUNTIME_TLS_SUPPORT
     #define configUSE_C_RUNTIME_TLS_SUPPORT    0
@@ -2873,7 +2873,7 @@
     #error configUSE_TASK_PREEMPTION_DISABLE is not supported in single core FreeRTOS
 #endif
 
-#if ( ( configNUMBER_OF_CORES == 1 ) && ( configUSE_CORE_AFFINITY != 1 ) )
+#if ( ( configNUMBER_OF_CORES == 1 ) && ( configUSE_CORE_AFFINITY != 0 ) )
     #error configUSE_CORE_AFFINITY is not supported in single core FreeRTOS
 #endif
 

@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * FreeRTOS Kernel V11.1.0
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
@@ -662,8 +662,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
 
 /*
  * Return the amount of time, in ticks, that will pass before the kernel will
- * next move a task from the Blocked state to the Running state or before the
- * tick count overflows (whichever is earlier).
+ * next move a task from the Blocked state to the Running state.
  *
  * This conditional compilation should use inequality to 0, not equality to 1.
  * This is to ensure portSUPPRESS_TICKS_AND_SLEEP() can be called when user

@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * FreeRTOS Kernel V11.1.0
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
@@ -53,7 +53,7 @@
  * The tskKERNEL_VERSION_MAJOR, tskKERNEL_VERSION_MINOR, tskKERNEL_VERSION_BUILD
  * values will reflect the last released version number.
  */
-#define tskKERNEL_VERSION_NUMBER       "V11.1.0+"
+#define tskKERNEL_VERSION_NUMBER       "V11.1.0"
 #define tskKERNEL_VERSION_MAJOR        11
 #define tskKERNEL_VERSION_MINOR        1
 #define tskKERNEL_VERSION_BUILD        0
