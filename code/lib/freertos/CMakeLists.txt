@@ -5,6 +5,7 @@ target_include_directories(freertos PUBLIC
     ${FREERTOS_KERNEL_PATH}
 )
 target_link_libraries(freertos
+	freertos_config
     FreeRTOS-Kernel
     FreeRTOS-Kernel-Heap4
     pico_stdlib
