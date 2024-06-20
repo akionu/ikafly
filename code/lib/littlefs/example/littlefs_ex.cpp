@@ -9,7 +9,7 @@ lfs_t lfs;
 lfs_file_t file;
 
 void task_lfs(void *) {
-	int8_t err = lsf_mount(&lfs, &lfs_pico_cfg);
+	int8_t err = lfs_mount(&lfs, &lfs_pico_cfg);
 
 	if (err) {
 		lfs_format(&lfs, &lfs_pico_cfg);

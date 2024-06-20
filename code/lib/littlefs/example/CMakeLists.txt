@@ -2,6 +2,7 @@ add_executable(littlefs_ex littlefs_ex.cpp)
 
 target_link_libraries(littlefs_ex 
 	pico_stdlib
+	pico_flash
 	hardware_i2c
 	freertos
 	littlefs

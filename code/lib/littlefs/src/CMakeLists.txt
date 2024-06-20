@@ -7,11 +7,13 @@ target_sources(littlefs INTERFACE
 target_link_libraries(littlefs
     INTERFACE
     pico_stdlib
+	pico_flash
 	hardware_flash
 	freertos
 )
 
 target_include_directories(littlefs INTERFACE
 	../../freertos/*
+	.
 )
 
