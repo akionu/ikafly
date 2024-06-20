@@ -137,6 +137,7 @@ void task_landing(void *landing){
 
 				vTaskResume(get_imu_h);
 				vTaskResume(get_gnss_h);
+				vTaskResume(g_motor_control_h);
 				printf("landing_delete");
 				vTaskDelete(NULL);
 
@@ -177,10 +178,12 @@ void task_get_imu(void *get_imu){
 
     imu.init();
 	imu.setDebugPrint(false);
-   // imu.calibration();
+    //imu.calibration();
+
+    TickType_t lastunblock_imu;
+    lastunblock_imu=xTaskGetTickCount();
 
 	vTaskResume(landing_h);
-	vTaskSuspend(NULL);
 	float euler[3];
 
 while(1){
@@ -192,7 +195,7 @@ while(1){
 
 		yaw=euler[2];
 		printf("imu");
-		vTaskDelay(20);
+		vTaskDelayUntil(&lastunblock_imu,pdMS_TO_TICKS(20));
 		}
 }
 
@@ -231,6 +234,8 @@ void send(){
             vTaskDelay(1000);
     }
 }
+
+
 
 
 
@@ -298,6 +303,8 @@ static void gpgga_callout(nmeap_context_t *context, void *data, void *user_data)
 
 void task_get_gnss(void *get_gnss){
     int ch;
+	TickType_t lastunblock_gnss;
+    lastunblock_gnss=xTaskGetTickCount();
     gpio_init(25);
     gpio_set_dir(25, GPIO_OUT);
     gpio_put(25, 0);
@@ -329,13 +336,11 @@ void task_get_gnss(void *get_gnss){
       		nmeap_parse(&nmea, ch);
 
 			if(cgg_o != cgg){
-				vTaskDelay(100);
+				vTaskDelayUntil(&lastunblock_gnss,pdMS_TO_TICKS(100));
 				printf("sus");
 			}
 
-		
-
-
+	
 	}	
 		
 }
@@ -349,6 +354,10 @@ void task_get_gnss(void *get_gnss){
 
 
 void task_stack(void *stack){
+	TickType_t lastunblock_stack;
+	lastunblock_stack=xTaskGetTickCount();
+
+
 	while(1){
 	int i;
 	float dis_av;
@@ -356,7 +365,7 @@ void task_stack(void *stack){
 	float dis_old[10];
 		for(i=0;i<10;i++){
 			dis_old[i]=dis;
-			vTaskDelay(500);
+			vTaskDelayUntil(&lastunblock_stack,pdMS_TO_TICKS(100));
 		}
 		for(i=0;i<9;i++){
 			if(dis_old[i+1]-dis_old[i]>=0){
@@ -372,7 +381,7 @@ void task_stack(void *stack){
 		
 		for(i=0;i<10;i++){
 			yaw_old[i]=yaw;
-			vTaskDelay(500);
+			vTaskDelayUntil(&lastunblock_stack,pdMS_TO_TICKS(500));
 		}
 		for(i=0;i<9;i++){
 			if(yaw_old[i+1]-yaw_old[i]>=0){
@@ -404,6 +413,9 @@ void task_g_motor_control(void *g_mortor_control){
 float p;
 float dis_ot=100;
 float dis_ot_g;
+
+TickType_t lastunblock_gmotor;
+lastunblock_gmotor=xTaskGetTickCount();
 
 
 
@@ -438,7 +450,7 @@ while(1){
 	}else{
 
 		motor.stop();
-		vTaskDelay(1000);
+		vTaskDelayUntil(&lastunblock_gmotor,pdMS_TO_TICKS(1000));
 	}
 	}
 }
@@ -467,10 +479,10 @@ int main(void){
     xTaskCreate(task_landing,"task_landing",256,NULL,6,&landing_h);
 	xTaskCreate(task_g_motor_control,"task_g_motor_control",256,NULL,6,&g_motor_control_h);
 
-    xTaskCreate(task_get_gnss,"task_get_gnss",256,NULL,2,&get_gnss_h);
+    xTaskCreate(task_get_gnss,"task_get_gnss",256,NULL,1,&get_gnss_h);
 	xTaskCreate(task_stack,"task_stack",256,NULL,3,&stack_h);
 
-    xTaskCreate(task_get_imu,"task_get_imu",256,NULL,1,&get_imu_h);
+    xTaskCreate(task_get_imu,"task_get_imu",256,NULL,2,&get_imu_h);
 	xTaskCreate(task_receieve,"task_receieve",256,NULL,5,&receive_h);
 
 	

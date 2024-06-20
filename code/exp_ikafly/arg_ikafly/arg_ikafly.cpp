@@ -164,9 +164,9 @@ int main(){
 
     
    
-    xTaskCreate(task_get_gnss,"task_get_gnss",256,NULL,2,NULL);
+    xTaskCreate(task_get_gnss,"task_get_gnss",256,NULL,1,NULL);
 
-    xTaskCreate(task_get_imu,"task_get_imu",256,NULL,1,NULL);
+    xTaskCreate(task_get_imu,"task_get_imu",256,NULL,2,NULL);
 
 	
     vTaskStartScheduler();
