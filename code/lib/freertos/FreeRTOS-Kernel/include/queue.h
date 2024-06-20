@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * FreeRTOS Kernel V11.1.0
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
@@ -34,13 +34,13 @@
     #error "include FreeRTOS.h" must appear in source files before "include queue.h"
 #endif
 
-#include "task.h"
-
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     extern "C" {
 #endif
 /* *INDENT-ON* */
+
+#include "task.h"
 
 /**
  * Type by which queues are referenced.  For example, a call to xQueueCreate()

@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * FreeRTOS Kernel V11.1.0
  * Copyright (C) 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * SPDX-License-Identifier: MIT
@@ -192,9 +192,7 @@ void vListInsert( List_t * const pxList,
         for( pxIterator = ( ListItem_t * ) &( pxList->xListEnd ); pxIterator->pxNext->xItemValue <= xValueOfInsertion; pxIterator = pxIterator->pxNext )
         {
             /* There is nothing to do here, just iterating to the wanted
-             * insertion position.
-             * IF YOU FIND YOUR CODE STUCK HERE, SEE THE NOTE JUST ABOVE.
-             */
+             * insertion position. */
         }
     }
 

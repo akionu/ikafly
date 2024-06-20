@@ -9,15 +9,18 @@ lfs_t lfs;
 lfs_file_t file;
 
 void task_lfs(void *) {
+	printf("task_lfs\n");
 	int8_t err = lfs_mount(&lfs, &lfs_pico_cfg);
 
 	if (err) {
+		printf("err: lfs_mount");
 		lfs_format(&lfs, &lfs_pico_cfg);
 	}
 	uint32_t boot_count = 0;
 	lfs_file_open(&lfs, &file, "boot_count", LFS_O_RDWR | LFS_O_CREAT);
     lfs_file_read(&lfs, &file, &boot_count, sizeof(boot_count));
 
+	printf("ok: lfs_file_read");
     // update boot count
     boot_count += 1;
     lfs_file_rewind(&lfs, &file);
@@ -38,7 +41,7 @@ void task_lfs(void *) {
 int main(void) {
 	stdio_init_all();
 	sleep_ms(2000);
-	printf("%s", __FILE_NAME__);
+	printf("%s\n", __FILE_NAME__);
 	
 	xTaskCreate(task_lfs,"task_lfs",256,NULL,1,NULL);
     vTaskStartScheduler();
