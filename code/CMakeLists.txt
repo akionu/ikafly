@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.12)
 
+# set board with 4MB flash
+set(PICO_BOARD pimoroni_picolipo_4mb)
+
 # set FreeRTOS Kernel Path
 set(FREERTOS_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib/freertos)
 set(FREERTOS_KERNEL_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib/freertos/FreeRTOS-Kernel)
@@ -7,7 +10,6 @@ set(FREERTOS_KERNEL_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib/freertos/FreeRTOS-Kerne
 # Pull in SDK (must be before project)
 include(pico_sdk_import.cmake)
 include(FreeRTOS_Kernel_import.cmake)
-
 
 project(blink C CXX ASM)
 set(CMAKE_C_STANDARD 11)
