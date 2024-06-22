@@ -11,7 +11,7 @@ set(FREERTOS_KERNEL_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib/freertos/FreeRTOS-Kerne
 include(pico_sdk_import.cmake)
 include(FreeRTOS_Kernel_import.cmake)
 
-project(blink C CXX ASM)
+project(ikafly C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -42,8 +42,10 @@ INTERFACE
 target_compile_definitions(freertos_config
   INTERFACE
     projCOVERAGE_TEST=0
+	# need for safe flash access
+	PICO_FLASH_SAFE_EXECUTE_PICO_SUPPORT_MULTICORE_LOCKOUT=0
+	PICO_FLASH_SAFE_EXECUTE_USE_FREERTOS_SMP=1
 )
-
 
 add_subdirectory(exp)
 add_subdirectory(lib)

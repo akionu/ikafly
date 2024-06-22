@@ -1,0 +1,7 @@
+If:
+    PathMatch: .*
+
+CompileFlags:
+    Add:
+        - --query-driver=/usr/bin/arm-none-eabi-gcc
+    Compiler: arm-none-eabi-gcc
