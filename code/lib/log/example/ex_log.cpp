@@ -23,8 +23,7 @@ void task_flash(void *p) {
 	static uint8_t wbuf[SIZE] = {0};
 	static uint8_t rbuf[SIZE] = {0};
 
-    uint8_t file0 = 0, file1 = 0;
-
+    uint8_t test_file = 0;
 	bool ret = false;
 
 	// prepare dummy data
@@ -34,35 +33,45 @@ void task_flash(void *p) {
     }
     for (uint16_t i = 0; i < TEKITOU_NUM; i++) wbuf[FLASH_PAGE_SIZE*2+i] = TEKITOU_NUM-i;
 
-    log1.init();
-    log1.make(&file0, "somedata", 16);
-    log1.make(&file1, "test", SIZE);
+    // init should be called first (otherwise, hang up)
+    ret = log1.init(); printf("init: ret: %s\n", ret?"ok":"fail");
+    log1.nuke();
 
-    printf("file0: %d, file1: %d\n", file0, file1);
-    log1.open(1);
+    ret = log1.mount(); printf("mount: ret: %s\n", ret?"ok":"fail");
+    if (!ret) {
+	    // erase
+    	printf("%d: nuke...", time_us_32()/1000);
+        log1.nuke();
+    	printf("%s\n", (ret?"ok":"fail"));
+        ret = log1.make(NULL, "somedata", 16);
+        printf("make: ret: %s\n", ret?"ok":"fail");
+        ret = log1.make(&test_file, "test", SIZE);
+        printf("make: ret: %s\n", ret?"ok":"fail");
+    }
+    ret = log1.find(&test_file, "test", sizeof("test"));
+    printf("find: ret: %s\n", ret?"ok":"fail");
+
+    printf("test_file: %d\n", test_file);
 
 	printf("PICO_OK: %d, PICO_ERROR_NOT_PERMITTED: %d, PICO_ERROR_INSUFFICIENT_RESOURCES: %d\n", PICO_OK, PICO_ERROR_NOT_PERMITTED, PICO_ERROR_INSUFFICIENT_RESOURCES);
 	// read data
-	printf("%d: read page...", time_us_32()/1000);
-    ret = log1.read(file1, rbuf, SIZE);
+	printf("%d: read...", time_us_32()/1000);
+    ret = log1.read(test_file, rbuf, SIZE);
 	printf("%s\n", "ok");
 	printf("read data:\n 0x");
 	for (uint16_t i = 0; i < SIZE; i++) printf("%x", rbuf[i]);
 	printf("\n");
 
-	// erase
-	printf("%d: erase sector...", time_us_32()/1000);
-	ret = log1.erase_sector_safe(log1.file_list[file0].offset); //tmp
-	printf("%s\n", (ret?"ok":"fail"));
-
 	// write data
-	printf("%d: write page...", time_us_32()/1000);
-	ret = log1.write(file1, wbuf, SIZE);
+	printf("%d: write...", time_us_32()/1000);
+    assert(SIZE==sizeof(wbuf));
+	ret = log1.write(test_file, wbuf, SIZE);
+//    ret = log1.append(test_file, &wbuf[SIZE-TEKITOU_NUM], TEKITOU_NUM);
 	printf("%s\n", (ret?"ok":"fail"));
 
 	// read data
-	printf("%d: read page...", time_us_32()/1000);
-    ret = log1.read(file1, rbuf, SIZE);
+	printf("%d: read...", time_us_32()/1000);
+    ret = log1.read(test_file, rbuf, SIZE);
 	printf("%s\n", "ok");
 
 	printf("(potentially) written data:\n 0x");
