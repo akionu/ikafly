@@ -28,7 +28,7 @@ int main(void) {
 	cam.init();
 	cam.enableJpeg();
 
-	while (1) {
+	while(1){
 		cam.capture();
 		while (!cam.isCaptureFinished()) tight_loop_contents();
 
@@ -38,9 +38,7 @@ int main(void) {
 		for (uint16_t i = 0; i < 64; i++) 
 			printf("00");
 
-
 		sleep_ms(1500);
-
 	}
 }
 
