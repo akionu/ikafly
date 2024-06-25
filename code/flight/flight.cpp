@@ -30,6 +30,7 @@
 
 #define I2C i2c1
 #define RAD2DEG 57.2958
+#define pai 3.1415
 #define UART uart0
 #define IRQ UART0_IRQ
 #define MOSI 12
@@ -194,7 +195,6 @@ while(1){
 
 
 		yaw=euler[2];
-		printf("imu");
 		vTaskDelayUntil(&lastunblock_imu,pdMS_TO_TICKS(20));
 		}
 }
@@ -344,7 +344,6 @@ void task_get_gnss(void *get_gnss){
 					vTaskResume(g_motor_control_h);
 					j++;
 				}
-				printf("dis=%f\n",dis);
 				}
 				
 			}
@@ -431,8 +430,8 @@ lastunblock_gmotor=xTaskGetTickCount();
 
 while(1){
 		if(gga.latitude != 0 && gga.longitude != 0){
-			printf("g_motor");
-	arctan=atan2(goal_latitude-gga.latitude,goal_latitude-gga.longitude);
+		
+	arctan=atan2(goal_longitude-gga.longitude,goal_latitude-gga.latitude);
 
 	torig[0]=cos(arctan);
 	torig[1]=sin(arctan);
@@ -447,7 +446,7 @@ while(1){
 
 	arg=atan2(-torig[3]*torig[0]+torig[2]*torig[1],torig[2]*torig[0]+torig[3]*torig[1]);
 
-	printf("arg=%f",arg);
+
 
 	/*if(dis<2){
 		vTaskSuspend(NULL);
@@ -472,11 +471,18 @@ while(1){
 				motor.setDirForward(1, -1);
 				j++;
 			}
-
-			p=arg*46.877;
-			motor.forward(800-p,800+p);
 			
-			vTaskDelayUntil(&lastunblock_gmotor,pdMS_TO_TICKS(500));
+			p=arg*39.15;
+
+			if(p>=123){
+				p=123;
+			}else if(p<=-123){
+				p=-123;
+			}
+
+			motor.forward(900+p,900-p);
+			
+			vTaskDelayUntil(&lastunblock_gmotor,pdMS_TO_TICKS(200));
 		}
 }
 }

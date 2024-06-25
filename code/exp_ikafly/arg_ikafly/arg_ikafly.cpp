@@ -39,6 +39,7 @@
 #define MISO 13
 #define goal_latitude 40.2121
 #define goal_longitude 140.0266
+#define pai 3.1415
 
 
 
@@ -48,6 +49,7 @@ float dis;
 float arctan;
 float torig[4];
 float arg;
+float arg_n;
 float yaw;
 uint8_t packet[32];
 int latitude_digit=8;
@@ -65,6 +67,8 @@ Motor motor;
 nmeap_context_t nmea;
 nmeap_gga_t gga;
 
+TaskHandle_t imu_h;
+TaskHandle_t gnss_h;
 
 
 void task_get_imu(void *get_imu){
@@ -74,14 +78,13 @@ void task_get_imu(void *get_imu){
 
     imu.init();
 	imu.setDebugPrint(false);
-    //imu.calibration();
+    vTaskSuspend(gnss_h);
+    imu.calibration();
+    vTaskResume(gnss_h);
 	float euler[3];
-
-    printf("lll");
 
 while(1){
 
-        printf("jjj");
 
         imu.update();
 		imu.getAttEuler(euler);
@@ -90,6 +93,7 @@ while(1){
 		yaw=euler[2];
 		vTaskDelayUntil(&lastunblock_imu,pdMS_TO_TICKS(20));
 		}
+
 }
 
 
@@ -137,12 +141,35 @@ void task_get_gnss(void *get_gnss){
       		nmeap_parse(&nmea, ch);
 
 			if(cgg_o != cgg){
-                printf("sus_a");
                 vTaskDelayUntil(&lastunblock_gnss,pdMS_TO_TICKS(100));
-				printf("sus");
-			}
+            if(gga.latitude != 0 && gga.longitude != 0){
+	        arctan=atan2(goal_longitude-gga.longitude,goal_latitude-gga.latitude);
 
-	}	
+	        torig[0]=cos(arctan);
+	        torig[1]=sin(arctan);
+
+            //torig[0]=1;
+            //torig[1]=0;
+
+        	torig[2]=cos(yaw);
+	        torig[3]=sin(yaw);
+
+	        arg=atan2(-torig[3]*torig[0]+torig[2]*torig[1],torig[2]*torig[0]+torig[3]*torig[1]);
+
+            printf("%f",arg*180/pai);
+
+
+            /*if(arg>=0){
+                arg_n=pai-arg;
+            }else{
+                arg_n=-(pai+arg);
+            }
+             printf("arg_n=%f",arg_n*180/pai); */
+
+            }
+	        }
+    }
+
 		
 }
 
@@ -162,9 +189,9 @@ int main(){
 
     
    
-    xTaskCreate(task_get_gnss,"task_get_gnss",256,NULL,1,NULL);
+    xTaskCreate(task_get_gnss,"task_get_gnss",256,NULL,1,&gnss_h);
 
-    xTaskCreate(task_get_imu,"task_get_imu",256,NULL,2,NULL);
+    xTaskCreate(task_get_imu,"task_get_imu",256,NULL,2,&imu_h);
 
 	
     vTaskStartScheduler();
