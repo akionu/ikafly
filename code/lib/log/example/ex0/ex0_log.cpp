@@ -16,6 +16,7 @@
 Logging log1;
 
 void task_flash(void* p);
+
 void task_flash(void *p) {
     const uint16_t TEKITOU_NUM = 23;
     const uint16_t SIZE = FLASH_PAGE_SIZE*2+TEKITOU_NUM;
@@ -36,20 +37,27 @@ void task_flash(void *p) {
     // init should be called first (otherwise, hang up)
     ret = log1.init(); printf("init: ret: %s\n", ret?"ok":"fail");
     log1.nuke();
-
     ret = log1.mount(); printf("mount: ret: %s\n", ret?"ok":"fail");
     if (!ret) {
+        // mount fails
 	    // erase
+        ret = log1.unmount(); printf("unmount: ret: %s\n", ret?"ok":"fail");
+        ret = log1.nuke();
     	printf("%d: nuke...", time_us_32()/1000);
-        log1.nuke();
     	printf("%s\n", (ret?"ok":"fail"));
-        ret = log1.make(NULL, "somedata", 16);
+        ret = log1.make(&test_file, "somedat", 16);
         printf("make: ret: %s\n", ret?"ok":"fail");
-        ret = log1.make(&test_file, "test", SIZE);
+        ret = log1.make(&test_file, "test", 0xff*3);
         printf("make: ret: %s\n", ret?"ok":"fail");
     }
-    ret = log1.find(&test_file, "test", sizeof("test"));
+    ret = log1.find(&test_file, "test", sizeof("test")-1); // sizeof("test") == 5 (because of last '\0')
+//    printf("sizeof(\"test\"): %d", sizeof("test"));
     printf("find: ret: %s\n", ret?"ok":"fail");
+    if (!ret) {
+        // find fails
+        printf("fails to find file\n");
+        while (1) {}
+    }
 
     printf("test_file: %d\n", test_file);
 
@@ -59,7 +67,7 @@ void task_flash(void *p) {
     ret = log1.read(test_file, rbuf, SIZE);
 	printf("%s\n", "ok");
 	printf("read data:\n 0x");
-	for (uint16_t i = 0; i < SIZE; i++) printf("%x", rbuf[i]);
+	for (uint16_t i = 0; i < SIZE; i++) printf("%02x", rbuf[i]);
 	printf("\n");
 
 	// write data
@@ -75,10 +83,10 @@ void task_flash(void *p) {
 	printf("%s\n", "ok");
 
 	printf("(potentially) written data:\n 0x");
-	for (uint16_t i = 0; i < SIZE; i++) printf("%x", wbuf[i]);
+	for (uint16_t i = 0; i < SIZE; i++) printf("%02x", wbuf[i]);
 	printf("\n");
 	printf("read data:\n 0x");
-	for (uint16_t i = 0; i < SIZE; i++) printf("%x", rbuf[i]);
+	for (uint16_t i = 0; i < SIZE; i++) printf("%02x", rbuf[i]);
     printf("\n");
 
     uint16_t failcnt = 0;
@@ -92,6 +100,12 @@ void task_flash(void *p) {
     printf("%s(cnt:%d)", (failcnt==0)?"ok":"fail", failcnt);
     printf("\n");
 
+    // save fs
+    log1.save_fs_force();
+
+    log1.unmount();
+    log1.mount(); printf("mount: ret: %s\n", ret?"ok":"fail");
+
 	while (1) vTaskDelay(100);
 }
 
@@ -100,7 +114,7 @@ int main(void) {
 	sleep_ms(2000);
 	printf("\n%s\n", __FILE_NAME__);
 
-	xTaskCreate(task_flash, "task_flash", 512, NULL, 1, NULL);
+	xTaskCreate(task_flash, "task_flash", 1024, NULL, 1, NULL);
 	vTaskStartScheduler();
 	while(1) {}
 }

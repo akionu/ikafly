@@ -1,0 +1,352 @@
+#include "log.hpp"
+
+// public:
+Logging::Logging() {
+}
+
+bool Logging::init() {
+    unmount();
+    uint32_t n = 0;
+    fsdata_offset = (uint32_t*)fsdata;
+    n += sizeof(uint32_t)*MAX_FILE;
+    fsdata_head = (uint32_t*)&fsdata[n];
+    n += sizeof(uint32_t)*MAX_FILE;
+    fsdata_max_size = (uint32_t*)&fsdata[n];
+    n += sizeof(uint32_t)*MAX_FILE;
+    fsdata_name = &fsdata[n];
+    n += sizeof(uint8_t)*MAX_NAME_LEN*MAX_FILE;
+    filesys_size = n;
+    printf("fsdata: offset: 0x%x, head: 0x%x, max_size: 0x%x, name: 0x%x, n: %d\n",
+           fsdata_offset, fsdata_head, fsdata_max_size, fsdata_name, n);
+
+    file_list_head = 0;
+    return (flashMutex_init());
+}
+
+bool Logging::mount() {
+//    printf("sizeof(struct s_file_list): %d\n", sizeof(struct s_file_list)); // 44
+    bool ret = false;
+//    ret = make(&fs_n, "err", FS_SIZE);
+    printf("mount: fs_n: %d\n", fs_n);
+    fsdata_head[fs_n] = FS_SIZE;
+    fsdata_max_size[fs_n] = FS_SIZE;
+    printf("before: ");
+    for (uint32_t i = 0; i < filesys_size; i++) {
+        printf("%02x", fsdata[i]);
+    }
+    printf("\n");
+    ret = read(fs_n, fsdata, filesys_size);
+    printf("after:  ");
+    for (uint32_t i = 0; i < filesys_size; i++) {
+        printf("%02x", fsdata[i]);
+    }
+//    vTaskDelay(10/portTICK_PERIOD_MS);
+//    ret = read(fs_n, fsdata, filesys_size);
+    printf("mount: read: ret: %s\n", ret?"ok":"fail");
+    // big endian to little endian
+//    for (uint8_t i = 0; i < MAX_FILE; i++) {
+//        fsdata_offset[i] = swap(fsdata_offset[i]);
+//        fsdata_head[i] = swap(fsdata_head[i]);
+//        fsdata_max_size[i] = swap(fsdata_max_size[i]);
+//    }
+    printf("mount: fsdata: offset: 0x%x, head: 0x%x, max_size: 0x%x, name: 0x%x, filesys_size: %d\n",
+           fsdata_offset, fsdata_head, fsdata_max_size, fsdata_name, filesys_size);
+    for (uint8_t i = 0; i < MAX_FILE; i++) {
+        printf("file: i: %d, name: %s, head: %d, size: %d, offset: 0x%02x==%d\n",
+               i, fsdata_get_name(i),
+               fsdata_head[i],
+               fsdata_max_size[i],
+               fsdata_offset[i],
+               fsdata_offset[i]
+               );
+    }
+    if (0 == memcmp(fsdata_get_name(fs_n), "filesys", 7)) {
+        ret = true;
+    } else {
+        unmount();
+        printf("mount: err\n");
+        ret = false;
+    }
+    return ret;
+}
+
+bool Logging::unmount() {
+    printf("unomunt\n");
+    for (uint32_t i = 0; i < FS_SIZE; i++) fsdata[i] = 0;
+    file_list_head = 0;
+    return true;
+}
+
+bool Logging::make(uint8_t* file_num, const char name[8], const uint32_t max_size) {
+    if (file_list_head + 1 > MAX_FILE) return false; // no more file
+    memcpy(fsdata_get_name(file_list_head), name, 8);
+    fsdata_head[file_list_head] = 0;
+    fsdata_max_size[file_list_head] = max_size;
+    if (file_list_head > 0) {
+        fsdata_offset[file_list_head] = 
+            fsdata_offset[file_list_head-1]
+            + fsdata_max_size[file_list_head-1];
+        if (fsdata_offset[file_list_head] > PICO_FLASH_SIZE_BYTES) return false;
+    } else {
+        // file_list_head == 0
+        fsdata_offset[file_list_head] = offset_base;
+    }
+    if (file_num != NULL) *file_num = file_list_head;
+    printf("make: file_list_head: %d, name: %s, head: %d, size: %d, offset: 0x%02x==%d, file_num: %d\n",
+           file_list_head, fsdata_get_name(file_list_head),
+           fsdata_head[file_list_head],
+           fsdata_max_size[file_list_head],
+           fsdata_offset[file_list_head],
+           fsdata_offset[file_list_head],
+           *file_num
+           );
+    file_list_head++;
+
+    for (uint8_t i = 0; i < MAX_FILE; i++) {
+        printf("file: i: %d, name: %s, head: %d, size: %d, offset: 0x%02x==%d\n",
+               i, fsdata_get_name(i),
+               fsdata_head[i],
+               fsdata_max_size[i],
+               fsdata_offset[i],
+               fsdata_offset[i]
+               );
+    }
+    return true;
+}
+
+bool Logging::find(uint8_t* file_num, const char query_name[8], const uint8_t size_query_name) {
+    bool ret = false;
+    for (uint8_t i = 0; i < MAX_FILE; i++) {
+        if (0 == memcmp(fsdata_get_name(i), query_name, size_query_name)) {
+            *file_num = i;
+            // find head
+            uint8_t head = 0;
+            for (uint8_t j = 0; j < MAX_FILE; j++) {
+                if (fsdata_max_size[j] != 0) head++;
+            }
+            file_list_head = head;
+            printf("file: i: %d, name: %s, head: %d, size: %d, offset: 0x%02x==%d, file_num: %d\n",
+               i, fsdata_get_name(i),
+               fsdata_head[i],
+               fsdata_max_size[i],
+               fsdata_offset[i],
+               fsdata_offset[i],
+               *file_num
+            );
+            ret = true;
+            break;
+        }
+    }
+    return ret;
+}
+
+bool Logging::read(const uint8_t file_num, const void* buf, const uint32_t size) {
+    uint8_t* pbuf = (uint8_t*)buf;
+    if ((fsdata_head[file_num] < size)
+        || (fsdata_max_size[file_num] < size)) {
+        //        for (uint32_t i = 0; i < size; i++) pbuf[i] = 0;
+        printf("read: err: head: 0x%02x==%d, size: 0x%02x==%02x\n", 
+               fsdata_head[file_num], fsdata_head[file_num],
+               size, size);
+        return false;
+    } else {
+        read_page(fsdata_offset[file_num], pbuf, size);
+    }
+    return true;
+}
+
+bool Logging::write(const uint8_t file_num, const void* buf, const uint32_t size) {
+    uint32_t offset = fsdata_offset[file_num];
+    bool ret = false;
+    if ((size) <= fsdata_max_size[file_num]) {
+        ret = write_page_internal_safe(offset, (uint8_t*)buf, size);
+        if (ret) fsdata_head[file_num] = size;
+    } else {
+        printf("write: err: head: 0x%02x==%d, size: 0x%02x==%d\n", 
+               fsdata_head[file_num], fsdata_head[file_num],
+               size, size);
+    }
+    return ret;
+}
+
+bool Logging::append(const uint8_t file_num, const void* buf, const uint32_t size){
+    uint8_t* pbuf = (uint8_t*)buf;
+    uint32_t offset = fsdata_offset[file_num]+fsdata_head[file_num];
+    bool ret = false;
+    if ((fsdata_head[file_num]+size) < fsdata_max_size[file_num]) {
+        ret = write_page_internal_safe(offset, pbuf, size);
+        if (ret) fsdata_head[file_num] += size;
+    }
+    return ret;
+}
+
+void Logging::erase(const uint8_t file_num, const uint32_t size) {
+    fsdata_head[file_num] = 0;
+}
+
+bool Logging::nuke() {
+    uint32_t size = (PICO_FLASH_SIZE_BYTES - offset_base)/(0x1000);
+    printf("nuke: size: 0x%02x==%d\n", size, size);
+    bool ret = false;
+    ret = erase_sector_safe(offset_base, /*size**/FLASH_SECTOR_SIZE);
+    unmount();
+    make(&fs_n, "filesys", 512);
+    fsdata_head[fs_n] = FS_SIZE;
+    fsdata_max_size[fs_n] = FS_SIZE;
+    return ret;
+}
+
+bool Logging::save_fs_force() {
+    printf("save_fs_force: ");
+    bool ret;
+//    ret = write(fs_n, fsdata, filesys_size);
+    static uint8_t tmp[FS_SIZE] = {0};
+    memcpy(tmp, (const void*)fsdata, filesys_size);
+//    ret = write_less_than_page_safe(fsdata_offset[fs_n], fsdata, filesys_size);
+    bool w = write_page_safe(offset_base, tmp);
+    printf("%s\n", w?"ok":"fail");
+    printf("before: ");
+    for (uint32_t i = 0; i < FLASH_PAGE_SIZE; i++) {
+        printf("%02x", tmp[i]);
+    }
+    printf("\n");
+    for (uint32_t i = 0; i < filesys_size; i++) fsdata[i] = 0;
+    
+    fsdata_head[fs_n] = FS_SIZE;
+    fsdata_max_size[fs_n] = FS_SIZE;
+//    ret = read(fs_n, fsdata, filesys_size);
+    ret = read(fs_n, fsdata, filesys_size);
+    printf("after:  ");
+    for (uint32_t i = 0; i < filesys_size; i++) {
+        printf("%02x", fsdata[i]);
+    }
+    printf("\n");
+    return ret;
+}
+
+// private:
+bool Logging::flashMutex_init() {
+    flashMutex = xSemaphoreCreateMutex();
+    return (flashMutex != NULL);
+}
+
+bool Logging::flashMutex_lock() {
+    return (xSemaphoreTake(flashMutex, (TickType_t)20) == pdTRUE);
+}
+
+bool Logging::flashMutex_unlock() {
+    return (xSemaphoreGive(flashMutex) == pdTRUE);
+}
+
+void Logging::erase_sector_unsafe(void *p) {
+    struct flash_ew_t* fp = (struct flash_ew_t*)p;
+    flash_range_erase(fp->offset, fp->size); // FLASH_SECTOR_SIZE == 4096Byte defined in flash.h
+}
+
+void Logging::write_page_unsafe(void *p) {
+    struct flash_ew_t* fp = (struct flash_ew_t*)p;
+    flash_range_program(fp->offset, fp->buf, FLASH_PAGE_SIZE);
+}
+
+bool Logging::erase_sector_safe(const uint32_t offset, uint32_t size) {
+    //    printf("erase_sector_safe: offset: 0x%02x, size: 0x%02x\n", offset, size);
+    struct flash_ew_t f = {
+        .offset = offset,
+        .size = size
+    };
+    if (flashMutex_lock()) {
+        int8_t ret = flash_safe_execute(Logging::erase_sector_unsafe, (void*)&f, UINT32_MAX);
+        printf("locked, ret: %d ", ret);
+        return (flashMutex_unlock() && (PICO_OK == ret));
+    }
+    return false;
+}
+
+bool Logging::write_page_safe(const uint32_t offset, uint8_t* buf) {
+    struct flash_ew_t f = {
+        .offset = offset,
+        .buf    = buf
+    };
+    if (flashMutex_lock()) {
+        int8_t ret = flash_safe_execute(Logging::write_page_unsafe, (void*)&f, UINT32_MAX);
+        //		printf("locked, ret: %d ", ret);
+        return (flashMutex_unlock() && (PICO_OK == ret));
+    }
+    return false;
+}
+
+bool Logging::write_less_than_page_safe(const uint32_t offset, uint8_t* buf, uint32_t size){
+    static uint8_t tmp[FLASH_PAGE_SIZE+1];
+    bool ret = false;
+    uint32_t begin = offset&0xffff00; // the beginning of the PAGE (FLASH_PAGE_SIZE should be 0xff)
+    uint32_t size_from_page_begin = (offset-begin+size); // size from the beginning of the PAGE
+    printf("wltps: begin: %02x, size_from_page_begin: 0x%02x==%d, offset-begin: %d\n", begin, size_from_page_begin, 
+           size_from_page_begin, offset-begin);
+    if (size_from_page_begin <= FLASH_PAGE_SIZE) { // buf size is within one PAGE 
+        read_page(begin, tmp, FLASH_PAGE_SIZE); // read first not to lose data
+        for (uint16_t i = 0; i <= size; i++) tmp[offset-begin+i] = buf[i];
+//        for (uint16_t i = 0; i < FLASH_PAGE_SIZE; i++) printf("%02x", tmp[i]);
+//        printf("\n");
+        ret = write_page_safe(begin, tmp);
+        printf("wltps: if: ret: %s\n", ret?"ok":"fail");
+    }
+    return ret;
+}
+
+bool Logging::write_page_internal_safe(const uint32_t offset, uint8_t* buf, uint32_t size) {
+    bool ret = false;
+    uint32_t begin = offset&0xffff00; // the beginning of the PAGE (FLASH_PAGE_SIZE should be 0xff)
+    uint32_t size_from_page_begin = (offset-begin+size); // size from the beginning of the PAGE
+    printf("offset: 0x%02x==%d, begin: 0x%02x, size_from_page_begin: 0x%02x==%d\n", offset, offset, begin, 
+           size_from_page_begin, size_from_page_begin);
+    if (size_from_page_begin <= FLASH_PAGE_SIZE) {
+        ret = write_less_than_page_safe(offset, buf, size);
+    } else {
+        // size_from_begin > FLASH_PAGE_SIZE
+        uint32_t begin_last_page = (offset+size)&0xffff00;
+        uint16_t middle_page_num = (begin_last_page - begin)/0xff -1;
+        uint32_t s1 = (0xff-((offset-begin)&0xff));
+        uint32_t s2 = (((offset+size-begin_last_page)&0xff));
+        printf("begin_last_page: 0x%02x==%d, middle_page_num: %d\n", begin_last_page, begin_last_page, middle_page_num);
+        printf("s1: 0x%02x==%d, s2: 0x%02x==%d\n", s1, s1, s2, s2);
+        // first page
+        if (s1 != 0) ret = write_less_than_page_safe(offset, buf, s1);
+        // middle pages
+        for (uint8_t i = 0; i < middle_page_num; i++) {
+            uint32_t now = s1 + 0xff * i + 1; 
+            uint32_t offset_now = offset + now;
+            printf("offset_now: 0x%02x==%d, offset_now-begin: 0x%02x==%d\n", offset_now, offset_now, offset_now-begin, offset_now-begin);
+            ret = write_page_safe(offset_now, &buf[now]);
+        }
+        // last page
+        if (s2 != 0) ret = write_less_than_page_safe(begin_last_page, &buf[size-s2], s2);
+    }
+    if (write_cnt_from_last_save_fs > PERIOD_SAVE_FS) {
+        save_fs_force();
+        write_cnt_from_last_save_fs = 0;
+    }
+    if (ret) write_cnt_from_last_save_fs++;
+    return ret;
+}
+
+bool Logging::read_page(const uint32_t offset, uint8_t* buf, uint32_t size) {
+    if (flashMutex_lock()) {
+        const uint8_t *p = (const uint8_t *)(XIP_BASE + offset);
+        memcpy(buf, p, size);
+        return (flashMutex_unlock());
+    }
+    return false;
+}
+
+uint8_t* Logging::fsdata_get_name(uint8_t file_num) {
+    return (&fsdata_name[MAX_NAME_LEN*file_num]);
+}
+
+uint32_t Logging::swap(uint32_t dat) {
+    char out[4],*p = (char*)&dat;
+    out[3] = *p++;
+    out[2] = *p++;
+    out[1] = *p++;
+    out[0] = *p++;
+    return *(uint32_t*)out;
+}

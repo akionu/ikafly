@@ -9,10 +9,11 @@ bool Logging::init() {
 }
 
 bool Logging::mount() {
+    static uint8_t tmp[filesys_size] = {0};
+    memset(tmp, 0, filesys_size);
     bool ret = false;
     // restore fs data from flash
-
-    read_page(offset_base, fsdata, filesys_size);
+    read(fs_n, fsdata, filesys_size);
     printf("mount: ");
     for (uint16_t i = 0; i < filesys_size; i++) printf("%02x", fsdata[i]);
     printf("\n");
@@ -125,7 +126,7 @@ bool Logging::write_page_internal_safe(const uint32_t offset, uint8_t* buf, uint
     // is size over a page?
     if ((offset&0xff)+size <= 0xff) {
         // size is under a page
-//        printf("write_page_internal_safe: size<=page\n");
+        printf("write_page_internal_safe: size<=page\n");
         ret = write_less_than_page_safe(offset, buf, size);
     } else {
         // size over a page
@@ -140,13 +141,13 @@ bool Logging::write_page_internal_safe(const uint32_t offset, uint8_t* buf, uint
         uint16_t middle_page_num = (last_page_begin-first_page_begin)/0xff-1;
         for (uint16_t i = 0; i < middle_page_num; i++) {
             uint32_t now = size_first + i*0xff + 1;
-//            printf("write_page_internal_safe: middle: now: 0x%x\n", now);
+            printf("write_page_internal_safe: middle: now: 0x%x\n", now);
             ret = write_page_safe(offset+now, &buf[now]);
         }
         // last page
         if (size_last != 0) ret = write_less_than_page_safe(last_page_begin, &buf[size-size_last], size_last);
-//        printf("write_page_internal_safe: middle_page_num: %d, ret: %s\n",
-//               middle_page_num, ret?"ok":"ng");
+        printf("write_page_internal_safe: middle_page_num: %d, ret: %s\n",
+               middle_page_num, ret?"ok":"ng");
     }
     return ret;
 }
@@ -205,10 +206,9 @@ bool Logging::write_page_safe(const uint32_t offset, uint8_t* buf) {
 }
 
 bool Logging::read_page(const uint32_t offset, uint8_t* buf, uint32_t size) {
-    printf("read_page: offset: 0x%x, size: %d\n", offset, size);
     if (flashMutex_lock()) {
         const uint8_t *p = (const uint8_t *)(XIP_BASE + offset);
-        memcpy((void*)buf, (void*)p, size);
+        memcpy(buf, p, size);
         return (flashMutex_unlock());
     }
     return false;
