@@ -1,0 +1,9 @@
+{
+    "clangd.arguments": [
+	    "--query-driver=/usr/bin/arm-none-eabi-*",
+	    "--clang-tidy",
+	    "--pretty",
+	    "--background-index",
+	    "-log=verbose"
+    ],
+}
