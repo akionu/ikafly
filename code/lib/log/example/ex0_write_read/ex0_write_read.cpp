@@ -36,7 +36,7 @@ void task_flash(void *p) {
 
     // init should be called first (otherwise, hang up)
     ret = log1.init(); printf("init: ret: %s\n", ret?"ok":"fail");
-    log1.nuke();
+//    log1.nuke();
     ret = log1.mount(); printf("mount: ret: %s\n", ret?"ok":"fail");
     if (!ret) {
         // mount fails

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 
 # set board with 4MB flash
 set(PICO_BOARD pimoroni_picolipo_4mb)
+#set(PICO_BOARD pico)
 
 # set FreeRTOS Kernel Path
 set(FREERTOS_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib/freertos)
