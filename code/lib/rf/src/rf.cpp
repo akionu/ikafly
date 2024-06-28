@@ -15,7 +15,7 @@ void Radio::init() {
 	gpio_set_dir(pin_miso, GPIO_IN);
 }
 
-bool Radio::is_air_clear() {
+bool Radio::is_air_clear(){
 	int8_t n = 0;
 	for (int8_t i = 0; i < 32; i++) {
 		if (receiveBit() == 0x00) n++;
@@ -40,11 +40,16 @@ void Radio::send(uint8_t packet[32]) {
 }
 
 void Radio::sendByte(uint8_t data) {
+	uint32_t before = 0;
 	for (int8_t i = 7; i >= 0; i--) {
-  	//  printf("%c", (packet[i] & (1<<i))==0?'0':'1');
+		before = time_us_32() + 1000;
+//		printf("%c", (packet[i] & (1<<i))==0?'0':'1');
 		gpio_put(pin_mosi, (data & (1<<i)));
+		while (time_us_32() < before) tight_loop_contents();
 	}
 }
+
+
 
 void Radio::receive(uint8_t packet[32]) {
 	// デフォルトは1、ビットは反転してない

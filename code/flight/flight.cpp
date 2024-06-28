@@ -35,8 +35,8 @@
 #define IRQ UART0_IRQ
 #define MOSI 12
 #define MISO 13
-#define goal_latitude 40.2121
-#define goal_longitude 140.0266
+#define goal_latitude 34.801388
+#define goal_longitude 135.771252
 
 
 
@@ -138,7 +138,6 @@ void task_landing(void *landing){
 
 				vTaskResume(get_imu_h);
 				vTaskResume(get_gnss_h);
-				vTaskResume(g_motor_control_h);
 				printf("landing_delete");
 				vTaskDelete(NULL);
 
@@ -179,7 +178,7 @@ void task_get_imu(void *get_imu){
 
     imu.init();
 	imu.setDebugPrint(false);
-    imu.calibration();
+    //imu.calibration();
 
     TickType_t lastunblock_imu;
     lastunblock_imu=xTaskGetTickCount();
@@ -196,6 +195,7 @@ while(1){
 
 		yaw=euler[2];
 		vTaskDelayUntil(&lastunblock_imu,pdMS_TO_TICKS(20));
+		//printf("imu");
 		}
 }
 
@@ -206,7 +206,6 @@ while(1){
 
 
 void send(){
-	radio.init();
     int latitude_digit=8;
 	int longitude_digit=9;
     int i;
@@ -231,7 +230,6 @@ void send(){
 		}
 
             radio.send(packet);
-            vTaskDelay(1000);
     }
 }
 
@@ -240,6 +238,7 @@ void send(){
 
 
 void assemble_lat(uint8_t packet_r[32]){
+
 	while(1){
   latitude_ot=0;
   longitude_ot=0;
@@ -252,10 +251,13 @@ void assemble_lat(uint8_t packet_r[32]){
 	longitude_ot=longitude_ot+packet_r[i]*pow((double)10,(double)longitude_digit-i-7);
   }
 }
-
 }
 
 void task_receieve(void *receieve){
+
+	TickType_t lastunblock_receive;
+	lastunblock_receive=xTaskGetTickCount();
+
 
 	while (1) {
 		
@@ -265,7 +267,7 @@ void task_receieve(void *receieve){
 			assemble_lat(packet);
 		}
 		    printf("\n");
-			vTaskDelay(1000);
+			vTaskDelayUntil(&lastunblock_receive,pdMS_TO_TICKS(1000));
 	    }
 
 }
@@ -337,7 +339,6 @@ void task_get_gnss(void *get_gnss){
       		nmeap_parse(&nmea, ch);
 
 			if(cgg_o != cgg){
-				vTaskDelayUntil(&lastunblock_gnss,pdMS_TO_TICKS(100));
 				if(gga.latitude != 0 && gga.longitude != 0){
 				dis=distance(goal_longitude,goal_latitude,gga.longitude,gga.latitude);
 				if(j==0){
@@ -345,9 +346,10 @@ void task_get_gnss(void *get_gnss){
 					j++;
 				}
 				}
-				
+				vTaskDelayUntil(&lastunblock_gnss,pdMS_TO_TICKS(100));
 			}
 
+		
 	
 	}	
 		
@@ -481,9 +483,13 @@ while(1){
 			}
 
 			motor.forward(900+p,900-p);
+			if(dis<=2.0){
+				motor.stop();
+				vTaskSuspend(NULL);
+			}
 			
-			vTaskDelayUntil(&lastunblock_gmotor,pdMS_TO_TICKS(200));
 		}
+			vTaskDelayUntil(&lastunblock_gmotor,pdMS_TO_TICKS(200));
 }
 }
 
@@ -498,6 +504,8 @@ int main(void){
     stdio_init_all();
     sleep_ms(2000);
 
+	radio.init();
+
 	motor.init(pin_left_begin, pin_right_begin);
 
 	i2c_init(I2C, 400*1000);
@@ -511,11 +519,11 @@ int main(void){
     xTaskCreate(task_landing,"task_landing",256,NULL,6,&landing_h);
 	xTaskCreate(task_g_motor_control,"task_g_motor_control",256,NULL,6,&g_motor_control_h);
 
-    xTaskCreate(task_get_gnss,"task_get_gnss",256,NULL,1,&get_gnss_h);
-	xTaskCreate(task_stack,"task_stack",256,NULL,3,&stack_h);
+    xTaskCreate(task_get_gnss,"task_get_gnss",256,NULL,2,&get_gnss_h);
+	//xTaskCreate(task_stack,"task_stack",256,NULL,3,&stack_h);
 
-    xTaskCreate(task_get_imu,"task_get_imu",256,NULL,2,&get_imu_h);
-	xTaskCreate(task_receieve,"task_receieve",256,NULL,5,&receive_h);
+    xTaskCreate(task_get_imu,"task_get_imu",256,NULL,1,&get_imu_h);
+	//xTaskCreate(task_receieve,"task_receieve",256,NULL,5,&receive_h);
 
 	
     vTaskStartScheduler();

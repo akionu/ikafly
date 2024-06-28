@@ -7,44 +7,52 @@
 
 Radio radio(24, 22);
 uint8_t packet[32] = {0};
-float latitude_ot;
+uint8_t i;
 
-void assemble_lat(uint8_t atai[32]){
-  latitude_ot=0;
-  int atai_digit=8;
-  int i;
-  for(i=0;i<=7;i++){
-	latitude_ot=latitude_ot+atai[i]*pow((double)10,(double)atai_digit-i-1);
-  }
+uint32_t latitude_ot;
+uint32_t longitude_ot;
+
+void assemble_lat(uint8_t packet_r[32])
+{
+	 latitude_ot=0;
+	 longitude_ot=0;
+
+
+	for(i=0;i<4;i++){
+		latitude_ot=latitude_ot|packet[i];
+		if(i != 3){
+			latitude_ot=latitude_ot<<8;
+			}
+	}
+	for(i=0;i<4;i++){
+		longitude_ot=longitude_ot|packet[i+4];
+		if(i != 3){
+			longitude_ot=longitude_ot<<8;
+			}
+	}
+	
 }
-void assemmble_lat(uint8_t atai[32]);
 
-int main(void) {
+int main(void)
+{
 	stdio_init_all();
 	sleep_ms(2000);
 	printf("%s\n", __FILE_NAME__);
 
 	radio.init();
 
-	while (1) {
-//		uint8_t st = radio.receiveBit();
-//		printf("%c", (st==0)?'0':'1');
+	while (1)
+	{
+		//		uint8_t st = radio.receiveBit();
+		//		printf("%c", (st==0)?'0':'1');
 		radio.receive(packet);
-		printf("%dms: ", time_us_32()/1000);
-		for (int8_t i = 0; i < 32; i++) {
-			printf("%x", packet[i]);
-			assemmble_lat(packet);
-		}
-		    printf("\n");
-	    }
+		printf("%dms: ", time_us_32() / 1000);
 
-}
+		assemble_lat(packet);
+		printf("lat=%d\n", latitude_ot);
+		printf("lon=%d\n", longitude_ot);
+		printf("\n");
 
-void assemmble_lat(uint8_t atai[32]){
-  latitude_ot=0;
-  int atai_digit=8;
-  int i;
-  for(i=0;i<=7;i++){
-	latitude_ot=latitude_ot+atai[i]*pow((double)10,(double)atai_digit-i-1);
-  }
+		sleep_ms(1000);
+	}
 }
