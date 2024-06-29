@@ -7,3 +7,6 @@ add_subdirectory(motor)
 add_subdirectory(freertos)
 add_subdirectory(log)
 #add_subdirectory(littlefs)
+add_compile_definitions(
+    LFS_THREADSAFE
+)
