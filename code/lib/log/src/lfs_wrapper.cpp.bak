@@ -1,0 +1,100 @@
+#include "lfs_wrapper.hpp"
+
+//SemaphoreHandle_t flashMutex;
+static void erase_sector_unsafe(void *p);
+static void prog_page_unsafe(void *p);
+
+static int flash_fs_read(const struct lfs_config* config, lfs_block_t block, lfs_off_t off, void* buffer, lfs_size_t size);
+static int flash_fs_prog(const struct lfs_config* config, lfs_block_t block, lfs_off_t off, const void* buffer, lfs_size_t size);
+static int flash_fs_erase(const struct lfs_config* config, lfs_block_t block);
+static int flash_fs_sync(const struct lfs_config* config);
+static int flash_fs_unlock(const struct lfs_config* config);
+static int flash_fs_lock(const struct lfs_config* config);
+
+struct lfs_config ikaflash_cfg {
+    .read = &flash_fs_read,
+    .prog = &flash_fs_prog,
+    .erase = &flash_fs_erase,
+    .sync = &flash_fs_sync,
+    .lock = &flash_fs_lock,
+    .unlock = &flash_fs_unlock,
+    .read_size = 1,
+    .prog_size = FLASH_PAGE_SIZE,
+    .block_size = FLASH_SECTOR_SIZE,
+    .block_count = FS_SIZE/FLASH_SECTOR_SIZE,
+    .block_cycles = (int32_t)500,
+    .cache_size = 256,
+    .lookahead_size = 32
+};
+
+bool flashMutex_init() {
+    flashMutex = xSemaphoreCreateMutex();
+    return (flashMutex != NULL);
+}
+
+static void prog_page_unsafe(void *p) {
+    struct flash_ew_t* fp = (struct flash_ew_t*)p;
+    flash_range_program(fp->offset, fp->buf, FLASH_PAGE_SIZE);
+}
+
+static void erase_sector_unsafe(void* p) {
+    struct flash_ew_t* fp = (struct flash_ew_t*)p;
+    flash_range_erase(fp->offset, fp->size); // FLASH_SECTOR_SIZE == 4096Byte defined in flash.h
+}
+
+static int flash_fs_read(const struct lfs_config* config, lfs_block_t block, lfs_off_t off, void* buffer, lfs_size_t size) {
+    uint32_t fs_start = XIP_BASE + FS_BASE;
+    uint32_t addr = fs_start + (block * config->block_size) + off;
+
+    memcpy(buffer, (unsigned char*)addr, size);
+    return LFS_ERR_OK;
+}
+
+
+static int flash_fs_prog(const struct lfs_config* config, lfs_block_t block, lfs_off_t off, const void* buffer, lfs_size_t size) {
+    uint32_t offset = FS_BASE + (block * config->block_size) + off;
+
+    struct flash_ew_t fp = {
+        .offset = offset,
+        .buf = (const uint8_t*)buffer,
+        .size = size
+    };
+
+    flash_safe_execute(prog_page_unsafe, &fp, UINT32_MAX);
+
+    return LFS_ERR_OK;
+}
+
+static int flash_fs_erase(const struct lfs_config* config, lfs_block_t block) {
+    uint32_t offset = FS_BASE + (block * config->block_size);
+
+    struct flash_ew_t fp = {
+        .offset = offset,
+        .size = config->block_size
+    };
+
+    flash_safe_execute(erase_sector_unsafe, &fp, UINT32_MAX);
+
+    return LFS_ERR_OK;
+}
+
+static int flash_fs_sync(const struct lfs_config* config) {
+    return LFS_ERR_OK;
+}
+
+static int flash_fs_unlock(const struct lfs_config* config) {
+    if (xSemaphoreGive(flashMutex) == pdTRUE) {
+        return LFS_ERR_OK;
+    } else {
+        return -1;
+    }
+}
+
+static int flash_fs_lock(const struct lfs_config* config) {
+    if (xSemaphoreTake(flashMutex, (TickType_t)20) == pdTRUE) {
+        return LFS_ERR_OK;
+    } else {
+        return -1;
+    }
+}
+

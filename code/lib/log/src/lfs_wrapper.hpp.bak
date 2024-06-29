@@ -1,0 +1,20 @@
+#pragma once
+#include "hardware/flash.h"
+#include "pico/flash.h"
+#include "FreeRTOS.h"
+#include "semphr.h"
+#include "lfs.h"
+#include "lfs_util.h"
+
+#define FS_SIZE (2*1024*1024)
+#define FS_BASE (0x200000)
+
+struct flash_ew_t {
+	uint32_t offset;
+	const uint8_t* buf;
+    uint32_t size;
+};
+
+extern bool flashMutex_init();
+extern SemaphoreHandle_t flashMutex;
+extern struct lfs_config ikaflash_cfg;
