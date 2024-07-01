@@ -26,20 +26,24 @@ int main(void) {
 	gpio_set_function(SDA, GPIO_FUNC_I2C);
 	gpio_set_function(SCL, GPIO_FUNC_I2C);
 
-	imu.setDebugPrint(false);
+	imu.setDebugPrint(true);
 
 	bool st = imu.init();
 	if (st) printf("IMU init success");
 	else printf("IMU init fails");
 
-	float euler[3];//, accel[3], gyro[3], mag[3];
+	float euler[3], accel[3], gyro[3], mag[3];
 	printf("roll pitch yaw\n");
 	while (1) {
 		imu.update(); // should call this 50ms each(20Hz), refer MadgwickAHRS.c and sensor output frequency in init() in imu.cpp
-		//imu.getAccel_mg(accel);
-		//printf("%3.2f %3.2f %3.2f\n", accel[0], accel[1], accel[2]);
+		imu.getMag_mG(mag);
+		printf("Mag:   %3.2f %3.2f %3.2f\n", accel[0], accel[1], accel[2]);
+		imu.getGyro_dps(gyro);
+		printf("Gyro:  %3.2f %3.2f %3.2f\n", accel[0], accel[1], accel[2]);
+        imu.getAccel_g(accel);
+		printf("Accel: %3.2f %3.2f %3.2f\n", accel[0], accel[1], accel[2]);
 		imu.getAttEuler(euler);
-		printf("%+03.2f %+03.2f %+03.2f\n", euler[0]*RAD2DEG, euler[1]*RAD2DEG, euler[2]*RAD2DEG);
+		printf("Euler: %+03.2f %+03.2f %+03.2f\n", euler[0]*RAD2DEG, euler[1]*RAD2DEG, euler[2]*RAD2DEG);
 		sleep_ms(49);
 	}
 

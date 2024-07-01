@@ -30,10 +30,10 @@ int main(void) {
 
 	// pressure
 	bool prs_st = prs.init();
+    float prs_hpa[5] = {0};
 	if (!prs_st) printf("Press: NG\n");
 	else {
 
-		float prs_hpa[5] = {0};
 		// 最初の数回は当てにならない
 		for (int8_t i = 0; i < 5; i++) {
 			prs_hpa[0] = prs.getPressHpa(); // index=0は意図的
@@ -63,6 +63,11 @@ int main(void) {
 			printf("\n");
 		}
 	}
+			printf("Press(hPa): ");
+			for (int8_t i = 0; i < 5; i++) {
+				printf("%4.2f ", prs_hpa[i]);
+			}
+			printf("\n");
 
 	// imu
 	float accel[10][3] = {{0}};
@@ -101,6 +106,16 @@ int main(void) {
 			}
 		}
 	}
+			for (int8_t i = 0; i < 10; i++) {
+				printf("i: %d, "
+						"accel: %3.2f %3.2f %3.2f, "
+						"gyro: %3.2f %3.2f %3.2f, "
+						"mag: %3.2f %3.2f %3.2f\n", 
+						i,
+						accel[i][0], accel[i][1], accel[i][2],
+						gyro[i][0], gyro[i][1], gyro[i][2],
+						mag[i][0], mag[i][1], mag[i][2]);
+			}
 
 	// camera
 	cam.init();
@@ -121,6 +136,9 @@ int main(void) {
 			printf("%02x", cam.image_buf[i]);
 		printf("\n");
 	}
+		for (uint16_t i = 0; i < cam.getJpegSize(); i++)
+			printf("%02x", cam.image_buf[i]);
+		printf("\n");
 
 	// gnss
 	gpio_init(pin_gnss_vcc);
@@ -135,15 +153,21 @@ int main(void) {
 	uart_set_format(uart0, 8, 1, UART_PARITY_NONE);
 	uart_set_fifo_enabled(uart0, true);
 
-	sleep_ms(1000);
+	sleep_ms(2000);
 
 	uint8_t buf[100] = {'\0'};
 	int16_t n = uart_is_readable(uart0);
 	if (n > 0) {
-		uart_read_blocking(uart0, buf, 50);
+        for (uint8_t i = 0; i < 32; i++) {
+            if (uart_is_readable(uart0) > 0) buf[i] = uart_getc(uart0);
+        }
 		printf("gnss: OK, n: %d\n", n);
 	}
 	else printf("gnss: NG, n: %d\n", n);
+    for (uint16_t i = 0; i < 32; i++) {
+        printf("%c", buf[i]);
+    }
+    printf("\n");
 
 	// motor
 	motor.init(pin_motor1_a, pin_motor2_a);
@@ -155,9 +179,13 @@ int main(void) {
 
 	// nichrome
 	gpio_init(pin_nichrome_left);
+    gpio_init(pin_led);
 	gpio_set_dir(pin_nichrome_left, GPIO_OUT);
+	gpio_set_dir(pin_led, GPIO_OUT);
 	gpio_put(pin_nichrome_left, 1); // HEAT
+	gpio_put(pin_led, 1); // HEAT
 	sleep_ms(3000);
 	gpio_put(pin_nichrome_left, 0);
+	gpio_put(pin_led, 0);
 	printf("nichrome: OK?\n");
 }

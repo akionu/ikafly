@@ -53,7 +53,7 @@ bool IMU::init() {
 	lsm6dso_xl_data_rate_set(&lsm6dso, LSM6DSO_XL_ODR_52Hz);
 	lsm6dso_gy_data_rate_set(&lsm6dso, LSM6DSO_GY_ODR_52Hz);
 	/* Set full scale */
-	lsm6dso_xl_full_scale_set(&lsm6dso, LSM6DSO_2g);
+	lsm6dso_xl_full_scale_set(&lsm6dso, LSM6DSO_8g);
 	lsm6dso_gy_full_scale_set(&lsm6dso, LSM6DSO_2000dps);
 	/* Configure filtering chain(No aux interface). */
 	/* Accelerometer - LPF1 + LPF2 path */
@@ -160,11 +160,11 @@ void IMU::update() {
 		memset(accel_raw, 0x00, 3 * sizeof(int16_t));
 		lsm6dso_acceleration_raw_get(&lsm6dso, accel_raw);
 		accel_g[0] =
-			-lsm6dso_from_fs2_to_mg(accel_raw[0])/1000.0f;
+			-lsm6dso_from_fs8_to_mg(accel_raw[0])/1000.0f;
 		accel_g[1] =
-			lsm6dso_from_fs2_to_mg(accel_raw[1])/1000.0f;
+			lsm6dso_from_fs8_to_mg(accel_raw[1])/1000.0f;
 		accel_g[2] =
-			lsm6dso_from_fs2_to_mg(accel_raw[2])/1000.0f;
+			lsm6dso_from_fs8_to_mg(accel_raw[2])/1000.0f;
 		//		printf("Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n", accel_g[0], accel_g[1], accel_g[2]);
 	}
 

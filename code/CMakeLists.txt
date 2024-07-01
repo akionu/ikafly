@@ -46,10 +46,13 @@ target_compile_definitions(freertos_config
 	PICO_FLASH_SAFE_EXECUTE_PICO_SUPPORT_MULTICORE_LOCKOUT=0
 	PICO_FLASH_SAFE_EXECUTE_USE_FREERTOS_SMP=1
 )
+add_compile_definitions(
+    LFS_THREADSAFE
+)
 
 add_subdirectory(exp)
 add_subdirectory(lib)
-add_subdirectory(freertos_ikafly)
-add_subdirectory(exp_ikafly)
-add_subdirectory(flight)
+#add_subdirectory(freertos_ikafly)
+#add_subdirectory(exp_ikafly)
+#add_subdirectory(flight)
 
