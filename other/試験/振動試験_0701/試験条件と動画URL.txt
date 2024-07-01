@@ -1,0 +1,34 @@
+イカフライ振動試験
+
+試験日：
+2024/7/1 14:00～
+
+試験場所：
+京都市産業技術研究所
+
+試験装置の諸元：
+型番：i210/SA1M
+振動数範囲：5～4,000Hz
+加振力：3kN（正弦波）、2.1kNrms（ランダム波）
+最大加速度：1,000m/s2
+最大速度：2.2m/s
+最大変位：30mmp-p
+最大搭載質量：120kg
+テーブルサイズ：500×500mm（標準）
+（参照：https://tc-kyoto.or.jp/equipment/equipment-0-15/）
+
+試験条件：
+ランダム振動
+20～2000Hz
+1分間（設定加速度に達してから）
+
+1回目 6.8G
+試験：https://youtu.be/P6L1LknU6j0
+動作確認：https://youtu.be/uX5Kpxtz9do
+
+2回目 15G
+試験：https://youtu.be/CP-4yeVO8BM
+動作確認：https://youtu.be/_Idh39xf9kw
+
+3回目 15G
+試験と動作確認：https://youtu.be/FiWdsYytP34
