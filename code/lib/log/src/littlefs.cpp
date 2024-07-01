@@ -22,21 +22,21 @@ int LFS::init() {
     LFS::flashMutex = xSemaphoreCreateMutex();
 
     pico_cfg.read = &flash_fs_read;
-     pico_cfg   .prog = &flash_fs_prog;
-      pico_cfg  .erase = &flash_fs_erase;
-       pico_cfg .sync = &flash_fs_sync;
-        pico_cfg.lock = &flash_fs_lock;
-        pico_cfg.unlock = &flash_fs_unlock;
+    pico_cfg   .prog = &flash_fs_prog;
+    pico_cfg  .erase = &flash_fs_erase;
+    pico_cfg .sync = &flash_fs_sync;
+    pico_cfg.lock = &flash_fs_lock;
+    pico_cfg.unlock = &flash_fs_unlock;
 
-        // block device configuration
-        pico_cfg.read_size = 1;
-        pico_cfg.prog_size = FLASH_PAGE_SIZE;
-        pico_cfg.block_size = FLASH_SECTOR_SIZE;
-        pico_cfg.block_count = FS_SIZE / FLASH_SECTOR_SIZE;
-        pico_cfg.block_cycles = (int32_t)500;
-        pico_cfg.cache_size = 256;
-        pico_cfg.lookahead_size = 32;
-    
+    // block device configuration
+    pico_cfg.read_size = 1;
+    pico_cfg.prog_size = FLASH_PAGE_SIZE;
+    pico_cfg.block_size = FLASH_SECTOR_SIZE;
+    pico_cfg.block_count = FS_SIZE / FLASH_SECTOR_SIZE;
+    pico_cfg.block_cycles = (int32_t)500;
+    pico_cfg.cache_size = 256;
+    pico_cfg.lookahead_size = 32;
+
     if (LFS::flashMutex != NULL) return LFS_ERR_OK;
     else return (-1);
 }
