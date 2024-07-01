@@ -22,3 +22,8 @@ target_link_libraries(imu
 	lis3mdl
 	lsm6dso
 )
+
+target_include_directories(imu
+    INTERFACE
+    .
+)

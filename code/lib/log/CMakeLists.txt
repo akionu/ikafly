@@ -1,4 +1,3 @@
-
 add_compile_definitions(
     LFS_THREADSAFE
 )

@@ -21,24 +21,21 @@ struct lfs_config LFS::pico_cfg;
 int LFS::init() {
     LFS::flashMutex = xSemaphoreCreateMutex();
 
-    pico_cfg  = {
-        // block device operations
-        .read = &flash_fs_read,
-        .prog = &flash_fs_prog,
-        .erase = &flash_fs_erase,
-        .sync = &flash_fs_sync,
-        .lock = &flash_fs_lock,
-        .unlock = &flash_fs_unlock,
+    pico_cfg.read = &flash_fs_read;
+     pico_cfg   .prog = &flash_fs_prog;
+      pico_cfg  .erase = &flash_fs_erase;
+       pico_cfg .sync = &flash_fs_sync;
+        pico_cfg.lock = &flash_fs_lock;
+        pico_cfg.unlock = &flash_fs_unlock;
 
         // block device configuration
-        .read_size = 1,
-        .prog_size = FLASH_PAGE_SIZE,
-        .block_size = FLASH_SECTOR_SIZE,
-        .block_count = FS_SIZE / FLASH_SECTOR_SIZE,
-        .block_cycles = (int32_t)500,
-        .cache_size = 256,
-        .lookahead_size = 32
-    };
+        pico_cfg.read_size = 1;
+        pico_cfg.prog_size = FLASH_PAGE_SIZE;
+        pico_cfg.block_size = FLASH_SECTOR_SIZE;
+        pico_cfg.block_count = FS_SIZE / FLASH_SECTOR_SIZE;
+        pico_cfg.block_cycles = (int32_t)500;
+        pico_cfg.cache_size = 256;
+        pico_cfg.lookahead_size = 32;
     
     if (LFS::flashMutex != NULL) return LFS_ERR_OK;
     else return (-1);
