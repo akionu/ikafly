@@ -36,9 +36,11 @@ TJPGD tjpg;
 // Result: 20x15
 uint32_t red_area[15] = {0};
 
+static int my_out_func(JDEC* jdec, void* bitmap, JRECT* rect);
+void count_vert(uint8_t vert[5], uint8_t area[15]);
+
 static int my_out_func(JDEC* jdec, void* bitmap, JRECT* rect) {
     // ref:https://qiita.com/yosihisa/items/c326e59ca5d65f35a181
-    const uint8_t N_BPP = 3; // RGB888
     uint8_t *src;
     uint16_t x, y;//, bws;
     uint8_t r,g,b;
@@ -88,6 +90,26 @@ static int my_out_func(JDEC* jdec, void* bitmap, JRECT* rect) {
     return 1;// Continue to decompress
 }
 
+void count_vert(uint8_t vert[5], uint32_t area[15]) {
+    // count ones in vertically devided area
+    // [4] [3] [2] [1] [0]
+    // max count in each area: 4*15=60
+    memset(vert, 0, 5);
+    uint8_t bit;
+    for (uint8_t y = 0; y < 15; y++) {
+        for (int8_t x = 20-1; x >= 0; x--) {
+            bit = (area[y] >> x) & 1;
+            if (bit == 1) {
+                if ((x>=0)&&(x<4)) vert[0]++;
+                else if (x<8) vert[1]++;
+                else if (x<12) vert[2]++;
+                else if (x<16) vert[3]++;
+                else vert[4]++;
+            }
+        }
+    }
+}
+
 int main(void) {
     stdio_init_all();
     sleep_ms(2000);
@@ -101,6 +123,7 @@ int main(void) {
     cam.enableJpeg();
 
     uint32_t cnt = 0;
+    uint8_t vert[5] = {0};
     while (1) {
         printf("%d: ", cnt++);
         cam.capture();
@@ -128,6 +151,10 @@ int main(void) {
                     }
                     printf("\n");
                 }
+
+                count_vert(vert, red_area);
+                printf("count: %d %d %d %d %d\n", vert[4], vert[3], vert[2], vert[1], vert[0]);
+
             } else {
                 printf("jd_decomp() failed (rc=%d)\n", res);
             }
