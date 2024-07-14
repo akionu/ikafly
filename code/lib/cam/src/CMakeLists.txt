@@ -15,3 +15,7 @@ target_link_libraries(cam
 	hardware_dma
 )
 
+target_include_directories(cam
+    INTERFACE
+    .
+)

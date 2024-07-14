@@ -1,0 +1,115 @@
+#include <stdio.h>
+#include "pico/stdlib.h"
+#include "tjpgd.h" 
+#include "tjpgdcnf.h"
+#include "img.h"
+
+//#define EX0_HR
+#define N_BPP (3-JD_FORMAT)
+
+typedef struct {
+    uint8_t *fp;
+//    uint8_t *fbuf;
+//    uint32_t wfbuf;
+} IODEV;
+
+#define SZ_WORK 3100
+uint8_t work_area[SZ_WORK];
+
+size_t in_func (    /* Returns number of bytes read (zero on error) */
+                JDEC* jd,       /* Decompression object */
+                uint8_t* buff,  /* Pointer to the read buffer (null to remove data) */
+                size_t nbyte    /* Number of bytes to read/remove */
+                ) {
+    IODEV *dev = (IODEV*)jd->device;   /* Session identifier (5th argument of jd_prepare function) */
+    static uint32_t head = 0;
+
+    if (buff) { /* Raad data from imput stream */
+        memcpy(buff, (uint8_t*)dev->fp+head, nbyte);
+        head += nbyte;
+        return nbyte;
+    } else {    /* Remove data from input stream */
+        if (head+nbyte <= sizeof(img)) {
+            head += nbyte;
+            return nbyte;
+        } else {
+            return 0;
+        }
+    }
+}
+
+
+int out_func (      /* Returns 1 to continue, 0 to abort */
+              JDEC* jd,       /* Decompression object */
+              void* bitmap,   /* Bitmap data to be output */
+              JRECT* rect     /* Rectangular region of output image */
+              ) {
+    IODEV *dev = (IODEV*)jd->device;   /* Session identifier (5th argument of jd_prepare function) */
+    uint8_t *src;//, *dst;
+    uint16_t y, bws;
+//    unsigned int bwd;
+
+
+    /* Progress indicator */
+    if (rect->left == 0) {
+//        printf("\r%lu%%", (rect->top << jd->scale) * 100UL / jd->height);
+    }
+
+    /* Copy the output image rectangle to the frame buffer */
+    src = (uint8_t*)bitmap;                           /* Output bitmap */
+//    dst = dev->fbuf + N_BPP * (rect->top * dev->wfbuf + rect->left);  /* Left-top of rectangle in the frame buffer */
+    bws = N_BPP * (rect->right - rect->left + 1);     /* Width of the rectangle [byte] */
+//    bwd = N_BPP * dev->wfbuf;                         /* Width of the frame buffer [byte] */
+    for (y = rect->top; y <= rect->bottom; y++) {
+//        memcpy(dst, src, bws);   /* Copy a line */
+#ifdef EX0_HR
+        for (uint16_t i = 0; i < bws; i++) printf("%02x", src[i]);
+        printf("\n");
+#else
+        fwrite(src, sizeof(uint8_t), bws, stdout);
+#endif
+        src += bws; //dst += bwd;  /* Next line */
+    }
+
+    return 1;    /* Continue to decompress */
+}
+
+int main(void) {
+    JRESULT res;      /* Result code of TJpgDec API */
+    JDEC jdec;        /* Decompression object */
+    void *work = (void*)work_area;       /* Pointer to the work area */
+    IODEV devid;
+    devid.fp = img;
+
+    stdio_init_all();
+    sleep_ms(2000);
+#ifdef EX0_HR
+    printf("\n%s\n", __FILE_NAME__);
+#endif
+    /* Prepare to decompress */
+    res = jd_prepare(&jdec, in_func, work, SZ_WORK, &devid);
+    if (res == JDR_OK) {
+        /* It is ready to dcompress and image info is available here */
+#ifdef EX0_HR
+        printf("Image size is %u x %u.\n%u bytes of work ares is used.\n", jdec.width, jdec.height, SZ_WORK - jdec.sz_pool);
+#endif
+        res = jd_decomp(&jdec, out_func, 0);   /* Start to decompress with 1/1 scaling */
+        if (res == JDR_OK) {
+            /* Decompression succeeded. You have the decompressed image in the frame buffer here. */
+#ifdef EX0_HR
+            printf("\rDecompression succeeded.\n");
+#endif
+        } else {
+#ifdef EX0_HR
+            printf("jd_decomp() failed (rc=%d)\n", res);
+#endif
+        }
+
+    } else {
+#ifdef EX0_HR
+        printf("jd_prepare() failed (rc=%d)\n", res);
+#endif
+    }
+
+    return res;
+}

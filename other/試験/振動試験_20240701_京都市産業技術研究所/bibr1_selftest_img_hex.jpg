@@ -1,0 +1,73 @@
+from machine import PWM,Pin
+from servo import Servo
+import bluetooth
+from ble_simple_peripheral import BLESimplePeripheral
+import time
+
+# init ble
+ble = bluetooth.BLE()
+sp = BLESimplePeripheral(ble)
+# init led
+led = machine.Pin("LED", Pin.OUT)
+led_state = 0
+# init servo
+#servo_idx = [0, 1, 2, 3, 4, 5]
+servo = []
+for i in range(6):
+    print("servo init: ",i)
+    servo.insert(i, Servo(i))
+#    servo[i].move(0)
+#    time.sleep(1)
+
+def zfill(s, width):
+    if len(s) < width:
+        return ("0" * (width - len(s))) + s
+    else:
+        return s
+
+def on_rx(data):
+    print("Data received: ", data)
+    # temp
+    if data[:2] == b'$t':
+        stemp = float(data[2:4])
+        if stemp >= 0 and stemp <= 45:
+            stemp = 0;
+            # set temp
+        # get temp
+        gtemp = 0.0
+        if gtemp >= 0 and gtemp <= 45:
+            gstemp = int(round(gtemp, 2) * 10)
+            sp.send("$okt" + zfill(str(gstemp),3) + "\r\n")
+        else:
+            sp.send("$et0000\r\n")
+    # motor
+    elif data[:2] == b'$m':
+        print(data[:2])
+        idx = int(data[2:4])
+        deg = int(data[4:7])
+        print("idx: ", idx , " deg: " , deg)
+        servo[idx].move(deg-90)
+        sp.send("$okmxxxx\r\n")
+        #time.sleep(1)
+    # battery
+    elif data[:2] == b'$b':
+        # read battery voltage
+        vbat = 0.0
+        gvbat = int(round(vbat, 2) * 10)
+        sp.send("$okb" + zfill(str(gvbat), 3)+"\r\n")
+    elif data[:2] == b'$r':
+        machine.soft_reset()
+    elif data == b'toggle\r\n':
+        global led_state
+        led.value(not led_state)
+        led_state = 1 - led_state
+        if led_state == 1:
+            sp.send("ON\r\n")
+        else:
+            sp.send("OFF\r\n")
+
+while True:
+    if sp.is_connected():
+        sp.on_write(on_rx)
+
+
