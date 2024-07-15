@@ -1,11 +1,8 @@
-add_compile_definitions(
-    LFS_THREADSAFE
-)
+set(TargetName comu_comu.cpp)
 
-set(TargetName flight.cpp)
 
 add_executable(${TargetName}
-    flight.cpp
+    comu_comu.cpp
 )
 
 target_link_libraries(${TargetName} 
@@ -13,17 +10,12 @@ target_link_libraries(${TargetName}
     pico_multicore
     pico_platform
     hardware_uart
-    freertos
     hardware_i2c
-    uprs
     hardware_pwm
-    gnss
-    imu
+    freertos
     rf
-    umotor
-    littlefs
-    tjpg
-    cam
+
+
 )
 
 pico_enable_stdio_usb(${TargetName} 1)

@@ -51,7 +51,7 @@ void Radio::sendByte(uint8_t data) {
 
 
 
-void Radio::receive(uint8_t packet[32]) {
+uint8_t Radio::receive(uint8_t packet[32]) {
 	// デフォルトは1、ビットは反転してない
 	uint8_t r[16] = {0x7f}; // 簡単のため富豪的
 	uint8_t detect[2] = {0};
@@ -76,6 +76,7 @@ void Radio::receive(uint8_t packet[32]) {
 		packet[i] = receiveByte();
 	}
 	printf("detect signal:\n");
+	return 1;
 }
 
 uint8_t Radio::receiveByte() {

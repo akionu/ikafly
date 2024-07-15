@@ -84,6 +84,7 @@ void disassemble_lat(void *dis)
     int latitude_digit = 9;
     int longitude_digit = 10;
     int i;
+    
     uint32_t latitude_s;
     uint32_t longitude_s;
      

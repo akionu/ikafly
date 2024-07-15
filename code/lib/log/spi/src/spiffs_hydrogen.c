@@ -27,7 +27,7 @@ u8_t SPIFFS_mounted(spiffs *fs) {
   return SPIFFS_CHECK_MOUNT(fs);
 }
 
-s32_t SPIFFS_format(spiffs *fs) {
+s32_t SPIFFS_spiffs *fs) {
 #if SPIFFS_READ_ONLY
   (void)fs;
   return SPIFFS_ERR_RO_NOT_IMPL;

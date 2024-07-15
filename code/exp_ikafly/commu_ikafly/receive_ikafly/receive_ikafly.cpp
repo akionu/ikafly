@@ -1,9 +1,9 @@
 #include <stdio.h>
+#include <stdint.h>
 #include <math.h>
 #include "hardware/timer.h"
 #include "pico/stdio.h"
 #include "../../../lib/rf/src/rf.h"
-#include <math.h>
 
 Radio radio(24, 22);
 uint8_t packet[32] = {0};

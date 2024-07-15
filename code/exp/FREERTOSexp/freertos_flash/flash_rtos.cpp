@@ -74,7 +74,7 @@ void task_flash(void *p) {
 	const uint32_t OFFSET = 0x200000; // Block 32(just after first 2MiB)
 
 	// shoud NOT be static when running this tasks more than one
-	static uint8_t wbuf[FLASH_PAGE_SIZE] = {0};
+	static uint8_t wbuf[] = {0};
 	static uint8_t rbuf[FLASH_PAGE_SIZE] = {0};
 
 	bool ret = false;

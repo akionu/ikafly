@@ -18,14 +18,16 @@ LFS lfs;
 // variables used by the filesystem
 lfs_file_t file;
 
-void task_lfs(void* p) {
+void task_lfs(void *p)
+{
     int err = lfs.init();
     // mount the filesystem
     err = lfs.mount();
 
     // reformat if we can't mount the filesystem
     // this should only happen on the first boot
-    if (err) {
+    if (err)
+    {
         lfs.format();
         lfs.mount();
     }
@@ -49,16 +51,20 @@ void task_lfs(void* p) {
     // print the boot count
     printf("boot_count: %d\n", boot_count);
 
-    while(1) {}
+    while (1)
+    {
+    }
 }
 
-int main(void) {
+int main(void)
+{
     stdio_usb_init();
     sleep_ms(2000);
     printf("\n%s\n", __FILE_NAME__);
 
     xTaskCreate(task_lfs, "task_lfs", 512, NULL, 1, NULL);
     vTaskStartScheduler();
-    while(1) {}
+    while (1)
+    {
+    };
 }
-

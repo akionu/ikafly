@@ -1,11 +1,7 @@
-add_compile_definitions(
-    LFS_THREADSAFE
-)
-
-set(TargetName flight.cpp)
+set(TargetName motor_p.cpp)
 
 add_executable(${TargetName}
-    flight.cpp
+    motor_p.cpp
 )
 
 target_link_libraries(${TargetName} 
@@ -21,9 +17,6 @@ target_link_libraries(${TargetName}
     imu
     rf
     umotor
-    littlefs
-    tjpg
-    cam
 )
 
 pico_enable_stdio_usb(${TargetName} 1)

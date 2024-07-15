@@ -530,7 +530,7 @@ void fs_reset_specific(u32_t addr_offset, u32_t phys_addr, u32_t phys_size,
   if (res == SPIFFS_OK) {
     SPIFFS_unmount(&__fs);
   }
-  res = SPIFFS_format(&__fs);
+  res = SPIFFS_&__fs);
   if (res != SPIFFS_OK) {
     printf("format failed, %i\n", SPIFFS_errno(&__fs));
   }

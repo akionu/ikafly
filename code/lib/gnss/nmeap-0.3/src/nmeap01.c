@@ -569,8 +569,8 @@ int nmeap_gpgga(nmeap_context_t *context,nmeap_sentence_t *sentence)
 
     /* if the sentence has a callout, call it */
     if (sentence->callout != 0) {
-        printf("gps ok: ");
-        printf("lat: %f, long: %f\n", gga->latitude, gga->longitude);
+       printf("gps ok: ");
+       printf("lat: %f, long: %f\n", gga->latitude, gga->longitude);
         
 
         (*sentence->callout)(context,gga,context->user_data);

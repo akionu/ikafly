@@ -46,7 +46,7 @@
 #define configUSE_IDLE_HOOK                     0
 #define configUSE_TICK_HOOK                     0
 #define configTICK_RATE_HZ                      ( ( TickType_t ) 1000 )
-#define configMAX_PRIORITIES                    32
+#define configMAX_PRIORITIES                    10
 #define configMINIMAL_STACK_SIZE                ( configSTACK_DEPTH_TYPE ) 256
 #define configUSE_16_BIT_TICKS                  0
 
@@ -54,7 +54,7 @@
 
 /* Synchronization Related */
 #define configUSE_MUTEXES                       1
-#define configUSE_RECURSIVE_MUTEXES             1
+#define configUSE_RECURSIVE_MUTEXES             0
 #define configUSE_APPLICATION_TASK_TAG          0
 #define configUSE_COUNTING_SEMAPHORES           1
 #define configQUEUE_REGISTRY_SIZE               8
