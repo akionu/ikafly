@@ -94,6 +94,7 @@ void count_vert(uint8_t vert[5], uint32_t area[15]) {
     // count ones in vertically devided area
     // [4] [3] [2] [1] [0]
     // max count in each area: 4*15=60
+    // 左右・上下反転に注意
     memset(vert, 0, 5);
     uint8_t bit;
     for (uint8_t y = 0; y < 15; y++) {

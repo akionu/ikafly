@@ -21,6 +21,8 @@ IMU::IMU(i2c_inst_t* i2c) {
 	lsm6dso.read_reg = lsm6dso_i2c_read;
 	lsm6dso.mdelay = lsm6dso_delay;
 	lsm6dso.handle = i2c;
+    
+    this->is_mag_calibrated = false;
 }
 
 bool IMU::init() {
