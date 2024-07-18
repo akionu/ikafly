@@ -44,7 +44,7 @@ target_compile_definitions(freertos_config
     projCOVERAGE_TEST=0
 	# need for safe flash access
 	PICO_FLASH_SAFE_EXECUTE_PICO_SUPPORT_MULTICORE_LOCKOUT=0
-	PICO_FLASH_SAFE_EXECUTE_USE_FREERTOS_SMP=1
+	PICO_FLASH_SAFE_EXECUTE_USE_FREERTOS_SMP=0
 )
 
 add_subdirectory(exp)

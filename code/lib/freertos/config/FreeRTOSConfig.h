@@ -102,11 +102,11 @@
 */
 
 /* SMP port only */
-#define configNUMBER_OF_CORES                   2
+#define configNUMBER_OF_CORES                   1
 #define configUSE_PASSIVE_IDLE_HOOK             0
 #define configTICK_CORE                         0
 #define configRUN_MULTIPLE_PRIORITIES           1
-#define configUSE_CORE_AFFINITY                 1
+#define configUSE_CORE_AFFINITY                 0
 
 /* RP2040 specific */
 #define configSUPPORT_PICO_SYNC_INTEROP         1

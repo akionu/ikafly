@@ -12,3 +12,8 @@ target_link_libraries(uprs
         hardware_i2c
         pico-spl06-001
 )
+
+target_include_directories(uprs
+    INTERFACE
+    .
+)
