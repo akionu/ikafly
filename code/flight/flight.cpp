@@ -106,9 +106,6 @@ Cam cam(I2C, XCLK, Y2_PIO_BASE, PIO, PIO_SM, DMA_CH);
 
 TJPGD tjpg;
 
-// make semaphoreHandle
-SemaphoreHandle_t xMutex;
-
 // make taskandle
 TaskHandle_t landing_h;
 TaskHandle_t get_gnss_h;
@@ -182,8 +179,9 @@ void task_landing(void *landing)
 
 				vTaskResume(get_imu_h);
 				printf("landing_delete");
-				vTaskDelete(NULL);
 			}
+
+			vTaskDelete(NULL);
 		}
 		else if (alt_cm - alt_old > 0.1)
 		{
@@ -205,12 +203,16 @@ void task_landing(void *landing)
 		{
 			nichrom();
 			printf("landing_delete");
-			landed = 1;
+			vTaskResume(g_motor_control_h);
+			vTaskResume(receive_h);
+			vTaskResume(send_h);
+			vTaskResume(get_imu_h);
+			vTaskResume(cam_motor_control_h);
 			vTaskDelete(NULL);
 		}
-
-		vTaskDelayUntil(&lastunlock_lan, pdMS_TO_TICKS(100));
 	}
+
+	vTaskDelayUntil(&lastunlock_lan, pdMS_TO_TICKS(100));
 }
 
 void task_get_imu(void *get_imu)
@@ -230,18 +232,12 @@ void task_get_imu(void *get_imu)
 
 	while (1)
 	{
-		// if (xSemaphoreTake(xMutex, pdMS_TO_TICKS(1000)) == 1)
-		//{
 
 		imu.update();
 		imu.getAttEuler(euler);
 
 		yaw = euler[2];
-
-		// xSemaphoreGive(xMutex);
 		vTaskDelayUntil(&lastunblock_imu, pdMS_TO_TICKS(20));
-		printf("imu");
-		//}
 	}
 }
 
@@ -283,7 +279,7 @@ void task_receieve(void *receieve)
 	while (1)
 	{
 
-		// if (xSemaphoreTake(xMutex, (TickType_t)0xfffffff) == 1)
+		// if (xSemaphoreTake(xMutex, 1) == 1)
 		//{
 		radio.receive(packet_m);
 		printf("receive");
@@ -314,8 +310,6 @@ void task_send(void *p)
 
 	while (1)
 	{
-		// if (xSemaphoreTake(xMutex, (TickType_t)0xffffff) == 1)
-		//{
 
 		for (i = 0; i < 4; i++)
 		{
@@ -331,9 +325,6 @@ void task_send(void *p)
 		radio.send(packet);
 
 		printf("j");
-		// xSemaphoreGive(xMutex);
-		//}
-
 		vTaskDelayUntil(&ltusend, pdMS_TO_TICKS(4000));
 		printf("k");
 	}
@@ -363,8 +354,9 @@ static void gpgga_callout(nmeap_context_t *context, void *data, void *user_data)
 void task_get_gnss(void *get_gnss)
 {
 	vTaskSuspend(NULL);
-	int ch;
+
 	int j = 0;
+	uint8_t ch;
 	TickType_t lastunblock_gnss;
 	lastunblock_gnss = xTaskGetTickCount();
 	gpio_init(25);
@@ -388,51 +380,31 @@ void task_get_gnss(void *get_gnss)
 	while (1)
 	{
 
-		cgg_o = cgg;
-		// if (xSemaphoreTake(xMutex, (TickType_t)0xfffffff) == 1)
+		ch = uart_getc(UART);
+		nmeap_parse(&nmea, ch);
+
+		if (cgg_o != cgg)
 		{
-			ch = uart_getc(UART);
-			nmeap_parse(&nmea, ch);
-			// xSemaphoreGive(xMutex);
-
-			if (cgg_o != cgg)
+			if (gga.latitude != 0 && gga.longitude != 0)
 			{
-				if (xSemaphoreTake(xMutex, (TickType_t)0xfffff) == 1)
+				if (j == 0)
 				{
-					if (gga.latitude != 0 && gga.longitude != 0)
-					{
-						if (j == 0)
-						{
-							printf("vv");
-							j++;
-							vTaskResume(landing_h);
-							vTaskResume(log_h);
-						}
-
-						dis = distance(goal_longitude, goal_latitude, gga.longitude, gga.latitude);
-
-						latitude_s = gga.latitude * 10000000;
-						longitude_s = gga.longitude * 10000000;
-						
-					}
-
-					if (landed == 1)
-					{
-						printf("ss");
-						vTaskResume(g_motor_control_h);
-						vTaskResume(receive_h);
-						vTaskResume(send_h);
-						vTaskResume(get_imu_h);
-						landed++;
-					}
-					xSemaphoreGive(xMutex);
+					printf("vv");
+					j++;
+					vTaskResume(landing_h);
+					vTaskResume(log_h);
 				}
 
-				vTaskDelayUntil(&lastunblock_gnss, pdMS_TO_TICKS(100));
+				dis = distance(goal_longitude, goal_latitude, gga.longitude, gga.latitude);
+
+				latitude_s = gga.latitude * 10000000;
+				longitude_s = gga.longitude * 10000000;
 			}
+			vTaskDelayUntil(&lastunblock_gnss, pdMS_TO_TICKS(100));
+			// vTaskDelay(100);
 		}
+		vTaskDelay(1);
 	}
-	vTaskDelay(1);
 }
 
 void task_stack(void *stack)
@@ -497,6 +469,7 @@ void task_stack(void *stack)
 		{
 			stacking = 0;
 		}
+		vTaskDelayUntil(&lastunblock_stack, pdMS_TO_TICKS(1000));
 	}
 }
 
@@ -515,95 +488,91 @@ void task_g_motor_control(void *g_mortor_control)
 
 	while (1)
 	{
+		printf("move");
 
-		// if (xSemaphoreTake(xMutex, (TickType_t)0xfffffff) == 1)
+		// calculate argument between ikafly and goal
+		arctan = atan2(goal_longitude - gga.longitude, goal_latitude - gga.latitude);
+
+		torig[0] = cos(arctan);
+		torig[1] = sin(arctan);
+
+		torig[2] = cos(yaw);
+		torig[3] = sin(yaw);
+
+		if (latitude_ot != 0)
 		{
-			printf("move");
-
-			// calculate argument between ikafly and goal
-			arctan = atan2(goal_longitude - gga.longitude, goal_latitude - gga.latitude);
-
-			torig[0] = cos(arctan);
-			torig[1] = sin(arctan);
-
-			torig[2] = cos(yaw);
-			torig[3] = sin(yaw);
-
-			if (latitude_ot != 0)
-			{
-				dis_ot = distance(longitude_ot, latitude_ot, gga.longitude, gga.latitude);
-				dis_ot_g = distance(longitude_ot, latitude_ot, gga.longitude, gga.latitude);
-			}
-
-			// xSemaphoreGive(xMutex);
-
-			arg = atan2(-torig[3] * torig[0] + torig[2] * torig[1], torig[2] * torig[0] + torig[3] * torig[1]);
-
-			if (j == 0)
-			{
-				motor.setDirForward(1, 1);
-				j++;
-			}
-
-			p = arg * 39.15;
-
-			if (p >= 123)
-			{
-				p = 123;
-			}
-			else if (p <= -123)
-			{
-				p = -123;
-			}
-
-			if (dis < 2)
-			{
-				vTaskSuspend(NULL);
-			}
-			else if (dis_ot >= 2)
-			{
-
-				motor.forward(900 + p, 900 - p);
-			}
-			else if (dis - dis_ot_g <= 0)
-			{
-
-				motor.forward(900 + p, 900 - p);
-			}
-			else
-			{
-
-				motor.stop();
-			}
-
-			/*if (j == 0)
-			{
-				motor.setDirForward(1, 1);
-				j++;
-			}
-
-			p = arg * 39.15;
-
-			if (p >= 123)
-			{
-				p = 123;
-			}
-			else if (p <= -123)
-			{
-				p = -123;
-			}
-
-			motor.forward(900 + p, 900 - p);
-			if (dis <= 2.0)
-			{
-				motor.stop();
-				vTaskSuspend(NULL);
-			}
-			vTaskDelayUntil(&lastunblock_gmotor, pdMS_TO_TICKS(200));*/
+			dis_ot = distance(longitude_ot, latitude_ot, gga.longitude, gga.latitude);
+			dis_ot_g = distance(longitude_ot, latitude_ot, gga.longitude, gga.latitude);
 		}
 
-		vTaskDelayUntil(&lastunblock_gmotor, pdMS_TO_TICKS(500));
+		arg = atan2(-torig[3] * torig[0] + torig[2] * torig[1], torig[2] * torig[0] + torig[3] * torig[1]);
+
+		if (j == 0)
+		{
+			motor.setDirForward(1, 1);
+			j++;
+		}
+
+		p = arg * 39.15;
+
+		if (p >= 123)
+		{
+			p = 123;
+		}
+		else if (p <= -123)
+		{
+			p = -123;
+		}
+
+		if (dis < 2)
+		{
+			vTaskSuspend(NULL);
+		}
+		else if (dis_ot >= 2)
+		{
+
+			motor.forward(900 + p, 900 - p);
+		}
+		else if (dis - dis_ot_g <= 0)
+		{
+
+			motor.forward(900 + p, 900 - p);
+		}
+		else
+		{
+
+			motor.stop();
+			printf("stop");
+			vTaskResume(cam_motor_control_h);
+		}
+
+		/*if (j == 0)
+		{
+			motor.setDirForward(1, 1);
+			j++;
+		}
+
+		p = arg * 39.15;
+
+		if (p >= 123)
+		{
+			p = 123;
+		}
+		else if (p <= -123)
+		{
+			p = -123;
+		}
+
+		motor.forward(900 + p, 900 - p);
+		if (dis <= 2.0)
+		{
+			motor.stop();
+			vTaskSuspend(NULL);
+		}
+		vTaskDelayUntil(&lastunblock_gmotor, pdMS_TO_TICKS(200));*/
 	}
+
+	vTaskDelayUntil(&lastunblock_gmotor, pdMS_TO_TICKS(500));
 }
 
 void task_log(void *log)
@@ -617,35 +586,42 @@ void task_log(void *log)
 
 	uint8_t dis_log;
 
+	lfs.init();
+
+	printf("init");
+
+	lfs.format();
+
+	printf("format");
+
+	lfs.mount();
+
+	printf("q");
+
 	while (1)
 	{
-		if (xSemaphoreTake(xMutex, (TickType_t)0xfffff) == 1)
+		printf("log\n");
+		time_f = clock() / CLOCKS_PER_SEC;
+		dis_log = dis * 10;
+		log_w[0] = time_f;
+		log_w[1] = latitude_s;
+		log_w[2] = longitude_s;
+		log_w[3] = dis_log;
+
+		if (landed = 0)
 		{
-			printf("log\n");
-			time_f = clock() / CLOCKS_PER_SEC;
-			dis_log = dis * 10;
-			log_w[0] = time_f;
-			log_w[1] = latitude_s;
-			log_w[2] = longitude_s;
-			log_w[3] = dis_log;
-
-			if (landed = 0)
-			{
-				log_w[4] = alt_cm;
-			}
-
-			lfs.file_open(&file, "ikafly_log", LFS_O_WRONLY | LFS_O_CREAT | LFS_O_APPEND);
-
-			lfs.file_write(&file, &log_w, sizeof(log_w));
-
-			lfs.file_sync(&file);
-
-			xSemaphoreGive(xMutex);
+			log_w[4] = alt_cm;
 		}
 
-		vTaskDelayUntil(&lastunlocklog, pdMS_TO_TICKS(2000));
-		//vTaskDelay(2000);
+		lfs.file_open(&file, "ikafly_log", LFS_O_WRONLY | LFS_O_CREAT | LFS_O_APPEND);
+
+		lfs.file_write(&file, &log_w, sizeof(log_w));
+
+		lfs.file_sync(&file);
 	}
+
+	vTaskDelayUntil(&lastunlocklog, pdMS_TO_TICKS(2000));
+	// vTaskDelay(2000);
 }
 
 static int my_out_func(JDEC *jdec, void *bitmap, JRECT *rect);
@@ -747,6 +723,7 @@ void count_vert(uint8_t vert[5], uint32_t area[15])
 
 void task_cam_motor_control(void *p)
 {
+	vTaskSuspend(NULL);
 	TickType_t lastunlock_cam;
 	lastunlock_cam = xTaskGetTickCount();
 
@@ -842,6 +819,10 @@ void task_cam_motor_control(void *p)
 			motor.forward(800, 1023);
 
 			break;
+
+		default:
+
+			motor.forward(0, 1023);
 		}
 
 		vTaskDelayUntil(&lastunlock_cam, pdMS_TO_TICKS(200));
@@ -886,37 +867,23 @@ int main(void)
 
 	printf("q");
 
-	int st=0;
+	int st = 0;
 
-	st=lfs.init();
+	xTaskCreate(task_get_gnss, "task_get_gnss", 1024, NULL, 2, &get_gnss_h);
 
-	printf("%d",st);
+ 	xTaskCreate(task_landing, "task_landing", 1024, NULL, 4, &landing_h);
 
-	lfs.format();
+	 xTaskCreate(task_g_motor_control, "task_g_motor_control", 1024, NULL, 3, &g_motor_control_h);
 
-	lfs.mount();
+	 xTaskCreate(task_stack, "task_stack", 256, NULL, 3, &stack_h);
 
+	 xTaskCreate(task_get_imu, "task_get_imu", 1024, NULL, 1, &get_imu_h);
 
-	printf("q");
+	 xTaskCreate(task_receieve, "task_receieve", 1024, NULL, tskIDLE_PRIORITY, &receive_h);
 
-	xMutex = xSemaphoreCreateMutex();
+	 xTaskCreate(task_send, "task_send", 1024, NULL, 2, &send_h);
 
-	
-	xTaskCreate(task_get_gnss, "task_get_gnss", 1024, NULL, 5, &get_gnss_h);
-
-	xTaskCreate(task_landing, "task_landing", 1024, NULL, 4, &landing_h);
-
-	xTaskCreate(task_g_motor_control, "task_g_motor_control", 1024, NULL, 3, &g_motor_control_h);
-
-	// xTaskCreate(task_stack,"task_stack",256,NULL,3,&stack_h);
-
-	xTaskCreate(task_get_imu, "task_get_imu", 1024, NULL, 1, &get_imu_h);
-
-	xTaskCreate(task_receieve, "task_receieve", 1024, NULL, tskIDLE_PRIORITY, &receive_h);
-
-	xTaskCreate(task_send, "task_send", 1024, NULL, 2, &send_h);
-
-	xTaskCreate(task_log, "task_log", 1024, NULL, 6, &log_h);
+	// xTaskCreate(task_log, "task_log", 1024, NULL, 6, &log_h);
 
 	// xTaskCreate(debug,"debug",256,NULL,1,NULL);
 

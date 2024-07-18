@@ -184,7 +184,6 @@ int main(void)
      xTaskCreate(task_gnss, "task_gnss", 512, NULL, 1, NULL);
      xTaskCreate(task_lfs, "task_lfs", 512, NULL, 2, &task);
    
-
     vTaskStartScheduler();
     while (1)
     {
