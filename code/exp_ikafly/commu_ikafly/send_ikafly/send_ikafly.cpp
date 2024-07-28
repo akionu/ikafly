@@ -16,6 +16,8 @@
 #include "../../../lib/freertos/FreeRTOS-Kernel/include/FreeRTOS.h"
 #include "../../../lib/freertos/FreeRTOS-Kernel/include/task.h"
 
+#include "semphr.h"
+
 #define I2C i2c1
 #define UART uart0
 #define IRQ UART0_IRQ
@@ -30,10 +32,15 @@ float longitude_ot = 0;
 int cgg = 0;
 int cgg_o;
 
+SemaphoreHandle_t xMutex;
+
 Radio radio(24, 22);
 nmeap_context_t nmea;
 nmeap_gga_t gga;
 uint8_t packet[32] = {0};
+
+ uint32_t latitude_s;
+uint32_t longitude_s;
 
 static void gpgga_callout(nmeap_context_t *context, void *data, void *user_data)
 {
@@ -64,6 +71,7 @@ void gnss(void *gn)
     TickType_t gnss_h;
     gnss_h = xTaskGetTickCount();
 
+
     while (1)
     {
         cgg_o = cgg;
@@ -73,6 +81,9 @@ void gnss(void *gn)
 
         if (cgg_o != cgg)
         {
+             latitude_s = gga.latitude * 10000000;
+            longitude_s = gga.longitude * 10000000;
+
             vTaskDelayUntil(&gnss_h, pdMS_TO_TICKS(100));
         }
     }
@@ -80,14 +91,12 @@ void gnss(void *gn)
 
 void disassemble_lat(void *dis)
 {
-    radio.init();
     int latitude_digit = 9;
     int longitude_digit = 10;
     int i;
-    
-    uint32_t latitude_s;
-    uint32_t longitude_s;
-     
+
+   
+
     TickType_t diss_h;
     diss_h = xTaskGetTickCount();
 
@@ -95,20 +104,23 @@ void disassemble_lat(void *dis)
     {
         if (gga.latitude != 0.0)
         {
+            if (xSemaphoreTake(xMutex, pdMS_TO_TICKS(1000)))
 
-            latitude_s = gga.latitude * 10000000;
-            longitude_s = gga.longitude * 10000000;
-
-            for(i=0;i<4;i++){
-                packet[i]=latitude_s>>8*(3-i);
+           
+            for (i = 0; i < 4; i++)
+            {
+                packet[i] = latitude_s >> 8 * (3 - i);
             }
-            for(i=0;i<4;i++){
-                packet[i+4]=longitude_s>>8*(3-i);
+            for (i = 0; i < 4; i++)
+            {
+                packet[i + 4] = longitude_s >> 8 * (3 - i);
             }
 
-            printf("sending");
             radio.send(packet);
+            printf("sending");
+            xSemaphoreGive(xMutex);
         }
+
         vTaskDelayUntil(&diss_h, pdMS_TO_TICKS(5000));
     }
 }
@@ -118,7 +130,11 @@ int main()
 
     stdio_init_all();
     sleep_ms(1000);
+    radio.init();
     uart_init(UART, 9600);
+
+    xMutex = xSemaphoreCreateMutex();
+
     xTaskCreate(gnss, "gnss", 256, NULL, 1, NULL);
     xTaskCreate(disassemble_lat, "dis", 256, NULL, 2, NULL);
     vTaskStartScheduler();

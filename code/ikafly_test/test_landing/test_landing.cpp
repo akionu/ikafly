@@ -34,11 +34,10 @@ Press prs(I2C, 0x77);
 LFS lfs;
 lfs_file_t file;
 
-
 const uint i2c_sda_pin = 14;
 const uint i2c_scl_pin = 15;
 
-int32_t st=0;
+int32_t st = 0;
 
 void nichrom()
 {
@@ -95,24 +94,24 @@ void landing(void *k)
             if (p >= 10)
             {
                 nichrom();
-                st=4;
+                st = 4;
             }
-            st=0;
+            st = 0;
         }
         else if (alt_m - alt_old >= 0.01)
         {
             printf("up");
-            st=2;
+            st = 2;
         }
         else if (alt_old - alt_m >= 0.01)
         {
             printf("down");
-            st=3;
+            st = 3;
         }
         else
         {
             printf("hovering");
-            st=1;
+            st = 1;
         };
         alt_old = alt_m;
 
@@ -121,13 +120,13 @@ void landing(void *k)
             p++;
         };
 
-
-        lfs.file_write(&file,&alt_m,sizeof(alt_m));
-        lfs.file_write(&file,&st,sizeof(st));
+        lfs.file_write(&file, &alt_m, sizeof(alt_m));
+        lfs.file_write(&file, &st, sizeof(st));
 
         lfs.file_sync(&file);
 
-        if(st==4){
+        if (st == 4)
+        {
             lfs.unmount();
         }
 
@@ -135,20 +134,25 @@ void landing(void *k)
     }
 }
 
-int main(void){
+int main(void)
+{
     stdio_init_all();
     sleep_ms(2000);
 
-/*
-    lfs.init();
-    lfs.format();
-    lfs.mount();
+    /*
+        lfs.init();
+        lfs.format();
+        lfs.mount();
 
-    */
+        */
 
-   printf("init");
+    printf("init");
 
-    lfs.file_open(&file,"landing", LFS_O_RDWR | LFS_O_CREAT | LFS_O_APPEND);
+    lfs.file_open(&file, "landing", LFS_O_RDWR | LFS_O_CREAT | LFS_O_APPEND);
 
-    xTaskCreate(landing,"landing",1024,NULL,2,NULL);
+    xTaskCreate(landing, "landing", 1024, NULL, 2, NULL);
+    vTaskStartScheduler();
+    while (1)
+    {
+    };
 }

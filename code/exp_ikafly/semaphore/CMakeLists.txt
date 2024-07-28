@@ -1,7 +1,7 @@
-set(TargetName test_landing.cpp)
+set(TargetName seaphore.cpp)
 
 add_executable(${TargetName}
-    landing_ikafly.cpp
+    semaphore.cpp
 )
 
 target_link_libraries(${TargetName} 
@@ -9,9 +9,8 @@ target_link_libraries(${TargetName}
     pico_multicore
     pico_platform
     hardware_uart
+    freertos
     hardware_i2c
-    uprs
-    hardware_pwmz
 )
 
 pico_enable_stdio_usb(${TargetName} 1)

@@ -1,17 +1,17 @@
-set(TargetName test_landing.cpp)
+set(TargetName freertos_ikafly_gnss)
 
 add_executable(${TargetName}
-    landing_ikafly.cpp
+    freertos_ikafly_gnss.cpp
 )
 
 target_link_libraries(${TargetName} 
-    pico_stdlib 
+    freertos
     pico_multicore
-    pico_platform
+    hardware_pwm
+    pico_stdlib
     hardware_uart
-    hardware_i2c
-    uprs
-    hardware_pwmz
+    gnss
+    
 )
 
 pico_enable_stdio_usb(${TargetName} 1)

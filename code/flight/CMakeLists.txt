@@ -2,10 +2,10 @@ add_compile_definitions(
     LFS_THREADSAFE
 )
 
-set(TargetName flight.cpp)
+set(TargetName flight2.cpp)
 
 add_executable(${TargetName}
-    flight.cpp
+    flight2.cpp
 )
 
 target_link_libraries(${TargetName} 

@@ -26,12 +26,11 @@
 #include "FreeRTOSConfig.h"
 #include "../lib/freertos/FreeRTOS-Kernel/include/FreeRTOS.h"
 #include "../lib/freertos/FreeRTOS-Kernel/include/task.h"
-#include "semphr.h"
-#include "portmacro.h"
-#include "projdefs.h"
-#include "croutine.h"
-#include "queue.h"
-#include "list.h"
+#include "../lib/freertos/FreeRTOS-Kernel/include/semphr.h"
+#include "../lib/freertos/FreeRTOS-Kernel/include/projdefs.h"
+#include "../lib/freertos/FreeRTOS-Kernel/include/croutine.h"
+#include "../lib/freertos/FreeRTOS-Kernel/include/queue.h"
+#include "../lib/freertos/FreeRTOS-Kernel/include/list.h"
 
 #include "../lib/imu/src/imu.h"
 #include "../lib/ikafly_pin.h"
@@ -85,12 +84,11 @@ uint8_t packet[32] = {0};
 uint8_t packet_m[32] = {0}; // be sent to other ikafly
 uint32_t latitude_ot = 0;	// other ikafly`s latitude
 uint32_t longitude_ot = 0;	// othe ikafly`s longitude
-uint32_t latitude_s = 0;
-uint32_t longitude_s = 0;
+uint32_t gga_s[3];
 uint32_t log_w[8] = {0};
 uint32_t red_area[15] = {0};
-int cgg = 0; // increment when gga is resdable
-int cgg_o = 0;
+int8_t cgg = 0; // increment when gga is resdable
+int8_t cgg_o = 0;
 int stacking = 0; // when ikafly is tacking, this is changed 1
 int landed = 0;
 
@@ -117,6 +115,10 @@ TaskHandle_t receive_h;
 TaskHandle_t log_h;
 TaskHandle_t cam_motor_control_h;
 
+QueueHandle_t gnss_q;
+QueueHandle_t imu_q;
+QueueHandle_t press_q;
+
 // melt nichrom line with heat
 void nichrom()
 {
@@ -140,6 +142,12 @@ void task_landing(void *landing)
 	int up_s = 0;
 	TickType_t lastunlock_lan;
 	lastunlock_lan = xTaskGetTickCount();
+
+	press_q = xQueueCreate(1,sizeof(alt_cm));
+	if (press_q == NULL)
+	{
+		press_q = xQueueCreate(1, sizeof(alt_cm));
+	}
 
 	printf("press init");
 	prs.init();
@@ -166,8 +174,8 @@ void task_landing(void *landing)
 
 	while (1)
 	{
-
 		alt_cm = prs.getAltM();
+		xQueueSend(press_q, &alt_cm, 0);
 		if (alt_cm - alt_av <= 0.1 && alt_av - alt_cm <= 0.1)
 		{
 			printf("ground");
@@ -178,10 +186,12 @@ void task_landing(void *landing)
 				landed = 1;
 
 				vTaskResume(get_imu_h);
+				vTaskResume(g_motor_control_h);
+				vTaskResume(receive_h);
+				vTaskResume(send_h);
 				printf("landing_delete");
+				vTaskDelete(NULL);
 			}
-
-			vTaskDelete(NULL);
 		}
 		else if (alt_cm - alt_old > 0.1)
 		{
@@ -194,7 +204,7 @@ void task_landing(void *landing)
 		else
 		{
 			printf("hovering");
-		};
+		}
 		alt_old = alt_cm;
 
 		up_s++;
@@ -207,12 +217,11 @@ void task_landing(void *landing)
 			vTaskResume(receive_h);
 			vTaskResume(send_h);
 			vTaskResume(get_imu_h);
-			vTaskResume(cam_motor_control_h);
 			vTaskDelete(NULL);
 		}
+		vTaskDelayUntil(&lastunlock_lan, pdMS_TO_TICKS(100));
+		// vTaskDelay(100);
 	}
-
-	vTaskDelayUntil(&lastunlock_lan, pdMS_TO_TICKS(100));
 }
 
 void task_get_imu(void *get_imu)
@@ -225,9 +234,11 @@ void task_get_imu(void *get_imu)
 
 	TickType_t lastunblock_imu;
 	lastunblock_imu = xTaskGetTickCount();
+	float euler[3];
+
+	imu_q = xQueueCreate(1,sizeof(euler[2]));
 
 	vTaskResume(get_gnss_h);
-	float euler[3];
 	vTaskSuspend(NULL);
 
 	while (1)
@@ -237,7 +248,8 @@ void task_get_imu(void *get_imu)
 		imu.getAttEuler(euler);
 
 		yaw = euler[2];
-		vTaskDelayUntil(&lastunblock_imu, pdMS_TO_TICKS(20));
+		xQueueSend(imu_q, &euler[2], 0);
+			vTaskDelayUntil(&lastunblock_imu, pdMS_TO_TICKS(20));
 	}
 }
 
@@ -279,8 +291,6 @@ void task_receieve(void *receieve)
 	while (1)
 	{
 
-		// if (xSemaphoreTake(xMutex, 1) == 1)
-		//{
 		radio.receive(packet_m);
 		printf("receive");
 
@@ -294,8 +304,6 @@ void task_receieve(void *receieve)
 		assemble_lat(packet_m);
 
 		printf("\n");
-		// xSemaphoreGive(xMutex);
-		//}
 		vTaskDelayUntil(&lastunblock_receive, pdMS_TO_TICKS(4000));
 	}
 }
@@ -304,20 +312,22 @@ void task_send(void *p)
 {
 
 	int i;
+	uint32_t gga_ss[3];
 	TickType_t ltusend;
 	ltusend = xTaskGetTickCount();
 	vTaskSuspend(NULL);
 
 	while (1)
 	{
+		xQueueReceive(gnss_q, &gga_ss, 10);
 
 		for (i = 0; i < 4; i++)
 		{
-			packet[i] = latitude_s >> 8 * (3 - i);
+			packet[i] = gga_ss[0] >> 8 * (3 - i);
 		}
 		for (i = 0; i < 4; i++)
 		{
-			packet[i + 4] = longitude_s >> 8 * (3 - i);
+			packet[i + 4] = gga_ss[0] >> 8 * (3 - i);
 		}
 		// packet[8] = stacking;
 
@@ -349,6 +359,10 @@ static void gpgga_callout(nmeap_context_t *context, void *data, void *user_data)
 {
 	nmeap_gga_t *gga = (nmeap_gga_t *)data;
 	cgg++;
+	if (cgg == 260)
+	{
+		cgg = 0;
+	}
 }
 
 void task_get_gnss(void *get_gnss)
@@ -359,6 +373,9 @@ void task_get_gnss(void *get_gnss)
 	uint8_t ch;
 	TickType_t lastunblock_gnss;
 	lastunblock_gnss = xTaskGetTickCount();
+
+	gnss_q = xQueueCreate(1, sizeof(gga_s));
+
 	gpio_init(25);
 	gpio_set_dir(25, GPIO_OUT);
 	gpio_put(25, 0);
@@ -380,6 +397,8 @@ void task_get_gnss(void *get_gnss)
 	while (1)
 	{
 
+		cgg_o = cgg;
+
 		ch = uart_getc(UART);
 		nmeap_parse(&nmea, ch);
 
@@ -392,18 +411,20 @@ void task_get_gnss(void *get_gnss)
 					printf("vv");
 					j++;
 					vTaskResume(landing_h);
-					vTaskResume(log_h);
+					// vTaskResume(log_h);
 				}
 
 				dis = distance(goal_longitude, goal_latitude, gga.longitude, gga.latitude);
 
-				latitude_s = gga.latitude * 10000000;
-				longitude_s = gga.longitude * 10000000;
+				gga_s[0] = gga.latitude * 10000000;
+				gga_s[1] = gga.longitude * 10000000;
+				gga_s[2] = dis;
+
+				xQueueSend(gnss_q, &gga_s, 0);
 			}
-			vTaskDelayUntil(&lastunblock_gnss, pdMS_TO_TICKS(100));
+			vTaskDelayUntil(&lastunblock_gnss, pdMS_TO_TICKS(1000));
 			// vTaskDelay(100);
 		}
-		vTaskDelay(1);
 	}
 }
 
@@ -568,23 +589,19 @@ void task_g_motor_control(void *g_mortor_control)
 		{
 			motor.stop();
 			vTaskSuspend(NULL);
-		}
-		vTaskDelayUntil(&lastunblock_gmotor, pdMS_TO_TICKS(200));*/
+		}*/
+		vTaskDelayUntil(&lastunblock_gmotor, pdMS_TO_TICKS(200));
 	}
-
-	vTaskDelayUntil(&lastunblock_gmotor, pdMS_TO_TICKS(500));
 }
 
 void task_log(void *log)
 {
 	vTaskSuspend(NULL);
-
 	TickType_t lastunlocklog;
 	lastunlocklog = xTaskGetTickCount();
-
 	clock_t time_f;
-
-	uint8_t dis_log;
+	int32_t alt_log = 0;
+	int32_t gga_log[3];
 
 	lfs.init();
 
@@ -600,17 +617,20 @@ void task_log(void *log)
 
 	while (1)
 	{
+
+		xQueueReceive(gnss_q, &gga_log, 10);
+
 		printf("log\n");
 		time_f = clock() / CLOCKS_PER_SEC;
-		dis_log = dis * 10;
 		log_w[0] = time_f;
-		log_w[1] = latitude_s;
-		log_w[2] = longitude_s;
-		log_w[3] = dis_log;
+		log_w[1] = gga_log[0];
+		log_w[2] = gga_log[1];
+		log_w[3] = gga_log[2];
 
 		if (landed = 0)
 		{
-			log_w[4] = alt_cm;
+			xQueueReceive(press_q, &alt_log, 100);
+			log_w[4] = alt_log;
 		}
 
 		lfs.file_open(&file, "ikafly_log", LFS_O_WRONLY | LFS_O_CREAT | LFS_O_APPEND);
@@ -618,10 +638,9 @@ void task_log(void *log)
 		lfs.file_write(&file, &log_w, sizeof(log_w));
 
 		lfs.file_sync(&file);
+		vTaskDelayUntil(&lastunlocklog, pdMS_TO_TICKS(2000));
+		// vTaskDelay(2000);
 	}
-
-	vTaskDelayUntil(&lastunlocklog, pdMS_TO_TICKS(2000));
-	// vTaskDelay(2000);
 }
 
 static int my_out_func(JDEC *jdec, void *bitmap, JRECT *rect);
@@ -869,19 +888,19 @@ int main(void)
 
 	int st = 0;
 
-	xTaskCreate(task_get_gnss, "task_get_gnss", 1024, NULL, 2, &get_gnss_h);
+	xTaskCreate(task_get_gnss, "task_get_gnss", 1024, NULL, 8, &get_gnss_h);
 
- 	xTaskCreate(task_landing, "task_landing", 1024, NULL, 4, &landing_h);
+	xTaskCreate(task_landing, "task_landing", 1024, NULL, 3, &landing_h);
 
-	 xTaskCreate(task_g_motor_control, "task_g_motor_control", 1024, NULL, 3, &g_motor_control_h);
+	//xTaskCreate(task_g_motor_control, "task_g_motor_control", 1024, NULL, 3, &g_motor_control_h);
 
-	 xTaskCreate(task_stack, "task_stack", 256, NULL, 3, &stack_h);
+	// xTaskCreate(task_stack, "task_stack", 256, NULL, 3, &stack_h);
 
-	 xTaskCreate(task_get_imu, "task_get_imu", 1024, NULL, 1, &get_imu_h);
+	xTaskCreate(task_get_imu, "task_get_imu", 1024, NULL, 1, &get_imu_h);
 
-	 xTaskCreate(task_receieve, "task_receieve", 1024, NULL, tskIDLE_PRIORITY, &receive_h);
+	// xTaskCreate(task_receieve, "task_receieve", 1024, NULL, tskIDLE_PRIORITY, &receive_h);
 
-	 xTaskCreate(task_send, "task_send", 1024, NULL, 2, &send_h);
+	// xTaskCreate(task_send, "task_send", 1024, NULL, 2, &send_h);
 
 	// xTaskCreate(task_log, "task_log", 1024, NULL, 6, &log_h);
 
