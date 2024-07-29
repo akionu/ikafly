@@ -8,4 +8,5 @@ target_sources(rf INTERFACE
 target_link_libraries(rf
         INTERFACE
         pico_stdlib
+        freertos
 )

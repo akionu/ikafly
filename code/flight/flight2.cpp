@@ -22,6 +22,7 @@
 #include "uprs.h"
 #include "littlefs.hpp"
 #include "imu.h"
+#include "../lib/rf/src/rf.h"
 #include "../lib/cam/src/cam.h"
 #include "../lib/tjpg/src/tjpg.hpp"
 #include "../lib/motor/src/umotor.h"
@@ -33,6 +34,7 @@
 #include "task.h"
 #include "queue.h"
 #include "semphr.h"
+#include "event_groups.h"
 
 #define I2C i2c1
 #define UART uart0
@@ -40,6 +42,7 @@
 #define MOSI 12
 #define MISO 13
 #define RAD2DEG 57.2958
+#define thrty 0.523599
 #define goal_latitude 34.801665
 #define goal_longitude 135.771090
 
@@ -71,12 +74,16 @@ nmeap_gga_t gga;
 Motor motor;
 Cam cam(I2C, XCLK, Y2_PIO_BASE, PIO, PIO_SM, DMA_CH);
 TJPGD tjpg;
+Radio radio(24, 22);
 
 SemaphoreHandle_t xMutex = NULL;
+EventGroupHandle_t gcs_event = NULL;
 
 QueueHandle_t press_q = NULL;
 QueueHandle_t gnss_q = NULL;
 QueueHandle_t imu_q = NULL;
+QueueHandle_t receive_q = NULL;
+QueueHandle_t stuck_q = NULL;
 
 TaskHandle_t landing_h;
 TaskHandle_t gnss_h;
@@ -86,13 +93,16 @@ TaskHandle_t gcontrol_h;
 TaskHandle_t ccontrol_h;
 TaskHandle_t send_h;
 TaskHandle_t receive_h;
+TaskHandle_t stuck_h;
 
 // uint8_t landed = 0;
 // for debug
 uint8_t landed = 1;
-
 uint8_t goal = 0;
 uint8_t g_con = 0;
+uint8_t gbit = (1 << 0);
+uint8_t cbit;
+uint8_t sbit;
 
 uint32_t call = 0;
 uint32_t call_a = 0;
@@ -101,11 +111,11 @@ uint32_t red_area[15] = {0};
 typedef struct
 {
     uint32_t gns[2];
-    uint8_t dis;
+    uint16_t dis;
     uint8_t arg;
 } gnss_data;
 
-gnss_data gdata[4];
+gnss_data gdata[6];
 
 void nichrom()
 {
@@ -169,6 +179,7 @@ void task_landing(void *landing)
                     nichrom();
                     // sprintf("delete_press");
                     vTaskResume(gcontrol_h);
+                    vTaskResume(send_h);
                     landed = 1;
                     vTaskSuspend(NULL);
                 }
@@ -220,41 +231,44 @@ void task_log(void *log)
     {
         if (gnss_q != NULL && press_q != NULL && imu_q != NULL)
         {
-            if (i % 5 == 0)
+            if (i % 10 == 0)
             {
                 xQueueReset(press_q);
                 xQueueReset(gnss_q);
+                xQueueReset(stuck_q);
+                xQueueReset(receive_q);
+
                 printf("q_reset");
             }
 
-            if (g_con == 0)
+            if (xQueueReceive(gnss_q, &gdata[1], 10) == 1)
             {
-
-                xQueueReceive(gnss_q, &gdata[1], 10);
                 printf("receive");
 
                 log_w[0] = gdata[1].gns[0];
                 log_w[1] = gdata[1].gns[1];
                 log_w[2] = gdata[1].dis;
                 log_w[3] = gdata[1].arg;
+            }
 
-                if (landed == 0)
+            if (landed == 0)
+            {
+                if (xQueueReceive(press_q, &alt_log, 10) == 1)
                 {
-                    xQueueReceive(press_q, &alt_log, 10);
                     log_w[4] = alt_log;
                 }
-                if (goal == 1)
-                {
-                    lfs.file_close(&file);
-                    lfs.unmount();
-                    printf("mision done");
-                    vTaskEndScheduler();
-                }
-
-                lfs.file_write(&file, &log_w, sizeof(log_w));
-                printf("write log\n");
-                i++;
             }
+            if (goal == 1)
+            {
+                lfs.file_close(&file);
+                lfs.unmount();
+                printf("mision done");
+                vTaskEndScheduler();
+            }
+
+            lfs.file_write(&file, &log_w, sizeof(log_w));
+            printf("write log\n");
+            i++;
         }
         vTaskDelayUntil(&llk_log, pdMS_TO_TICKS(2000));
         // vTaskDelay(2000);vTaskSuspend(NULL);
@@ -326,21 +340,21 @@ void task_gnss(void *gnss)
 
         if (call != call_a)
         {
-             xQueueReceive(imu_q, &yaw,10);
+            xQueueReceive(imu_q, &yaw, 10);
 
-             arctan = atan2(goal_longitude - gga.longitude, goal_latitude - gga.latitude);
-             torig[0] = cos(arctan);
-             torig[1] = sin(arctan);
-             torig[2] = cos(yaw);
-             torig[3] = sin(yaw);
+            arctan = atan2(goal_longitude - gga.longitude, goal_latitude - gga.latitude);
+            torig[0] = cos(arctan);
+            torig[1] = sin(arctan);
+            torig[2] = cos(yaw);
+            torig[3] = sin(yaw);
 
-             gdata[0].gns[0] = gga.latitude * 10000000;
-             gdata[0].gns[1] = gga.longitude * 10000000;
-             gdata[0].dis = distance(goal_longitude, goal_latitude, gga.longitude, gga.latitude);
-             gdata[0].arg = atan2(-torig[3] * torig[0] + torig[2] * torig[1], torig[2] * torig[0] + torig[3] * torig[1]);
+            gdata[0].gns[0] = gga.latitude * 10000000;
+            gdata[0].gns[1] = gga.longitude * 10000000;
+            gdata[0].dis = distance(goal_longitude, goal_latitude, gga.longitude, gga.latitude) * 10;
+            gdata[0].arg = atan2(-torig[3] * torig[0] + torig[2] * torig[1], torig[2] * torig[0] + torig[3] * torig[1]);
 
-             xQueueSend(gnss_q, &gdata[0], 10);
-             
+            xQueueSend(gnss_q, &gdata[0], 0);
+            xEventGroupSetBits(gcs_event, gbit);
 
             vTaskDelayUntil(&llk_gnss, pdMS_TO_TICKS(150));
         }
@@ -359,7 +373,8 @@ void task_imu(void *imu_t)
     // imu.calibration();
 
     float euler[3];
-
+    // for debug
+    // vTaskSuspend(NULL);
     printf("task_imu");
     while (1)
     {
@@ -379,11 +394,11 @@ void task_imu(void *imu_t)
 void task_gcontrol(void *gcontrol)
 {
     // if we landed
-    vTaskSuspend(NULL);
+    // vTaskSuspend(NULL);
 
     float p;
     int j = 0;
-    float dis_ot = 100;
+    float dis_ot;
     float dis_ot_g;
 
     double dis_m;
@@ -399,86 +414,87 @@ void task_gcontrol(void *gcontrol)
     printf("gcontrol");
     while (1)
     {
-        if (gnss_q != NULL && press_q != NULL && imu_q != NULL)
+        if (gnss_q != NULL && press_q != NULL && imu_q != NULL && receive_q != NULL)
         {
 
             printf("move\n");
 
             // calculate argument between ikafly and goal
 
-            /*if (latitude_ot != 0)
+            if (xQueueReceive(receive_q, &dis_ot, 0) != 1)
             {
-                dis_ot = distance(longitude_ot, latitude_ot, gga.longitude, gga.latitude);
-                dis_ot_g = distance(longitude_ot, latitude_ot, gga.longitude, gga.latitude);
-            }*/
+                dis_ot = 1000;
+            }
 
-            xQueueReceive(gnss_q, &gdata[2], 10);
-
-            dis_m = gdata[2].dis;
-            arg_m = gdata[2].arg;
-
-            if (dis_m > 0)
+            if (xQueueReceive(gnss_q, &gdata[2], 0) == 1)
             {
 
-                /* if (j == 0)
-             {
-                 motor.setDirForward(1, 1);
-                 j++;
-             }
+                dis_m = gdata[2].dis;
+                arg_m = gdata[2].arg;
 
-             p = arg_m * 39.15;
-
-             if (p >= 123)
-             {
-                 p = 123;
-             }
-             else if (p <= -123)
-             {
-                 p = -123;
-             }
-
-             if (dis_m < 2)
-             {
-                 vTaskSuspend(NULL);
-             }
-             else if (dis_ot >= 2)
-             {
-
-                 motor.forward(900 + p, 900 - p);
-             }
-             else if (dis_m - dis_ot_g <= 0)
-             {
-
-                 motor.forward(900 + p, 900 - p);
-             }
-             else
-             {
-
-                 motor.stop();
-                 printf("stop");
-                 vTaskSuspend(NULL);
-                 //vTaskResume(cam_motor_control_h);
-             } */
-
-                if (j == 0)
+                if (dis_m > 0)
                 {
-                    motor.setDirForward(1, 1);
-                    j++;
-                }
 
-                p = arg_m * 39.15;
+                    /* if (j == 0)
+                 {
+                     motor.setDirForward(1, 1);
+                     j++;
+                 }
 
-                if (p >= 123)
-                {
-                    p = 123;
-                }
-                else if (p <= -123)
-                {
-                    p = -123;
-                }
+                 p = arg_m * 39.15;
 
-                motor.forward(900 + p, 900 - p);
-                if (dis_m <= 2.0)
+                 if (p >= 123)
+                 {
+                     p = 123;
+                 }
+                 else if (p <= -123)
+                 {
+                     p = -123;
+                 }
+
+                 if (dis_m < 2)
+                 {
+                     vTaskSuspend(NULL);
+                 }
+                 else if (dis_ot >= 2)
+                 {
+
+                     motor.forward(900 + p, 900 - p);
+                 }
+                 else if (dis_m - dis_ot_g <= 0)
+                 {
+
+                     motor.forward(900 + p, 900 - p);
+                 }
+                 else
+                 {
+
+                     motor.stop();
+                     printf("stop");
+                     vTaskSuspend(NULL);
+                     //vTaskResume(cam_motor_control_h);
+                 } */
+
+                    if (j == 0)
+                    {
+                        motor.setDirForward(1, 1);
+                        j++;
+                    }
+
+                    p = arg_m * 39.15;
+
+                    if (p >= 123)
+                    {
+                        p = 123;
+                    }
+                    else if (p <= -123)
+                    {
+                        p = -123;
+                    }
+
+                    motor.forward(900 + p, 900 - p);
+                }
+                /*else
                 {
                     l++;
                     motor.stop();
@@ -489,10 +505,9 @@ void task_gcontrol(void *gcontrol)
                         vTaskSuspend(gnss_h);
                         vTaskSuspend(NULL);
                     }
-                }
+                }*/
             }
         }
-        printf("papa\n");
         vTaskDelayUntil(&llk_gcontrol, pdMS_TO_TICKS(200));
     }
 }
@@ -593,7 +608,7 @@ void count_vert(uint8_t vert[5], uint32_t area[15])
 void task_ccontrol(void *ccontrol)
 {
     // if we done gnss control
-    // vTaskSuspend(NULL);
+    vTaskSuspend(NULL);
     cam.init();
     cam.enableJpeg();
 
@@ -609,101 +624,235 @@ void task_ccontrol(void *ccontrol)
 
     while (1)
     {
-        if (xSemaphoreTake(xMutex, (TickType_t)0xffffff) == 1)
+        cbit = xEventGroupWaitBits(gcs_event, gbit, pdTRUE, pdTRUE, (TickType_t)0xfffff);
+        if (cbit && gbit)
         {
-            cam.capture();
-            while (!cam.isCaptureFinished())
-                tight_loop_contents();
-            uint32_t size = cam.getJpegSize();
-
-            memset(red_area, 0, sizeof(red_area));
-
-            JRESULT res = tjpg.prepare(cam.image_buf, size);
-            if (res == JDR_OK)
+            if (xSemaphoreTake(xMutex, (TickType_t)0xffffff) == 1)
             {
-                res = tjpg.decomp(my_out_func, 3);
+                cam.capture();
+                while (!cam.isCaptureFinished())
+                    tight_loop_contents();
+                uint32_t size = cam.getJpegSize();
 
+                memset(red_area, 0, sizeof(red_area));
+
+                JRESULT res = tjpg.prepare(cam.image_buf, size);
                 if (res == JDR_OK)
                 {
-                    uint8_t bit;
-                    for (uint8_t y = 0; y < 15; y++)
+                    res = tjpg.decomp(my_out_func, 3);
+
+                    if (res == JDR_OK)
                     {
-                        for (int8_t i = 20 - 1; i >= 0; i--)
+                        uint8_t bit;
+                        for (uint8_t y = 0; y < 15; y++)
                         {
-                            bit = (red_area[y] >> i) & 1;
+                            for (int8_t i = 20 - 1; i >= 0; i--)
+                            {
+                                bit = (red_area[y] >> i) & 1;
+                            }
                         }
-                    }
 
-                    count_vert(vert, red_area);
+                        count_vert(vert, red_area);
 
-                    if (vert[0] > 50 && vert[1] > 50 && vert[2] > 50 && vert[3] > 50 && vert[4] > 50)
-                    {
-                        goal = 1;
-                        printf("goal");
-                        xSemaphoreGive(xMutex);
-                        vTaskSuspend(NULL);
-                    }
-
-                    int8_t dire = 0;
-                    for (int8_t q = 0; q < 3; q++)
-                    {
-                        if (vert[q + 1] >= vert[q])
+                        if (vert[0] > 50 && vert[1] > 50 && vert[2] > 50 && vert[3] > 50 && vert[4] > 50)
                         {
-                            dire = q + 1;
+                            goal = 1;
+                            printf("goal");
+                            xSemaphoreGive(xMutex);
+                            vTaskSuspend(NULL);
                         }
-                    }
 
-                    printf("ccontrol");
+                        int8_t dire = 0;
+                        for (int8_t q = 0; q < 3; q++)
+                        {
+                            if (vert[q + 1] >= vert[q])
+                            {
+                                dire = q + 1;
+                            }
+                        }
 
-                    switch (dire)
-                    {
+                        printf("ccontrol");
 
-                    case 0:
+                        switch (dire)
+                        {
 
-                        motor.forward(800, 1023);
+                        case 0:
 
-                        break;
+                            motor.forward(800, 1023);
 
-                    case 1:
+                            break;
 
-                        motor.forward(900, 1023);
+                        case 1:
 
-                        break;
+                            motor.forward(900, 1023);
 
-                    case 2:
+                            break;
 
-                        motor.forward(1023, 1023);
+                        case 2:
 
-                        break;
+                            motor.forward(1023, 1023);
 
-                    case 3:
+                            break;
 
-                        motor.forward(900, 1023);
+                        case 3:
 
-                        break;
+                            motor.forward(900, 1023);
 
-                    case 4:
+                            break;
 
-                        motor.forward(800, 1023);
+                        case 4:
 
-                        break;
+                            motor.forward(800, 1023);
 
-                    default:
+                            break;
 
-                        motor.forward(0, 1023);
+                        default:
+
+                            motor.forward(0, 1023);
+                        }
                     }
                 }
+                xSemaphoreGive(xMutex);
             }
-            xSemaphoreGive(xMutex);
         }
-         vTaskDelayUntil(&llk_ccontrol, pdMS_TO_TICKS(200));
-        //vTaskDelay(200);
+        vTaskDelayUntil(&llk_ccontrol, pdMS_TO_TICKS(200));
+        // vTaskDelay(200);
     }
 }
 
 void task_send(void *send)
 {
-    vTaskSuspend(NULL);
+    // vTaskSuspend(NULL);
+    radio.init();
+
+    TickType_t llk_send;
+    llk_send = xTaskGetTickCount();
+
+    uint8_t packet_s[32] = {0};
+    printf("task_send\n");
+
+    uint8_t st_r;
+    uint32_t p=0;;
+
+    //vTaskSuspend(NULL);
+
+    while (1)
+    {
+        // for debug
+
+        if (gnss_q != NULL && press_q != NULL && imu_q != NULL)
+        {
+           
+                if (xQueueReceive(gnss_q, &gdata[3], 10) == 1)
+                {
+                    packet_s[0] = gdata[3].dis;
+                }
+
+                if (xQueueReceive(stuck_q, &st_r, 10) == 1)
+                {
+                    packet_s[1] = st_r;
+                }
+                else
+                {
+                    packet_s[1] = 0;
+                }
+
+                radio.send(packet_s);
+                printf("send");
+        }
+        vTaskDelayUntil(&llk_send, pdMS_TO_TICKS(2000));
+    }
+}
+
+void task_receive(void *receive)
+{
+
+    TickType_t llk_receive;
+    llk_receive = xTaskGetTickCount();
+    uint32_t rec[2];
+    uint8_t packet_r[32];
+      printf("task_receive\n");
+  
+    while (1)
+    {
+        printf("rerere\n");
+        radio.receive(packet_r);
+        printf("ceive");
+
+        rec[0] = packet_r[0];
+        rec[1] = packet_r[1];
+
+        xQueueSend(receive_q, &rec, 10);
+
+        vTaskDelayUntil(&llk_receive, pdMS_TO_TICKS(20000));
+    }
+}
+void task_stuck(void *stuck)
+{
+
+    TickType_t llk_stuck;
+    llk_stuck = xTaskGetTickCount();
+
+    uint8_t p = 0;
+    uint8_t stucking = 0;
+
+    stuck_q = xQueueCreate(32, sizeof(stucking));
+
+    printf("task_stucking\n");
+
+    while (1)
+    {
+        if (gnss_q != NULL && press_q != NULL && imu_q != NULL)
+        {
+
+            if (xQueueReceive(gnss_q, &gdata[4], 10) == 1)
+            {
+
+                if (p == 0)
+                {
+                    gdata[5].dis = gdata[4].dis;
+                    gdata[5].arg = gdata[4].arg;
+                }
+                else
+                {
+                    if (gdata[4].dis - gdata[5].dis < 10 || gdata[5].dis - gdata[4].dis < 10)
+                    {
+                        if (gdata[4].arg - gdata[5].arg < thrty || gdata[5].arg - gdata[4].arg < thrty)
+                        {
+                            if (g_con == 0)
+                            {
+                                vTaskSuspend(gcontrol_h);
+                            }
+                            else
+                            {
+                                vTaskSuspend(ccontrol_h);
+                            }
+
+                            stucking = 1;
+                            printf("stucking");
+                            motor.backward(1023);
+                            vTaskDelayUntil(&llk_stuck, pdMS_TO_TICKS(10000));
+
+                            if (g_con == 0)
+                            {
+                                vTaskResume(gcontrol_h);
+                            }
+                            else
+                            {
+                                vTaskResume(ccontrol_h);
+                            }
+                        }
+                    }
+                    gdata[5].dis = gdata[4].dis;
+                    gdata[5].arg = gdata[4].arg;
+                }
+            }
+             printf("st\n");
+        }
+       
+        xQueueSend(stuck_q, &stucking, 10);
+        vTaskDelayUntil(&llk_stuck, pdMS_TO_TICKS(10000));
+    }
 }
 
 int main(void)
@@ -716,16 +865,23 @@ int main(void)
     gpio_set_function(pin_i2c1_scl, GPIO_FUNC_I2C);
 
     xMutex = xSemaphoreCreateMutex();
+    gcs_event = xEventGroupCreate();
+
+      receive_q = xQueueCreate(32, sizeof(uint32_t));
 
     printf("init");
 
-    xTaskCreate(task_log, "task_log", 1024, NULL, 9, &log_h);
-    xTaskCreate(task_landing, "task_landing", 1024, NULL, 3, &landing_h);
-    xTaskCreate(task_gnss, "task_gnss", 1024, NULL, 1, &gnss_h);
-    xTaskCreate(task_imu, "task_imu", 1024, NULL, 2, &imu_h);
-    xTaskCreate(task_gcontrol, "task_gcontrol", 1024, NULL, 4, &gcontrol_h);
-    xTaskCreate(task_ccontrol, "task_ccontrol", 1024, NULL, 4, &ccontrol_h);
-    // xTaskCreate(task_send,"task_send",1024,NULL,5,&send_h);
+
+
+    xTaskCreate(task_gnss, "task_gnss", 1024, NULL, 2, &gnss_h);
+    xTaskCreate(task_imu, "task_imu", 1024, NULL, 4, &imu_h);
+    xTaskCreate(task_landing, "task_landing", 1024, NULL, 5, &landing_h);
+    xTaskCreate(task_gcontrol, "task_gcontrol", 1024, NULL, 6, &gcontrol_h);
+    //xTaskCreate(task_ccontrol, "task_ccontrol", 1024, NULL, 7, &ccontrol_h);
+    xTaskCreate(task_receive, "task_receive", 1024, NULL,7 , &receive_h);
+    xTaskCreate(task_send, "task_send", 1024, NULL, 8, &send_h);
+    xTaskCreate(task_stuck, "task_stuck", 1024, NULL, 9, &stuck_h);
+    xTaskCreate(task_log, "task_log", 1024, NULL, 10, &log_h);
 
     vTaskStartScheduler();
     while (1)

@@ -1,6 +1,12 @@
 #include "rf.h"
 #include "hardware/timer.h"
 #include "pico/platform.h"
+#include "../../freertos/config/FreeRTOSConfig.h"
+#include "../../freertos/FreeRTOS-Kernel/include/FreeRTOS.h"
+#include "../../freertos/FreeRTOS-Kernel/include/task.h"
+
+
+
 #include <cstdint>
 
 Radio::Radio(uint8_t pin_mosi, uint8_t pin_miso) {
@@ -69,7 +75,11 @@ uint8_t Radio::receive(uint8_t packet[32]) {
 			detect[1] |= (r[8+i]<<(7-i));
 		}
 
+		
+
 		if (detect[0] == 0x66 && detect[1] == 0x99) break;
+		printf("detect\n");
+		vTaskDelay(5000);
 	}
 
 	for (int16_t i = 0; i < 32; i++) {
