@@ -10,7 +10,7 @@ Press::Press(i2c_inst_t* i2c, uint8_t addr) {
     config.i2c = i2c;
     config.mode = BGD_PRS_TEMP;
     config.prs_config[0] = 4;
-    config.prs_config[1] = 128;
+    config.prs_config[1] = 32;
     config.temp_config[0] = 2;
     config.temp_config[1] = 8;
 }

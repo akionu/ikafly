@@ -33,9 +33,9 @@ int main(void) {
 		while (!cam.isCaptureFinished()) tight_loop_contents();
 
 		for (uint16_t i = 0; i < cam.getJpegSize(); i++) {
-			printf("0x%02x, ", cam.image_buf[i]);
-//			printf("%02x", cam.image_buf[i]);
-            if ((i+1)%10 == 0) printf("\\\n");
+//			printf("0x%02x, ", cam.image_buf[i]);
+			printf("%02x", cam.image_buf[i]);
+//            if ((i+1)%10 == 0) printf("\\\n");
         }
 
 		for (uint16_t i = 0; i < 64; i++) 

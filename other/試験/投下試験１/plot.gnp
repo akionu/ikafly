@@ -1,0 +1,29 @@
+# echo "load 'plot.gnp'" | gnuplot
+set xlabel "Time from boot [*50ms]"
+set ylabel "Accel [g]"
+set key left bottom
+set terminal png
+set terminal png font "Times New Roman,14"
+set datafile separator ","
+
+set output "try1.png"
+set title "Drop Exp. Try 1"
+plot [80:120][-1.5:1.5] "try1.csv" u 1 w l lw 2 title "x-axis",\
+"try1.csv" u 2 w l lw 2 title "y-axis",\
+"try1.csv" u 3 w l lw 2 title "z-axis",\
+"try1.csv" u (sqrt($1**2+$2**2+$3**2)-1) w l lw 2 title "sqrt(x^2+y^2+z^2)-1"
+
+set output "try2.png"
+set title "Drop Exp. Try 2"
+plot [20:90][-1.5:1.5] "try2.csv" u 1 w l lw 2 title "x-axis",\
+"try2.csv" u 2 w l lw 2 title "y-axis",\
+"try2.csv" u 3 w l lw 2 title "z-axis",\
+"try2.csv" u (sqrt($1**2+$2**2+$3**2)-1) w l lw 2 title "sqrt(x^2+y^2+z^2)-1"
+
+set output "try3.png"
+set title "Drop Exp. Try 3"
+plot [60:140][-1.5:1.5] "try3.csv" u 1 w l lw 2 title "x-axis",\
+"try3.csv" u 2 w l lw 2 title "y-axis",\
+"try3.csv" u 3 w l lw 2 title "z-axis",\
+"try3.csv" u (sqrt($1**2+$2**2+$3**2)-1) w l lw 2 title "sqrt(x^2+y^2+z^2)-1"
+

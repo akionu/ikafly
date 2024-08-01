@@ -52,15 +52,34 @@ bool IMU::init() {
 	lsm6dso_xl_usr_offset_z_set(&lsm6dso, &accel_offset[2]);
 	lsm6dso_xl_usr_offset_set(&lsm6dso, PROPERTY_ENABLE);
 	/* Set Output Data Rate */
-	lsm6dso_xl_data_rate_set(&lsm6dso, LSM6DSO_XL_ODR_52Hz);
+	lsm6dso_xl_data_rate_set(&lsm6dso, LSM6DSO_XL_ODR_417Hz);
 	lsm6dso_gy_data_rate_set(&lsm6dso, LSM6DSO_GY_ODR_52Hz);
 	/* Set full scale */
+#ifdef IMU_ACCEL_16G
+	lsm6dso_xl_full_scale_set(&lsm6dso, LSM6DSO_16g);
+#elif defined (IMU_ACCEL_8G)
+	lsm6dso_xl_full_scale_set(&lsm6dso, LSM6DSO_8g);
+#else
 	lsm6dso_xl_full_scale_set(&lsm6dso, LSM6DSO_2g);
+#endif
 	lsm6dso_gy_full_scale_set(&lsm6dso, LSM6DSO_2000dps);
 	/* Configure filtering chain(No aux interface). */
 	/* Accelerometer - LPF1 + LPF2 path */
 	lsm6dso_xl_hp_path_on_out_set(&lsm6dso, LSM6DSO_LP_ODR_DIV_100);
 	lsm6dso_xl_filter_lp2_set(&lsm6dso, PROPERTY_ENABLE);
+    // FREE FALL DETECTION
+    lsm6dso_int_notification_set(&lsm6dso, LSM6DSO_ALL_INT_LATCHED);
+    lsm6dso_ff_dur_set(&lsm6dso, 0x0a); // 3sample
+    lsm6dso_ff_threshold_set(&lsm6dso, LSM6DSO_FF_TSH_312mg);
+    lsm6dso_wkup_dur_set(&lsm6dso, 0x04);
+    lsm6dso_act_sleep_dur_set(&lsm6dso, 0x04);
+    lsm6dso_wkup_threshold_set(&lsm6dso, 0x02);
+    lsm6dso_act_mode_set(&lsm6dso, LSM6DSO_XL_12Hz5_GY_PD);
+    lsm6dso_pin_int1_route_t int1_route;
+    lsm6dso_pin_int1_route_get(&lsm6dso, &int1_route);
+    int1_route.free_fall = PROPERTY_ENABLE;
+    lsm6dso_pin_int1_route_set(&lsm6dso, int1_route);
+    
 
 	// LIS3MDL
 	tmp = 0;	
@@ -161,13 +180,29 @@ void IMU::update() {
 		/* Read acceleration field data */
 		memset(accel_raw, 0x00, 3 * sizeof(int16_t));
 		lsm6dso_acceleration_raw_get(&lsm6dso, accel_raw);
+#ifdef IMU_ACCEL_16G
+		accel_g[0] =
+			-lsm6dso_from_fs16_to_mg(accel_raw[0])/1000.0f;
+		accel_g[1] =
+			lsm6dso_from_fs16_to_mg(accel_raw[1])/1000.0f;
+		accel_g[2] =
+			lsm6dso_from_fs16_to_mg(accel_raw[2])/1000.0f;
+#elif defined(IMU_ACCEL_8G)
+		accel_g[0] =
+			-lsm6dso_from_fs8_to_mg(accel_raw[0])/1000.0f;
+		accel_g[1] =
+			lsm6dso_from_fs8_to_mg(accel_raw[1])/1000.0f;
+		accel_g[2] =
+			lsm6dso_from_fs8_to_mg(accel_raw[2])/1000.0f;
+#else
 		accel_g[0] =
 			-lsm6dso_from_fs2_to_mg(accel_raw[0])/1000.0f;
 		accel_g[1] =
 			lsm6dso_from_fs2_to_mg(accel_raw[1])/1000.0f;
 		accel_g[2] =
 			lsm6dso_from_fs2_to_mg(accel_raw[2])/1000.0f;
-		//		printf("Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n", accel_g[0], accel_g[1], accel_g[2]);
+#endif
+//		printf("Acceleration [g]:%4.2f\t%4.2f\t%4.2f\r\n", accel_g[0], accel_g[1], accel_g[2]);
 	}
 
 	lsm6dso_gy_flag_data_ready_get(&lsm6dso, &reg);
@@ -230,6 +265,12 @@ void IMU::getMag_mG(float mag[3]) {
 
 void IMU::setDebugPrint(bool enable) {
 	debug = enable;
+}
+
+bool IMU::isFreeFallNow() {
+    lsm6dso_all_sources_t intr;
+    lsm6dso_all_sources_get(&lsm6dso, &intr);
+    return (intr.free_fall);
 }
 
 // private:

@@ -1,0 +1,12 @@
+# echo "load 'plot.gnp'" | gnuplot
+set xlabel "Time from boot [*20ms]"
+set ylabel "Accel [g]"
+set key left top
+set terminal png
+set terminal png font "Times New Roman,14"
+set datafile separator ","
+
+set output "try1.png"
+set title "Quasi-static Exp. Try 1"
+plot [0:1500][-2:16] "log_accel_1.csv" u (sqrt($1**2+$2**2+$3**2)-1) w l lw 2 title "sqrt(x^2+y^2+z^2)-1",\
+(10) w l title "10G line"

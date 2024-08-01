@@ -5,6 +5,8 @@
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 
+#define IMU_ACCEL_16G
+
 extern "C" {
 	#include "./lis3mdl/src/lis3mdl.h"
 	#include "./lsm6dso/src/lsm6dso.h"
@@ -29,6 +31,7 @@ class IMU
 		void setAccelOffset(uint8_t offset[3]); // x,y,z, [mg]
 		
 		void setDebugPrint(bool enable);
+        bool isFreeFallNow();
 	private:
 		void q2e(float q[4], float euler[3]);
 		bool debug = false;
