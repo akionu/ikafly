@@ -9,3 +9,10 @@ target_link_libraries(gnss
         pico_stdlib
         hardware_uart
 )
+
+target_include_directories(gnss
+    INTERFACE
+    .
+    ./inc/
+    ./src/
+)

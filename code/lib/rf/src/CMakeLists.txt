@@ -10,3 +10,8 @@ target_link_libraries(rf
         pico_stdlib
         freertos
 )
+
+target_include_directories(rf
+    INTERFACE
+.
+)

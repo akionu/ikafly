@@ -9,3 +9,8 @@ target_link_libraries(umotor
         pico_stdlib
         hardware_pwm
 )
+
+target_include_directories(umotor
+    INTERFACE
+    .
+)

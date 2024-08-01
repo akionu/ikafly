@@ -23,7 +23,10 @@ target_link_libraries(${TargetName}
     gnss
     imu
     littlefs
-    
+    rf
+    cam
+    tjpg
+    umotor
 )
 
 pico_enable_stdio_usb(${TargetName} 1)
