@@ -12,18 +12,18 @@ target_link_libraries(${TargetName}
     pico_stdlib 
     pico_multicore
     pico_platform
+    pico_flash
     hardware_uart
+    hardware_pio
+    hardware_dma
     freertos
     hardware_i2c
     uprs
     hardware_pwm
     gnss
     imu
-    rf
-    umotor
     littlefs
-    tjpg
-    cam
+    
 )
 
 pico_enable_stdio_usb(${TargetName} 1)

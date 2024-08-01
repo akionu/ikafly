@@ -26,21 +26,22 @@
 #include "FreeRTOSConfig.h"
 #include "../lib/freertos/FreeRTOS-Kernel/include/FreeRTOS.h"
 #include "../lib/freertos/FreeRTOS-Kernel/include/task.h"
-#include "../lib/freertos/FreeRTOS-Kernel/include/semphr.h"
-#include "../lib/freertos/FreeRTOS-Kernel/include/projdefs.h"
-#include "../lib/freertos/FreeRTOS-Kernel/include/croutine.h"
-#include "../lib/freertos/FreeRTOS-Kernel/include/queue.h"
-#include "../lib/freertos/FreeRTOS-Kernel/include/list.h"
-
+#include "pico/stdlib.h"
+#include "pico/platform.h"
+#include "pico/stdio.h"
+#include "pico/time.h"
+#include "hardware/i2c.h"
+#include "hardware/uart.h"
+#include <cmath>
+#include <iostream>
+#include <stdint.h>
+#include <stdio.h>
+#include <math.h>
+#include "nmeap-0.3/inc/nmeap.h"
 #include "../lib/imu/src/imu.h"
-#include "../lib/ikafly_pin.h"
-#include "../lib/rf/src/rf.h"
-#include "../lib/motor/src/umotor.h"
 #include "../lib/press/src/uprs.h"
 #include "../lib/gnss/nmeap-0.3/inc/nmeap.h"
-#include "../lib/log/src/littlefs.hpp"
-#include "../lib/cam/src/cam.h"
-#include "../lib/tjpg/src/tjpg.hpp"
+
 
 #define I2C i2c1
 #define RAD2DEG 57.2958
@@ -96,60 +97,11 @@ nmeap_context_t nmea;
 nmeap_gga_t gga;
 IMU imu(I2C);
 Press prs(I2C, 0x77);
-Motor motor;
-Radio radio(24, 22);
-LFS lfs;
-lfs_file_t file;
-Cam cam(I2C, XCLK, Y2_PIO_BASE, PIO, PIO_SM, DMA_CH);
 
-TJPGD tjpg;
 
-// make taskandle
-TaskHandle_t landing_h;
-TaskHandle_t get_gnss_h;
-TaskHandle_t get_imu_h;
-TaskHandle_t stack_h;
-TaskHandle_t g_motor_control_h;
-TaskHandle_t send_h;
-TaskHandle_t receive_h;
-TaskHandle_t log_h;
-TaskHandle_t cam_motor_control_h;
+	void task_press(void *press){
+	vTaskDelay(1000);
 
-QueueHandle_t gnss_q;
-QueueHandle_t imu_q;
-QueueHandle_t press_q;
-
-// melt nichrom line with heat
-void nichrom()
-{
-	gpio_init(pin_nichrome_left);
-	gpio_init(pin_nichrome_right);
-
-	gpio_set_dir(pin_nichrome_left, 0);
-	gpio_set_dir(pin_nichrome_right, 0);
-
-	gpio_put(pin_nichrome_left, 1);
-	gpio_put(pin_nichrome_right, 1);
-
-	vTaskDelay(500);
-
-	gpio_put(pin_nichrome_left, 0);
-	gpio_put(pin_nichrome_right, 0);
-}
-
-void task_landing(void *landing)
-{
-	int up_s = 0;
-	TickType_t lastunlock_lan;
-	lastunlock_lan = xTaskGetTickCount();
-
-	press_q = xQueueCreate(1,sizeof(alt_cm));
-	if (press_q == NULL)
-	{
-		press_q = xQueueCreate(1, sizeof(alt_cm));
-	}
-
-	printf("press init");
 	prs.init();
 
 	float alt_con[52], alt_av, alt_old;
@@ -564,352 +516,109 @@ void task_g_motor_control(void *g_mortor_control)
 
 			motor.stop();
 			printf("stop");
-			vTaskResume(cam_motor_control_h);
-		}
-
-		/*if (j == 0)
-		{
-			motor.setDirForward(1, 1);
-			j++;
-		}
-
-		p = arg * 39.15;
-
-		if (p >= 123)
-		{
-			p = 123;
-		}
-		else if (p <= -123)
-		{
-			p = -123;
-		}
-
-		motor.forward(900 + p, 900 - p);
-		if (dis <= 2.0)
-		{
-			motor.stop();
-			vTaskSuspend(NULL);
-		}*/
-		vTaskDelayUntil(&lastunblock_gmotor, pdMS_TO_TICKS(200));
-	}
-}
-
-void task_log(void *log)
-{
-	vTaskSuspend(NULL);
-	TickType_t lastunlocklog;
-	lastunlocklog = xTaskGetTickCount();
-	clock_t time_f;
-	int32_t alt_log = 0;
-	int32_t gga_log[3];
-
-	lfs.init();
-
-	printf("init");
-
-	lfs.format();
-
-	printf("format");
-
-	lfs.mount();
-
-	printf("q");
-
-	while (1)
-	{
-
-		xQueueReceive(gnss_q, &gga_log, 10);
-
-		printf("log\n");
-		time_f = clock() / CLOCKS_PER_SEC;
-		log_w[0] = time_f;
-		log_w[1] = gga_log[0];
-		log_w[2] = gga_log[1];
-		log_w[3] = gga_log[2];
-
-		if (landed = 0)
-		{
-			xQueueReceive(press_q, &alt_log, 100);
-			log_w[4] = alt_log;
-		}
-
-		lfs.file_open(&file, "ikafly_log", LFS_O_WRONLY | LFS_O_CREAT | LFS_O_APPEND);
-
-		lfs.file_write(&file, &log_w, sizeof(log_w));
-
-		lfs.file_sync(&file);
-		vTaskDelayUntil(&lastunlocklog, pdMS_TO_TICKS(2000));
-		// vTaskDelay(2000);
-	}
-}
-
-static int my_out_func(JDEC *jdec, void *bitmap, JRECT *rect);
-void count_vert(uint8_t vert[5], uint8_t area[15]);
-
-static int my_out_func(JDEC *jdec, void *bitmap, JRECT *rect)
-{
-	// ref:https://qiita.com/yosihisa/items/c326e59ca5d65f35a181
-	uint8_t *src;
-	uint16_t x, y; //, bws;
-	uint8_t r, g, b;
-	double h = 0, s, v;
-	uint32_t bitshift = 0;
-
-	//    printf("\n");
-	src = (uint8_t *)bitmap;
-	//    bws = N_BPP * (rect->right - rect->left + 1);
-	for (y = 0; y < (rect->bottom - rect->top + 1); y++)
-	{
-		for (x = 0; x < (rect->right - rect->left + 1); x += 1)
-		{
-			//            printf("y: %d\n", y);
-			r = *(src + 3 * (y * (rect->right - rect->left + 1) + x));
-			g = *(src + 3 * (y * (rect->right - rect->left + 1) + x) + 1);
-			b = *(src + 3 * (y * (rect->right - rect->left + 1) + x) + 2);
-			//            printf("(%03d,%03d,%03d),", r,g,b);
-			double MAX = max((max(r, g)), b);
-			double MIN = min((min(r, g)), b);
-			v = MAX / 256 * 100;
-
-			if (MAX == MIN)
-			{
-				h = 0;
-				s = 0;
-			}
-			else
-			{
-				if (MAX == r)
-					h = 60.0 * (g - b) / (MAX - MIN) + 0;
-				else if (MAX == g)
-					h = 60.0 * (b - r) / (MAX - MIN) + 120.0;
-				else if (MAX == b)
-					h = 60.0 * (r - g) / (MAX - MIN) + 240.0;
-
-				if (h > 360.0)
-					h = h - 360.0;
-				else if (h < 0)
-					h = h + 360.0;
-				s = (MAX - MIN) / MAX * 100.0;
-			}
-
-			if (h > 360.0)
-				h -= 360;
-
-			// 赤色の判定
-			if ((h >= H_MIN_1 && h <= H_MAX_1) || (h >= H_MIN_2 && h <= H_MAX_2))
-			{
-				if ((s >= S_MIN && s <= S_MAX) && (v >= V_MIN && v <= V_MAX))
-				{
-					// printf("red!: (rx,ry)=(%d,%d)\n", rect->left+x, rect->top+y);
-					bitshift = (rect->left + x);
-					red_area[rect->top + y] |= (1 << bitshift);
-				}
+			if(i>=5){
+				printf("taskdelete");
+				vTaskDelete(NULL);
 			}
 		}
+
+		press_hpa_old=press_hpa;
+
+
+		vTaskDelay(300);
 	}
 
-	return 1; // Continue to decompress
 }
 
-void count_vert(uint8_t vert[5], uint32_t area[15])
+#define UART uart0
+#define IRQ UART0_IRQ
+#define MOSI 12
+#define MISO 13
+
+static nmeap_context_t nmea;
+static nmeap_gga_t gga;
+
+static void print_gga(nmeap_gga_t *gga)
 {
-	// count ones in vertically devided area
-	// [4] [3] [2] [1] [0]
-	// max count in each area: 4*15=60
-	memset(vert, 0, 5);
-	uint8_t bit;
-	for (uint8_t y = 0; y < 15; y++)
-	{
-		for (int8_t x = 20 - 1; x >= 0; x--)
-		{
-			bit = (area[y] >> x) & 1;
-			if (bit == 1)
-			{
-				if ((x >= 0) && (x < 4))
-					vert[0]++;
-				else if (x < 8)
-					vert[1]++;
-				else if (x < 12)
-					vert[2]++;
-				else if (x < 16)
-					vert[3]++;
-				else
-					vert[4]++;
-			}
-		}
-	}
+    printf("%.6f,%.6f\n",gga->latitude,gga->longitude);
 }
 
-void task_cam_motor_control(void *p)
+
+/** called when a gpgga message is received and parsed */
+
+static void gpgga_callout(nmeap_context_t *context, void *data, void *user_data)
 {
-	vTaskSuspend(NULL);
-	TickType_t lastunlock_cam;
-	lastunlock_cam = xTaskGetTickCount();
-
-	uint32_t cnt = 0;
-	uint8_t vert[5] = {0};
-
-	while (1)
-	{
-		printf("%d: ", cnt++);
-		cam.capture();
-		while (!cam.isCaptureFinished())
-			tight_loop_contents();
-		uint32_t size = cam.getJpegSize();
-		printf("last: ");
-		for (uint32_t i = size - 10; i < size; i++)
-			printf("%02x", cam.image_buf[i]);
-		printf(", size: %d\n", size);
-
-		memset(red_area, 0, sizeof(red_area));
-		JRESULT res = tjpg.prepare(cam.image_buf, size);
-		if (res == JDR_OK)
-		{
-			printf("Image size is %u x %u.\n%u bytes of work area is free.\n", tjpg.jdec.width, tjpg.jdec.height, tjpg.jdec.sz_pool);
-			res = tjpg.decomp(my_out_func, 3);
-			// 160x120 -> (1/2^3) -> 20x15
-			if (res == JDR_OK)
-			{
-				printf("\rDecompression succeeded.\n");
-				// print red_area (20x15)
-				uint8_t bit;
-				for (uint8_t y = 0; y < 15; y++)
-				{
-					//                   std::cout << std::bitset<32>(red_area[y]) << std::endl;
-					for (int8_t i = 20 - 1; i >= 0; i--)
-					{
-						bit = (red_area[y] >> i) & 1;
-						printf("%u", bit);
-					}
-					printf("\n");
-				}
-
-				count_vert(vert, red_area);
-				printf("count: %d %d %d %d %d\n", vert[4], vert[3], vert[2], vert[1], vert[0]);
-			}
-			else
-			{
-				printf("jd_decomp() failed (rc=%d)\n", res);
-			}
-		}
-		else
-		{
-			printf("jd_prepare() failed (rc=%d)\n", res);
-		}
-
-		int8_t dire = 0;
-		for (int8_t q = 0; q < 3; q++)
-		{
-			if (vert[q + 1] >= vert[q])
-			{
-				dire = q + 1;
-			}
-		}
-
-		switch (dire)
-		{
-
-		case 0:
-
-			motor.forward(800, 1023);
-
-			break;
-
-		case 1:
-
-			motor.forward(900, 1023);
-
-			break;
-
-		case 2:
-
-			motor.forward(1023, 1023);
-
-			break;
-
-		case 3:
-
-			motor.forward(900, 1023);
-
-			break;
-
-		case 4:
-
-			motor.forward(800, 1023);
-
-			break;
-
-		default:
-
-			motor.forward(0, 1023);
-		}
-
-		vTaskDelayUntil(&lastunlock_cam, pdMS_TO_TICKS(200));
-	}
+    nmeap_gga_t *gga = (nmeap_gga_t *)data;
 }
 
-void debug(void *p)
+void task_gps(void *gps)
 {
-	TickType_t deb;
-	deb = xTaskGetTickCount();
+    int ch;
+    gpio_init(25);
+    gpio_set_dir(25, GPIO_OUT);
+    gpio_put(25, 0);
 
-	while (1)
-	{
-		printf("okokokokokoko\n");
-		vTaskDelay(1000);
-		printf("jdjdjdjd\n");
-		vTaskDelayUntil(&deb, pdMS_TO_TICKS(1000));
-		printf("gggg");
+    // uart setting
+    uart_init(UART, 9600);
+    gpio_set_function(MOSI, GPIO_FUNC_UART);
+    gpio_set_function(MISO, GPIO_FUNC_UART);
+    uart_set_baudrate(UART, 9600);
+    uart_set_hw_flow(UART, false, false);
+    uart_set_format(UART, 8, 1, UART_PARITY_NONE);
+
+    uart_set_fifo_enabled(UART, true);
+    irq_set_enabled(IRQ, true);
+    uart_set_irq_enables(UART, true, false);
+
+    nmeap_init(&nmea, NULL);
+    nmeap_addParser(&nmea, "GNGGA", nmeap_gpgga, gpgga_callout, &gga);
+
+    while (1)
+    {
+        ch = uart_getc(UART);
+        nmeap_parse(&nmea, ch);
+        print_gga(&gga);
+    }
+}
+
+#define RAD2DEG 57.2958
+
+IMU imu(I2C);
+
+void task_imu(void *){
+	vTaskDelay(2000);
+	printf("This is imu_euler\n");
+	
+	imu.setDebugPrint(false);
+
+	bool st = imu.init();
+	if (st) printf("IMU init success");
+	else printf("IMU init fails");
+
+	float euler[3];//, accel[3], gyro[3], mag[3];
+	printf("roll pitch yaw\n");
+	while (1) {
+		imu.update(); // should call this 50ms each(20Hz), refer MadgwickAHRS.c and sensor output frequency in init() in imu.cpp
+		//imu.getAccel_mg(accel);
+		//printf("%3.2f %3.2f %3.2f\n", accel[0], accel[1], accel[2]);
+		imu.getAttEuler(euler);
+		printf("%+03.2f %+03.2f %+03.2f\n", euler[0]*RAD2DEG, euler[1]*RAD2DEG, euler[2]*RAD2DEG);
+		vTaskDelay(49);
 	}
 }
 
 int main(void)
 {
+
 	stdio_init_all();
-	sleep_ms(2000);
-
-	i2c_init(I2C, 400 * 1000);
-
+	i2c_init(I2C, 400*1000);
 	gpio_set_function(i2c_sda_pin, GPIO_FUNC_I2C);
 	gpio_set_function(i2c_scl_pin, GPIO_FUNC_I2C);
 
-	radio.init();
-
-	sleep_ms(1000);
-
-	motor.init(pin_left_begin, pin_right_begin);
-
-	sleep_ms(1000);
-
-	cam.init();
-	cam.enableJpeg();
-
-	printf("q");
-
-	int st = 0;
-
-	xTaskCreate(task_get_gnss, "task_get_gnss", 1024, NULL, 8, &get_gnss_h);
-
-	xTaskCreate(task_landing, "task_landing", 1024, NULL, 3, &landing_h);
-
-	//xTaskCreate(task_g_motor_control, "task_g_motor_control", 1024, NULL, 3, &g_motor_control_h);
-
-	// xTaskCreate(task_stack, "task_stack", 256, NULL, 3, &stack_h);
-
-	xTaskCreate(task_get_imu, "task_get_imu", 1024, NULL, 1, &get_imu_h);
-
-	// xTaskCreate(task_receieve, "task_receieve", 1024, NULL, tskIDLE_PRIORITY, &receive_h);
-
-	// xTaskCreate(task_send, "task_send", 1024, NULL, 2, &send_h);
-
-	// xTaskCreate(task_log, "task_log", 1024, NULL, 6, &log_h);
-
-	// xTaskCreate(debug,"debug",256,NULL,1,NULL);
-
-	// xTaskCreate(task_cam_motor_control, "task_cam_motor_contol", 1024, NULL, 4, &cam_motor_control_h);
-
-	vTaskStartScheduler();
-	while (1)
-	{
-	};
+    xTaskCreate(task_press,"task_press",256,NULL,3,NULL);
+	xTaskCreate(task_gps,"task_gps",256,NULL,1,NULL);
+	xTaskCreate(task_imu,"task_imu",256,NULL,2,NULL);
+    vTaskStartScheduler();
+    while(1){};
+    
 }

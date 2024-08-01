@@ -52,6 +52,7 @@ add_subdirectory(lib)
 add_subdirectory(freertos_ikafly)
 add_subdirectory(exp_ikafly)
 add_subdirectory(flight)
+add_subdirectory(flight_read)
 add_subdirectory(ikafly_test)
 add_subdirectory(freertos)
 
