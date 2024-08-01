@@ -19,7 +19,7 @@ int main(void) {
 	// 回転方向の補正
 	// 正回転させようとしたときに正回転したら1
 	// 逆回転したら-1を左右に入れる
-	motor.setDirForward(-1, -1);
+	motor.setDirForward(-1, 1);
 	
 	// 正回転（両方とも）
 	// 引数は回転速度pwm（0<=pwm<=1023）

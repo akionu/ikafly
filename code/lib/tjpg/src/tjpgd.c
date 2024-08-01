@@ -953,7 +953,7 @@ static JRESULT mcu_output (
 
 
 /*-----------------------------------------------------------------------*/
-/* Analyze the JPEG image and Initialize decompressor object             */
+/* Analyze the JPEG image and Initialize ressor object             */
 /*-----------------------------------------------------------------------*/
 
 #define	LDB_WORD(ptr)		(uint16_t)(((uint16_t)*((uint8_t*)(ptr))<<8)|(uint16_t)*(uint8_t*)((ptr)+1))

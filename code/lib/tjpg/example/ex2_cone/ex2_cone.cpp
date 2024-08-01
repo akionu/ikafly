@@ -39,6 +39,7 @@ uint32_t red_area[15] = {0};
 static int my_out_func(JDEC *jdec, void *bitmap, JRECT *rect);
 void count_vert(uint8_t vert[5], uint8_t area[15]);
 
+uint8_t i=0;
 static int my_out_func(JDEC *jdec, void *bitmap, JRECT *rect)
 {
     // ref:https://qiita.com/yosihisa/items/c326e59ca5d65f35a181
@@ -47,6 +48,9 @@ static int my_out_func(JDEC *jdec, void *bitmap, JRECT *rect)
     uint8_t r, g, b;
     double h = 0, s, v;
     uint32_t bitshift = 0;
+
+    printf("%d",i);
+    
 
     //    printf("\n");
     src = (uint8_t *)bitmap;
@@ -153,8 +157,8 @@ int main(void)
     {
         printf("%d: ", cnt++);
         cam.capture();
-        while (!cam.isCaptureFinished())
-            tight_loop_contents();
+
+        sleep_ms(200);
         uint32_t size = cam.getJpegSize();
         printf("last: ");
         for (uint32_t i = size - 10; i < size; i++)
