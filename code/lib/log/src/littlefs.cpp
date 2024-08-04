@@ -22,11 +22,13 @@ int LFS::init() {
     LFS::flashMutex = xSemaphoreCreateMutex();
 
     pico_cfg.read = &flash_fs_read;
-    pico_cfg   .prog = &flash_fs_prog;
-    pico_cfg  .erase = &flash_fs_erase;
-    pico_cfg .sync = &flash_fs_sync;
+    pico_cfg.prog = &flash_fs_prog;
+    pico_cfg.erase = &flash_fs_erase;
+    pico_cfg.sync = &flash_fs_sync;
+#ifdef LFS_THREADSAFE
     pico_cfg.lock = &flash_fs_lock;
     pico_cfg.unlock = &flash_fs_unlock;
+#endif
 
     // block device configuration
     pico_cfg.read_size = 1;

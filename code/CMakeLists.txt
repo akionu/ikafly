@@ -55,4 +55,5 @@ add_subdirectory(flight)
 add_subdirectory(flight_read)
 add_subdirectory(ikafly_test)
 add_subdirectory(freertos)
+add_subdirectory(flightk)
 

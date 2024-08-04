@@ -1,3 +1,7 @@
+
+add_compile_definitions(
+    LFS_THREADSAFE
+)
 add_executable(ex_lfs
         ex_lfs.cpp
         )

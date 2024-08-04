@@ -15,6 +15,10 @@
 #define HW_FLASH_STORAGE_BYTES  FS_SIZE
 #define HW_FLASH_STORAGE_BASE   (0x200000)
 
+#ifndef LFS_THREADSAFE
+#warning "LFS_THREADSAFE did not defined"
+#endif
+
 class LFS {
 public:
     /// Filesystem functions

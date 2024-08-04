@@ -79,6 +79,13 @@ bool IMU::init() {
     int1_route.free_fall = PROPERTY_ENABLE;
     lsm6dso_pin_int1_route_set(&lsm6dso, int1_route);
     
+    // FIFO
+#ifdef IMU_FIFO
+    lsm6dso_fifo_watermark_set(&lsm6dso, 25); // 20Hz*25times=500ms
+    lsm6dso_fifo_xl_batch_set(&lsm6dso, LSM6DSO_XL_BATCHED_AT_52Hz);
+    lsm6dso_fifo_gy_batch_set(&lsm6dso, LSM6DSO_GY_BATCHED_AT_52Hz);
+    lsm6dso_fifo_mode_set(&lsm6dso, LSM6DSO_STREAM_MODE);
+#endif
 
 	// LIS3MDL
 	tmp = 0;	
@@ -120,7 +127,10 @@ void IMU::calibration(){
 	co[1]=0.0;
 	co[2]=0.0;
 	co[3]=1.0;
-	for(i=0;i<=150000;i++){	
+    uint8_t reg = 0;
+	for(i=0;i<=100000;i++){	
+	lis3mdl_mag_data_ready_get(&lis3mdl, &reg);
+	if (reg) {
 	memset(mag_raw, 0x00, 3 * sizeof(int16_t));
 	lis3mdl_magnetic_raw_get(&lis3mdl, mag_raw);
 
@@ -133,12 +143,81 @@ void IMU::calibration(){
   co[1] = co[1] + 4 * lr * f * dy;
   co[2] = co[2] + 4 * lr * f * dz;
   co[3] = co[3] + 4 * lr * f * co[3];   
+        }
 }
 printf("done calibration");
 }
 void IMU::update() {
 	uint8_t reg;
 	double distance_2,distance;
+
+#ifdef IMU_FIFO
+    uint16_t num = 0;
+    uint8_t wmflag = 0;
+    lsm6dso_fifo_tag_t reg_tag;
+    int16_t dummy[3] = {0};
+    /* Read watermark flag */
+    lsm6dso_fifo_wtm_flag_get(&lsm6dso, &wmflag);
+
+    if (wmflag > 0) {
+      /* Read number of samples in FIFO */
+      lsm6dso_fifo_data_level_get(&lsm6dso, &num);
+
+      while (num--) {
+        /* Read FIFO tag */
+        lsm6dso_fifo_sensor_tag_get(&lsm6dso, &reg_tag);
+
+        switch (reg_tag) {
+          case LSM6DSO_XL_NC_TAG:
+            memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
+            lsm6dso_fifo_out_raw_get(&lsm6dso, accel_raw);
+#ifdef IMU_ACCEL_16G
+		accel_g[0] =
+			-lsm6dso_from_fs16_to_mg(accel_raw[0])/1000.0f;
+		accel_g[1] =
+			lsm6dso_from_fs16_to_mg(accel_raw[1])/1000.0f;
+		accel_g[2] =
+			lsm6dso_from_fs16_to_mg(accel_raw[2])/1000.0f;
+#elif defined(IMU_ACCEL_8G)
+		accel_g[0] =
+			-lsm6dso_from_fs8_to_mg(accel_raw[0])/1000.0f;
+		accel_g[1] =
+			lsm6dso_from_fs8_to_mg(accel_raw[1])/1000.0f;
+		accel_g[2] =
+			lsm6dso_from_fs8_to_mg(accel_raw[2])/1000.0f;
+#else
+		accel_g[0] =
+			-lsm6dso_from_fs2_to_mg(accel_raw[0])/1000.0f;
+		accel_g[1] =
+			lsm6dso_from_fs2_to_mg(accel_raw[1])/1000.0f;
+		accel_g[2] =
+			lsm6dso_from_fs2_to_mg(accel_raw[2])/1000.0f;
+#endif
+//		printf("Acceleration [g]:%4.2f\t%4.2f\t%4.2f\r\n", accel_g[0], accel_g[1], accel_g[2]);
+            break;
+
+          case LSM6DSO_GYRO_NC_TAG:
+            memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
+            lsm6dso_fifo_out_raw_get(&lsm6dso, data_raw_angular_rate.u8bit);
+		gyro_dps[0] =
+			-lsm6dso_from_fs2000_to_mdps(gyro_raw[0])/1000.0f;
+		gyro_dps[1] =
+			lsm6dso_from_fs2000_to_mdps(gyro_raw[1])/1000.0f;
+		gyro_dps[2] =
+			lsm6dso_from_fs2000_to_mdps(gyro_raw[2])/1000.0f;
+		//		printf("Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n", gyro_dps[0], gyro_dps[1], gyro_dps[2]);
+            break;
+
+          default:
+            /* Flush unused samples */
+            memset(dummy.u8bit, 0x00, 3 * sizeof(int16_t));
+            lsm6dso_fifo_out_raw_get(&lsm6dso, dummy);
+            break;
+        }
+      }
+    }
+  }
+#else 
 	// LIS3MDL
 	/* Read output only if new value is available */
 	lis3mdl_mag_data_ready_get(&lis3mdl, &reg);
@@ -202,7 +281,7 @@ void IMU::update() {
 			lsm6dso_from_fs2000_to_mdps(gyro_raw[2])/1000.0f;
 		//		printf("Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n", gyro_dps[0], gyro_dps[1], gyro_dps[2]);
 	}
-
+#endif // IMU_FIFO
 	// 機体の座標系
 	if (debug) {
 		printf("Acc: %+01.3f %+01.3f %+01.3f, Gyro: %+03.2f %+03.2f %+03.2f, Mag: %+03.2f %+03.2f %+03.2f\n",
