@@ -19,23 +19,24 @@
 #define MOSI 12
 #define MISO 13
 #define RAD2DEG 57.2958
+int m = 0, n = 0;
 
- nmeap_context_t nmea;
- nmeap_gga_t gga;
+nmeap_context_t nmea;
+nmeap_gga_t gga;
 
 static void gpgga_callout(nmeap_context_t *context, void *data, void *user_data)
 {
     nmeap_gga_t *gga = (nmeap_gga_t *)data;
+    m++;
 }
 
- int main()
+int main()
 {
     int ch;
     stdio_init_all();
     gpio_init(25);
     gpio_set_dir(25, GPIO_OUT);
     gpio_put(25, 0);
-
 
     uart_init(UART, 9600);
     gpio_set_function(MOSI, GPIO_FUNC_UART);
@@ -44,11 +45,9 @@ static void gpgga_callout(nmeap_context_t *context, void *data, void *user_data)
     uart_set_hw_flow(UART, false, false);
     uart_set_format(UART, 8, 1, UART_PARITY_NONE);
 
-
     uart_set_fifo_enabled(UART, true);
     irq_set_enabled(IRQ, true);
     uart_set_irq_enables(UART, true, false);
-
 
     nmeap_init(&nmea, NULL);
     nmeap_addParser(&nmea, "GNGGA", nmeap_gpgga, gpgga_callout, &gga);
@@ -56,9 +55,17 @@ static void gpgga_callout(nmeap_context_t *context, void *data, void *user_data)
     while (1)
     {
 
-        if(uart_is_readable(UART)){
-        ch = uart_getc(UART);
-        nmeap_parse(&nmea, ch);
+        
+        if (uart_is_readable(UART))
+        {
+            m = n;
+            ch = uart_getc(UART);
+            nmeap_parse(&nmea, ch);
+
+            if (m != n)
+            {
+                printf("%f\n%f\n", gga.altitude, gga.longitude);
+            }
         }
     }
 }

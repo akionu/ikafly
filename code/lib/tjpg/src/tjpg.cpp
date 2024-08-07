@@ -1,4 +1,8 @@
 #include "tjpg.hpp"
+#include "../../freertos/config/FreeRTOSConfig.h"
+#include "../../freertos/FreeRTOS-Kernel/include/FreeRTOS.h"
+#include "../../freertos/FreeRTOS-Kernel/include/task.h"
+
 
 uint16_t TJPGD::size_img = 0;
 uint16_t TJPGD::in_func_head = 0;

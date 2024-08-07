@@ -8,6 +8,7 @@ target_sources(tjpg INTERFACE
 target_link_libraries(tjpg
     INTERFACE
 	pico_stdlib
+    freertos
 )
 
 target_include_directories(tjpg
