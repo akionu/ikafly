@@ -64,7 +64,7 @@ int main()
 
             if (m != n)
             {
-                printf("%f\n%f\n", gga.altitude, gga.longitude);
+                printf("%f\n%f\n", gga.latitude, gga.longitude);
             }
         }
     }

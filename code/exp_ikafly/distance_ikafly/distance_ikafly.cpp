@@ -17,19 +17,19 @@
 #define IRQ UART0_IRQ
 #define MOSI 12
 #define MISO 13
-#define RAD2DEG 57.2958
-#define goal_long 36.10377480555555
-#define goal_lat 140.08785505555556
-#define h 0.01745329251
+#define EARTH_RAD 6378137
+#define goal_long 
+#define goal_lat 
+#define h 0.01745329251 
 double dis = 0;
 uint32_t m = 0, n = 0;
 
 nmeap_context_t nmea;
 nmeap_gga_t gga;
 
-uint32_t j[2] = {0};
+int j[2] = {0};
 
-double distance()
+/*double distance()
 {
     double RX = 6378.137;
     double RY = 6356.752;
@@ -41,6 +41,17 @@ double distance()
     double M = RX * (1 - pow(E, 2.0)) / pow(W, 3.0);
     double N = RX / W;
     return sqrt(pow(M * dy, 2.0) + pow(N * dx * cos(mu), 2.0));
+}*/
+
+double cal_distance(double x1, double y1, double x2, double y2)
+{
+    /*
+      pointA(lng x1, lat y1), pointB(lng x2, lat y2)
+      D = Rcos^-1(siny1siny2 + cosy1cosy2cosΔx)
+      Δx = x2 - x1
+      R = 6378.137[km]
+    */
+    return EARTH_RAD * acos(sin(y1 * h) * sin(y2 * h) + cos(y1 * h) * cos(y2 * h) * cos(x2 * h - x1 * h));
 }
 
 static void gpgga_callout(nmeap_context_t *context, void *data, void *user_data)
@@ -81,10 +92,14 @@ int main()
             nmeap_parse(&nmea, ch);
 
             if (m != n)
-            {  
-                j[1] = gga.longitude * 100;
-                j[0] = gga.altitude;
-                printf("%f\n%d\n", gga.altitude, j[1]);
+            {
+                /* j[1] = gga.longitude * 10000000;
+                 j[0] = gga.latitude * 10000000;
+                 printf("%d\n%d\n", j[0], j[1]);
+                 */
+
+                dis = cal_distance(goal_long, goal_lat, gga.longitude, gga.latitude);
+                printf("%f", dis);
             }
         }
     }
