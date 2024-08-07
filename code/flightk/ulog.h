@@ -8,19 +8,32 @@
 
 #include "littlefs.hpp"
 
-class Log {
+class Log : LFS {
     public:
         Log(uint8_t code);
-        void init();
-        bool addLog(int32_t lat, int32_t lon,
-                float yaw, float roll, float pitch,
-                uint8_t seq, 
-                uint8_t buf[12]);
+        bool init();
         void showAll();
-        uint32_t head;
-        uint8_t bufw[32] = {0};
-        
+        bool addLog(int32_t lat, int32_t lon, float dist,
+                float yaw, float roll, float pitch, float yaw_goal,// deg -180~180
+                int16_t motor_left, int16_t motor_right,
+                uint8_t seq, bool stack,
+                uint8_t buf[17]);
+        void encodeLine(uint8_t dst[32],
+                int32_t lat, int32_t lon, float dist,
+                float yaw, float roll, float pitch, float yaw_goal,// deg -180~180
+                int16_t motor_left, int16_t motor_right,
+                uint8_t seq, bool stack,
+                uint8_t buf[17]);
+        void decodeLine(uint8_t raw[32],
+                   uint8_t* code, uint8_t* min, uint8_t* sec,
+                   int32_t* lat, int32_t* lon, uint8_t* dist,
+                   float* yaw, float* roll, float* pitch, float* yaw_goal,
+                   uint8_t* motor_right, uint8_t* motor_left,
+                   uint8_t* seq, bool* stack,
+                   uint8_t buf[17]);
     private:
         datetime_t time;
         uint8_t code;
+        uint8_t wbuf[32];
+        lfs_file_t file_log;
 };

@@ -43,8 +43,10 @@ void Motor::forward(int16_t pwm) {
 }
 
 void Motor::forward(int16_t pwm_left, int16_t pwm_right) {
-        rotate(slice_left, dir_left*pwm_left);
-        rotate(slice_right, dir_right*pwm_right);
+    pwm_left_now = dir_left*pwm_left;
+    pwm_right_now = dir_right*pwm_right;
+    rotate(slice_left, pwm_left_now);
+    rotate(slice_right, pwm_right_now);
 }
 
 void Motor::backward(int16_t pwm) {
@@ -70,4 +72,11 @@ void Motor::setDirForward(int8_t left, int8_t right) {
     }
     dir_left = left;
     dir_right = right;
+}
+
+int16_t Motor::getPwmLeft() {
+    return (pwm_left_now);
+}
+int16_t Motor::getPwmRight() {
+    return (pwm_right_now);
 }

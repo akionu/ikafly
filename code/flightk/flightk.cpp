@@ -46,8 +46,6 @@ Motor motor;
 Press prs(i2c1, 0x77);
 IMU imu(i2c1);
 //IMGCONE imgcone;
-LFS lfs;
-lfs_file_t file;
 Log logging(0);
 static int my_out_func(JDEC *jdec, void *bitmap, JRECT *rect);
 void count_vert(uint8_t vert[5], uint32_t area[15]);
@@ -112,6 +110,7 @@ void addLogBuf(const char* fmt, ...) {
 
 class Mode {
 public:
+    float alt_ref;
     Mode() {
         // landing
         for (int i = 0; i < 10; i++) alt_change[i] = 3776.0f;
@@ -193,7 +192,6 @@ public:
         }
         return MODE_LANDING;
     }
-    float alt_ref;
 
     int8_t nichrome() {
         if (expansionCnt > (3*SEC2CNT)) {
@@ -288,126 +286,107 @@ public:
         static bool iscap = true;
         if (iscap) {
             printf("capture");
-        cam.capture();
+            cam.capture();
             iscap = false;
         } else {
             printf("no-capture");
             iscap = true;
 
+            uint32_t size = cam.getJpegSize();
+            //        printf("last: ");
+            //        for (uint32_t i = size - 10; i < size; i++)
+            //            printf("%02x", cam.image_buf[i]);
+            //        printf(", size: %d\n", size);
 
-        uint32_t size = cam.getJpegSize();
-//        printf("last: ");
-//        for (uint32_t i = size - 10; i < size; i++)
-//            printf("%02x", cam.image_buf[i]);
-//        printf(", size: %d\n", size);
-
-        memset(red_area, 0, sizeof(red_area));
-        JRESULT res = tjpg.prepare(cam.image_buf, size);
-        if (res == JDR_OK)
-        {
-            printf("Image size is %u x %u.\n%u bytes of work area is free.\n", tjpg.jdec.width, tjpg.jdec.height, tjpg.jdec.sz_pool);
-            res = tjpg.decomp(my_out_func, 3);
-            // 160x120 -> (1/2^3) -> 20x15
+            memset(red_area, 0, sizeof(red_area));
+            JRESULT res = tjpg.prepare(cam.image_buf, size);
             if (res == JDR_OK)
             {
-                printf("\rDecompression succeeded.\n");
-                // print red_area (20x15)
-                uint8_t bit;
-//                for (uint8_t y = 0; y < 15; y++)
-//                {
-//                    //                   std::cout << std::bitset<32>(red_area[y]) << std::endl;
-//                    for (int8_t i = 20 - 1; i >= 0; i--)
-//                    {
-//                        bit = (red_area[y] >> i) & 1;
-//                        printf("%u", bit);
-//                    }
-//                    printf("\n");
-//                }
-
-                count_vert(vert, red_area);
-                printf("count: %d %d %d %d %d\n", vert[4], vert[3], vert[2], vert[1], vert[0]);
-            }
-            else
-        {
-                printf("jd_decomp() failed (rc=%d)\n", res);
-            }
-        }
-        else
-    {
-            printf("jd_prepare() failed (rc=%d)\n", res);
-        }
-
-        int8_t dire = 0;
-        int8_t most = vert[0];
-
-        for (int8_t q = 0; q < 5; q++)
-        {
-            if (vert[q] > most)
-            {
-                most=vert[q];
-                dire = q;
-            }
-        }
-
-        switch (dire)
-        {
-            case 0:
-
-                if (vert[0] == 0)
+                printf("Image size is %u x %u.\n%u bytes of work area is free.\n", tjpg.jdec.width, tjpg.jdec.height, tjpg.jdec.sz_pool);
+                res = tjpg.decomp(my_out_func, 3);
+                // 160x120 -> (1/2^3) -> 20x15
+                if (res == JDR_OK)
                 {
-                    printf("ゴールは見当たりません");
-                    motor.forward(1023, 700);
+                    printf("\rDecompression succeeded.\n");
+                    count_vert(vert, red_area);
+                    printf("count: %d %d %d %d %d\n", vert[4], vert[3], vert[2], vert[1], vert[0]);
                 }
                 else
             {
-                    motor.forward(1023, 800);
-                    printf("右前方ゴールです\n");
+                    printf("jd_decomp() failed (rc=%d)\n", res);
                 }
-                if (most > 20) return MODE_GOAL;
-                break;
+            }
+            else
+        {
+                printf("jd_prepare() failed (rc=%d)\n", res);
+            }
 
-            case 1:
+            int8_t dire = 0;
+            int8_t most = vert[0];
 
-                printf("少し右前方ゴールです\n");
+            for (int8_t q = 0; q < 5; q++)
+            {
+                if (vert[q] > most)
+                {
+                    most=vert[q];
+                    dire = q;
+                }
+            }
 
-                motor.forward(1023, 900);
-                break;
+            switch (dire)
+            {
+                case 0:
 
-            case 2:
+                    if (vert[0] == 0)
+                    {
+                        printf("ゴールは見当たりません");
+                        motor.forward(1023, 700);
+                    }
+                    else
+                {
+                        motor.forward(1023, 800);
+                        printf("右前方ゴールです\n");
+                    }
+                    if (most > 20) return MODE_GOAL;
+                    break;
 
-                printf("前方ゴールです\n");
+                case 1:
 
-                motor.forward(1023);
-                break;
+                    printf("少し右前方ゴールです\n");
 
-            case 3:
+                    motor.forward(1023, 900);
+                    break;
 
-                motor.forward(900, 1023);
-                printf("少し左前方ゴールです\n");
+                case 2:
 
-                break;
+                    printf("前方ゴールです\n");
 
-            case 4:
+                    motor.forward(1023);
+                    break;
 
-                motor.forward(700, 1023);
-                printf("左前方ゴールです\n");
+                case 3:
 
-                break;
+                    motor.forward(900, 1023);
+                    printf("少し左前方ゴールです\n");
+
+                    break;
+
+                case 4:
+
+                    motor.forward(700, 1023);
+                    printf("左前方ゴールです\n");
+
+                    break;
+            }
         }
-        }
-         
+
         return MODE_CAM;
     }
 
     int8_t goal() {
         static bool is_first = true;
         static bool is_goal = false;
-        static uint8_t cnt = 0;
 
-        //bno08x.dataAvailable();
-        if (cnt > 20*SEC2CNT) {
-            return MODE_SHOWLOG;
-        }
         if (is_first) {
             is_first = false;
         }
@@ -421,6 +400,7 @@ public:
                 printf("d:%2.0fm ok", dist);
                 printf("goal\n");
                 is_goal = true;
+
             } else {
                 printf("onlyGnss\n");
                 isOnlyGnss = true;
@@ -440,6 +420,10 @@ public:
             sleep_ms(10);
         }
     }
+
+    bool isStack() {
+        return (is_stack);
+    }
 private:
     // landing
     float alt_change[10];
@@ -452,11 +436,12 @@ private:
     bool isOnlyGnss;
     // forwardTof
     float forwardYaw;
+    bool is_stack = false;
 } mode;
 
 bool rtCallback(repeating_timer_t* rt) {
     static int16_t i = 0;
-//    printf("%d-", time_us_32()/1000);
+    //    printf("%d-", time_us_32()/1000);
     imu.update();
     if (i == 10) {
         rt_flag = true;
@@ -465,7 +450,7 @@ bool rtCallback(repeating_timer_t* rt) {
     } else {
         i++;
     }
-//    printf("-%d\n", time_us_32()/1000);
+    //    printf("-%d\n", time_us_32()/1000);
     return true;
 }
 
@@ -505,17 +490,15 @@ void aupdate() {
     mode_now = ret;
     if (islog) {
         float euler[3];
-            imu.getAttEuler(euler);
+        imu.getAttEuler(euler);
         float roll = euler[0]*RAD2DEG;
         float pitch = euler[1]*RAD2DEG;
-            float yaw = -euler[2]*RAD2DEG;
-        logging.addLog(gps.getLatitude(), gps.getLongitude(),
-        yaw, roll, pitch,
-        mode_now,
-        logbuf);
-        lfs.file_open(&file, "logging", LFS_O_RDWR | LFS_O_APPEND);
-        lfs.file_write(&file, logging.bufw, 32);
-        lfs.file_close(&file);
+        float yaw = -euler[2]*RAD2DEG;
+        logging.addLog(gps.getLatitude(), gps.getLongitude(), gps.getDistance(),
+                       yaw, roll, pitch, gps.getDirection(),
+                       motor.getPwmLeft(), motor.getPwmRight(),
+                       mode_now, mode.isStack(),
+                       logbuf);
     }
     islog = (islog ? (false) : (true));
     uint32_t et = time_us_32() - before;
@@ -670,28 +653,18 @@ int main(void) {
     cam.init();
     cam.enableJpeg();
 
-    // lfs
-    int err = lfs.init();
-    // mount the filesystem
-    err = lfs.mount();
-    if (err)
-    {
-        lfs.format();
-        lfs.mount();
-    }
-    lfs.file_open(&file, "logging", LFS_O_RDWR | LFS_O_CREAT | LFS_O_APPEND);
-    lfs.file_close(&file);
+    // logging
 
     // imu calibration
     printf("calibrate!\n");
     imu.calibration();
 
-    add_repeating_timer_ms(-50, &rtCallback, NULL, &timer);
-    
+    add_repeating_timer_ms(-20, &rtCallback, NULL, &timer);
+
     while (1) {
         if (rt_flag) {
             printf("r %d ", rt_flag);
-//            aupdate();
+            //            aupdate();
             rt_flag = false;
         }   
     }

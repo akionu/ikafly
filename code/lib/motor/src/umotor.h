@@ -12,6 +12,8 @@ class Motor {
         void backward(int16_t pwm_left, int16_t pwm_right);
         void stop();
         void setDirForward(int8_t left, int8_t right);
+        int16_t getPwmLeft();
+        int16_t getPwmRight();
     private:
 		uint8_t init(uint8_t pin);
 		void rotate(uint8_t slice, int16_t pwm);
@@ -20,5 +22,6 @@ class Motor {
         bool is_dir_set;
         int8_t dir_left;
         int8_t dir_right;
+        int16_t pwm_left_now, pwm_right_now;
 };
 

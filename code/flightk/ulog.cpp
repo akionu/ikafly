@@ -1,8 +1,10 @@
 #include "ulog.h"
 
+#define YRP_DEG2DIV (0.0888888888888) // 32/360
+#define YRP_DIV2DEG (11.25) // 360/32
+
 Log::Log(uint8_t code) {
     this->code = code;
-    this->head = 0;
     this->time.year  = 2023;
     this->time.month = 06;
     this->time.day   = 17;
@@ -16,78 +18,144 @@ Log::Log(uint8_t code) {
     sleep_us(64);
 }
 
-bool Log::addLog(int32_t lat, int32_t lon,
-                float yaw, float roll, float pitch,
-                uint8_t seq, 
-                uint8_t buf[12]) {
+bool Log::init() {
+    int err = LFS::init();
+    // mount the filesystem
+    err = LFS::mount();
+    if (err)
+    {
+        LFS::format();
+        LFS::mount();
+    }
+    err = LFS::file_open(&file_log, "logging", LFS_O_RDWR | LFS_O_CREAT | LFS_O_APPEND);
+    LFS::file_close(&file_log);
+    return (err > 0);
+}
+
+bool Log::addLog(int32_t lat, int32_t lon, float dist,
+                float yaw, float roll, float pitch, float yaw_goal,// deg -180~180
+                int16_t motor_left, int16_t motor_right,
+                uint8_t seq, bool stack,
+                uint8_t buf[17]) {
+    static bool is_first = true;
+    LFS::file_open(&file_log, "logging", LFS_O_RDWR | LFS_O_APPEND);
+    if (is_first) {
+        LFS::file_rewind(&file_log);
+    }
+    encodeLine(wbuf, lat, lon, dist, yaw, roll, pitch, yaw_goal,
+               motor_left, motor_right, seq, stack, buf);
+    // write to LFS file
+    assert(sizeof(wbuf) == 32);
+    int err = LFS::file_write(&file_log, wbuf, sizeof(wbuf));
+    LFS::file_close(&file_log);
+    return (err > 0);
+}
+
+void Log::encodeLine(uint8_t dst[32],
+                int32_t lat, int32_t lon, float dist,
+                float yaw, float roll, float pitch, float yaw_goal,// deg -180~180
+                int16_t motor_left, int16_t motor_right,
+                uint8_t seq, bool stack,
+                uint8_t buf[17]) {
+    uint8_t mleft = (uint8_t)((float)abs(motor_left) * (4.0/1023.0)) & 0b0011;
+    uint8_t mright = (uint8_t)((float)abs(motor_right) * (4.0/1023.0)) & 0b0011;
     //uint8_t buf[12] = {' '};
     rtc_get_datetime(&time);
     // 機体コード
-    bufw[0] = code;
+    dst[0] = (code << 4) | ((time.min&0xf0) >> 4);
     // rtc
     // time
-    bufw[1] = time.hour;
-    bufw[2] = time.min;
-    bufw[3] = time.sec;
+    dst[1] = ((time.min&0x0f) << 4) | ((time.sec&0xf0) >> 4);
+    dst[2] = ((time.sec&0x0f) << 4) | (mleft << 2) | (mright);
     // gps
     // latitude
-    bufw[4] = (lat >> 24) & 0xff;
-    bufw[5] = (lat >> 16) & 0xff;
-    bufw[6] = (lat >> 8) & 0xff;
-    bufw[7] = (lat & 0xff);
+    dst[3] = (lat >> 24) & 0xff;
+    dst[4] = (lat >> 16) & 0xff;
+    dst[5] = (lat >> 8) & 0xff;
+    dst[6] = (lat & 0xff);
     // longitude
-    bufw[8] = (lon >> 24) & 0xff;
-    bufw[9] = (lon >> 16) & 0xff;
-    bufw[10] = (lon >> 8) & 0xff;
-    bufw[11] = (lon & 0xff);
+    dst[7] = (lon >> 24) & 0xff;
+    dst[8] = (lon >> 16) & 0xff;
+    dst[9] = (lon >> 8) & 0xff;
+    dst[10] = (lon & 0xff);
     // yaw
-    int16_t tmp = (int16_t)(yaw * 100);
-    bufw[12] = (tmp << 8);
-    bufw[13] = (tmp & 0xff);
+    // y5 y4 y3 y2 y1 r5 r4 r3
+    yaw += 180.0;
+    uint8_t tmp = (uint8_t)(yaw*YRP_DEG2DIV+0.5);
+    dst[11] = (tmp & 0b00011111) << 3;
     // roll
-    tmp = (int16_t)(roll * 100);
-    bufw[14] = (tmp << 8);
-    bufw[15] = (tmp & 0xff);
+    tmp = (uint8_t)(roll*YRP_DEG2DIV+0.5);
+    dst[11] |= (tmp & 0b00011100) >> 2;
+    // r2 r1 p5 p4 p3 p2 p1 stack
+    dst[12] = (tmp & 0b00000011) << 6;
     // pitch
-    tmp = (int16_t)(pitch * 100);
-    bufw[16] = (tmp << 8);
-    bufw[17] = (tmp & 0xff);
+    tmp = (uint8_t)(pitch*YRP_DEG2DIV+0.5);
+    dst[12] |= (tmp & 0b00011111) << 1;
+    dst[12] |= (stack?1:0) & 0x01;
+    // goal yaw
+    // y5 y4 y3 y2 y1 s3 s2 s1
+    tmp = (uint8_t)(yaw_goal*YRP_DEG2DIV+0.5);
+    dst[13] = (tmp & 0b00011111) << 3;
     // seq number
-    bufw[18] = seq;
+    dst[13] |= (seq & 0b0111);
+    // dist from goal
+    dst[14] = (uint8_t)dist;
     // data
-    for (int i = 0; i < 12; i++) bufw[i+19] = buf[i];
-    // separator
-    bufw[31] = '\n';
-
-    return true;
+    for (int i = 0; i < 17; i++) dst[i+15] = buf[i];
 }
 
 void Log::showAll() {
-    uint32_t now = 0;
-    uint8_t buf[32] = {0};
-    printf("code,hour.min.sec,lat,lon,yaw,roll,pitch,seq,data\n");
-    while (now < head) {
-        int ret = 0; // tmp
-        now += ((ret > 0) ? ret : 0);
-        if (buf[31] != '\n') {
-            printf("error reading log: %d\n", now);
-        }
-        int32_t lat = (buf[4] << 24) | (buf[5] << 16) | (buf[6] << 8) | buf[7];
-        int32_t lon = (buf[8] << 24) | (buf[9] << 16) | (buf[10] << 8) | buf[11];
-        printf("%c,%d.%d.%d,%d,%d,%3.2f,%3.2f,%3.2f,%d,", 
-                    buf[0], // code
-                    buf[1], // hour
-                    buf[2], // min
-                    buf[3], // sec
-                    lat,
-                    lon,
-                    (float)((buf[12] << 8) | buf[13]) / 100.0f,
-                    (float)((buf[14] << 8) | buf[15]) / 100.0f,
-                    (float)((buf[16] << 8) | buf[17]) / 100.0f,
-                    buf[18]
-        );
-        for (int i = 0; i < 12; i++) printf("%c", buf[i+19]);
-        for (int i = 0; i < 32; i++) buf[i] = ' ';
+    uint8_t buf[32] {'\0'};
+    int32_t lat, lon;
+    uint8_t code, min, sec, mleft, mright, seq, dist;
+    uint8_t cdata[17];
+    float yaw, roll, pitch, yaw_goal;
+    bool stack;
+    int32_t head = 0;
+    LFS::file_open(&file_log, "logging", LFS_O_RDONLY);
+    printf("code,min.sec,lat,lon,dist,yaw,roll,pitch,yaw_to_goal,motor_left,motor_right,stack,seq,data\n");
+    int32_t size = LFS::file_size(&file_log);
+    while (head < size) {
+        LFS::file_read(&file_log, buf, sizeof(buf));
+        // get data in buf
+        this->decodeLine(buf, &code, &min, &sec, &lat, &lon, &dist, 
+                       &yaw, &roll, &pitch, &yaw_goal,
+                       &mleft, &mright, &seq, &stack, cdata);
+        printf("%u,%u.%u,%d,%d,%u,%3.2f,%3.1f,%3.1f,%3.1f,%u,%u,%d,%u,",
+               code, min, sec, lat, lon, dist, yaw, roll, pitch, yaw_goal,
+               mleft, mright, stack, seq);
+        for (int8_t i = 0; i < 17; i++) printf("%c", cdata[i]);
         printf("\n");
+        head += 32;
+        LFS::file_seek(&file_log, head, LFS_SEEK_SET);
     }
+}
+
+void Log::decodeLine(uint8_t raw[32],
+                   uint8_t* code, uint8_t* min, uint8_t* sec,
+                   int32_t* lat, int32_t* lon, uint8_t* dist,
+                   float* yaw, float* roll, float* pitch, float* yaw_goal,
+                   uint8_t* motor_left, uint8_t* motor_right,
+                   uint8_t* seq, bool* stack,
+                   uint8_t buf[17]) {
+    uint8_t tmp = 0;
+    *code = raw[0] >> 4;
+    *min = (raw[0] << 4) | (raw[1] >> 4);
+    *sec = (raw[1] << 4) | (raw[2] >> 4);
+    *motor_left = (raw[2] & 0b00001100) >> 2;
+    *motor_right = (raw[2] & 0b00000011);
+    *lat = (raw[3] << 24) | (raw[4] << 16) | (raw[5] << 8) | raw[6];
+    *lon = (raw[7] << 24) | (raw[8] << 16) | (raw[9] << 8) | raw[10];
+    tmp = (raw[11] >> 3) & 0b00011111;
+    *yaw = YRP_DIV2DEG*(float)tmp;
+    tmp = ((raw[11] << 2) & 0b00011100) | ((raw[12] >> 6) & 0b00000011);
+    *roll = YRP_DIV2DEG*(float)tmp;
+    tmp = (raw[12] >> 1) & 0b00011111;
+    *pitch = YRP_DIV2DEG*(float)tmp;
+    *stack = (raw[12]&0x01)?true:false;
+    tmp = (raw[13] >> 3) & 0b00011111;
+    *yaw_goal = YRP_DIV2DEG*(float)tmp;
+    *seq = (raw[13] & 0b0111);
+    *dist = raw[14];
+    for (int8_t i = 0; i < 17; i++) buf[i] = raw[i+15];
 }
