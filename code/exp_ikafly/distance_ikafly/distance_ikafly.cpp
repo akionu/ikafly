@@ -18,9 +18,9 @@
 #define MOSI 12
 #define MISO 13
 #define EARTH_RAD 6378137
-#define goal_long 
-#define goal_lat 
-#define h 0.01745329251 
+#define goal_long 135.770979
+#define goal_lat 34.801609
+#define h 0.01745329251
 double dis = 0;
 uint32_t m = 0, n = 0;
 

@@ -43,8 +43,10 @@
 #define MISO 13
 #define RAD2DEG 57.2958
 #define thrty 0.523599
-#define goal_latitude 34.801665
-#define goal_longitude 135.771090
+#define goal_latitude 34.801609
+#define goal_longitude 135.770979
+#define EARTH_RAD 6378137
+#define rp 0.01745329251
 
 #define XCLK 0
 #define Y2_PIO_BASE 1
@@ -244,9 +246,9 @@ void task_log(void *log)
 
     printf("task_log\n");
 
-    // for debug
     vTaskSuspend(NULL);
 
+    // for debug
     TickType_t llk_log;
     llk_log = xTaskGetTickCount();
 
@@ -308,18 +310,17 @@ void task_log(void *log)
     }
 }
 
-double distance(double longitude, double latitude, double longitude_self, double latitude_self)
+double distance(double x1, double y1, double x2, double y2)
 {
-    double RX = 6378.137;
-    double RY = 6356.752;
-    double dx = latitude - latitude_self, dy = longitude - longitude_self;
-    double mu = (goal_latitude + gga.latitude) / 2.0;
-    double E = sqrt(1 - pow(RY / RX, 2.0));
-    double W = sqrt(1 - pow(E * sin(mu), 2.0));
-    double M = RX * (1 - pow(E, 2.0)) / pow(W, 3.0) / pow(W, 3.0);
-    double N = RX / W;
-    return sqrt(pow(M * dy, 2.0) + pow(N * dx * cos(mu), 2.0))/100;
+    /*
+      pointA(lng x1, lat y1), pointB(lng x2, lat y2)
+      D = Rcos^-1(siny1siny2 + cosy1cosy2cosΔx)
+      Δx = x2 - x1
+      R = 6378.137[km]
+    */
+    return EARTH_RAD * acos(sin(y1 * rp) * sin(y2 * rp) + cos(y1 * rp) * cos(y2 * rp) * cos(x2 * rp - x1 * rp));
 }
+
 
 static void gpgga_callout(nmeap_context_t *context, void *data, void *user_data)
 {
@@ -342,8 +343,7 @@ void task_gnss(void *gnss)
     double torig[4];
     float yaw;
 
-    TickType_t llk_gnss;
-    llk_gnss = xTaskGetTickCount();
+   
     gnss_q = xQueueCreate(32, sizeof(gga_s));
 
     gpio_init(25);
@@ -366,9 +366,14 @@ void task_gnss(void *gnss)
 
     printf("task_gnss");
 
+    vTaskSuspend(NULL);
+
     vTaskResume(imu_h);
     vTaskResume(log_h);
     vTaskResume(landing_h);
+
+     TickType_t llk_gnss;
+    llk_gnss = xTaskGetTickCount();
     while (1)
     {
         call_a = call;
@@ -412,6 +417,7 @@ void task_imu(void *imu_t)
     float euler[3];
     // for debug
     printf("task_imu");
+
     vTaskSuspend(NULL);
 
     TickType_t llk_imu;
@@ -517,7 +523,7 @@ void task_gcontrol(void *gcontrol)
             }
 
             //for debug
-            s++;
+           /* s++;
             if (s == 30)
             {
 
@@ -528,7 +534,7 @@ void task_gcontrol(void *gcontrol)
                 vTaskResume(ccontrol_h);
                 printf("done\n");
                 vTaskSuspend(NULL);
-            }
+            }*/
         }
         vTaskDelayUntil(&llk_gcontrol, pdMS_TO_TICKS(200));
 
@@ -642,6 +648,7 @@ void task_ccontrol(void *ccontrol)
     uint8_t vert[5] = {0};
 
     printf("task_ccontrol\n");
+
     vTaskSuspend(NULL);
 
     TickType_t llk_ccontrol;
@@ -783,7 +790,7 @@ void task_send(void *send)
     uint8_t st_r;
     uint32_t p = 0;
 
-        vTaskSuspend(NULL);
+    vTaskSuspend(NULL);
 
     TickType_t llk_send;
     llk_send = xTaskGetTickCount();
@@ -825,7 +832,6 @@ void task_receive(void *receive)
     uint32_t rec[2];
     uint8_t packet_r[32];
     printf("task_receive\n");
-
     vTaskSuspend(NULL);
 
     TickType_t llk_receive;
@@ -855,9 +861,9 @@ void task_stuck(void *stuck)
     stuck_q = xQueueCreate(32, sizeof(stucking));
 
     printf("task_stucking\n");
+    vTaskSuspend(NULL);
 
     // for debug
-    vTaskSuspend(NULL);
 
     TickType_t llk_stuck;
     llk_stuck = xTaskGetTickCount();
@@ -938,14 +944,15 @@ int main(void)
     printf("init");
 
     xTaskCreate(task_gnss, "task_gnss", 1024 * 2, NULL, 2, &gnss_h);
-    xTaskCreate(task_imu, "task_imu", 1024 * 2, NULL, 4, &imu_h);
-    xTaskCreate(task_landing, "task_landing", 1024 * 2, NULL, 5, &landing_h);
-    xTaskCreate(task_gcontrol, "task_gcontrol", 1024 * 2, NULL, 6, &gcontrol_h);
-    xTaskCreate(task_ccontrol, "task_ccontrol", 1024 * 2, NULL, 7, &ccontrol_h);
-    xTaskCreate(task_receive, "task_receive", 1024*2, NULL,7 , &receive_h);
-    xTaskCreate(task_send, "task_send", 1024*2, NULL, 8, &send_h);
-    xTaskCreate(task_stuck, "task_stuck", 1024*2, NULL, 9, &stuck_h);
-    xTaskCreate(task_log, "task_log", 1024 * 2, NULL, 10, &log_h);
+    xTaskCreate(task_imu, "task_imu", 1024 * 2, NULL, 3, &imu_h);
+    xTaskCreate(task_landing, "task_landing", 1024 * 2, NULL, 4, &landing_h);
+    xTaskCreate(task_gcontrol, "task_gcontrol", 1024 * 2, NULL, 5, &gcontrol_h);
+    xTaskCreate(task_ccontrol, "task_ccontrol", 1024 * 2, NULL, 6, &ccontrol_h);
+    xTaskCreate(task_receive, "task_receive", 1024*2, NULL,6 , &receive_h);
+    xTaskCreate(task_send, "task_send", 1024*2, NULL, 7, &send_h);
+    xTaskCreate(task_stuck, "task_stuck", 1024*2, NULL, 8, &stuck_h);
+    xTaskCreate(task_log, "task_log", 1024 * 2, NULL, 9, &log_h);
+
 
     vTaskStartScheduler();
     while (1)
