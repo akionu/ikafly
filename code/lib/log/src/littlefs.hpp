@@ -69,7 +69,6 @@ public:
 
 private:
     lfs_t lfs;
-    static SemaphoreHandle_t flashMutex;
     static void flash_erase_safe(void *p);
     static void flash_prog_safe(void *p);
 
@@ -77,8 +76,11 @@ private:
     static int flash_fs_prog(const struct lfs_config* config, lfs_block_t block, lfs_off_t off, const void* buf, lfs_size_t size);
     static int flash_fs_erase(const struct lfs_config* config, lfs_block_t block);
     static int flash_fs_sync(const struct lfs_config* config);
+#ifdef LFS_THREADSAFE
+    static SemaphoreHandle_t flashMutex;
     static int flash_fs_unlock(const struct lfs_config* config);
     static int flash_fs_lock(const struct lfs_config* config);
+#endif
 
     static struct lfs_config pico_cfg;
 //    {

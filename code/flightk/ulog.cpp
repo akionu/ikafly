@@ -1,5 +1,7 @@
 #include "ulog.h"
 
+//LFS LFS::
+
 #define YRP_DEG2DIV (0.0888888888888) // 32/360
 #define YRP_DIV2DEG (11.25) // 360/32
 
@@ -19,17 +21,24 @@ Log::Log(uint8_t code) {
 }
 
 bool Log::init() {
-    int err = LFS::init();
+    int err;
+    err = LFS::init();
+    //printf("init: %d: %s\n", err, (err>=0)?"ok":"fail"); 
+    if (err < 0) return false;
     // mount the filesystem
     err = LFS::mount();
-    if (err)
-    {
+    //printf("mount: %d: %s\n", err, (err>=0)?"ok":"fail");  
+    if (err) {
+        printf("Log: no lfs system found, format...\n");
         LFS::format();
         LFS::mount();
     }
     err = LFS::file_open(&file_log, "logging", LFS_O_RDWR | LFS_O_CREAT | LFS_O_APPEND);
-    LFS::file_close(&file_log);
-    return (err > 0);
+    //printf("file_open: %d: %s\n", err, (err>=0)?"ok":"fail"); 
+    if (err < 0) return false;
+    err = LFS::file_close(&file_log);
+    //printf("format: %d: %s\n", err, (err>=0)?"ok":"fail"); 
+    return (err >= 0);
 }
 
 bool Log::addLog(int32_t lat, int32_t lon, float dist,
@@ -41,6 +50,7 @@ bool Log::addLog(int32_t lat, int32_t lon, float dist,
     LFS::file_open(&file_log, "logging", LFS_O_RDWR | LFS_O_APPEND);
     if (is_first) {
         LFS::file_rewind(&file_log);
+        is_first = false;
     }
     encodeLine(wbuf, lat, lon, dist, yaw, roll, pitch, yaw_goal,
                motor_left, motor_right, seq, stack, buf);
@@ -158,4 +168,49 @@ void Log::decodeLine(uint8_t raw[32],
     *seq = (raw[13] & 0b0111);
     *dist = raw[14];
     for (int8_t i = 0; i < 17; i++) buf[i] = raw[i+15];
+}
+
+bool Log::storeCalibData(double co[4]) {
+    int ret;
+    ret = LFS::file_open(&file_calib, "calib", LFS_O_RDWR | LFS_O_CREAT);
+    if (ret < 0) return false;
+    ret = LFS::file_rewind(&file_calib);
+    if (ret < 0) return false;
+    ret = LFS::file_write(&file_calib, co, sizeof(double)*4);
+    if (ret < 0) return false;
+    ret = LFS::file_close(&file_calib);
+    return (ret>=0);
+}
+
+bool Log::readCalibData(double co[4]) {
+    int ret = LFS::file_open(&file_calib, "calib", LFS_O_RDONLY);
+    printf("Log: calib data %s\n", (ret>=0)?"found":"not found");
+    if (ret < 0) return false;
+    ret = LFS::file_read(&file_calib, co, sizeof(double)*4);
+    if (ret < 0) return false;
+    ret = LFS::file_close(&file_calib);
+    return (ret>=0);
+}
+
+bool Log::storeImg(uint8_t* img, int32_t size) {
+    int ret;
+    ret = LFS::file_open(&file_img, "img", LFS_O_RDWR | LFS_O_CREAT);
+    if (ret < 0) return false;
+    ret = LFS::file_write(&file_img, img, size);
+    if (ret < 0) return false;
+    ret = LFS::file_close(&file_img);
+    return (ret >= 0);
+}
+
+bool Log::readImg(uint8_t* img, int16_t* read_size, int32_t max_size) {
+    int16_t ret;
+    ret = LFS::file_open(&file_img, "img", LFS_O_RDWR | LFS_O_CREAT);
+    if (ret < 0) return false;
+    ret = LFS::file_read(&file_img, img, max_size);
+    if (ret < 0) return false;
+    else {
+        *read_size = ret;
+    }
+    ret = LFS::file_close(&file_img);
+    return (ret >= 0);
 }

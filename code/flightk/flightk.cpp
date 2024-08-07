@@ -72,7 +72,7 @@ GPS gps(
 //Log //logging('C', 2);
 //#endif //CODE_C
 
-uint8_t logbuf[12];
+uint8_t logbuf[17];
 bool rt_flag = false;
 
 //bool bnoIsEnoughAccuracy() {
@@ -104,7 +104,7 @@ uint8_t vert[5] = {0};
 void addLogBuf(const char* fmt, ...) {
     va_list arg;
     va_start(arg, fmt);
-    vsnprintf((char *)logbuf, 12, fmt, arg);
+    vsnprintf((char *)logbuf, 17, fmt, arg);
     va_end(arg);
 }
 
@@ -132,7 +132,7 @@ public:
 
         if (!isDetectRise) {
             if (alt_change[0] >= 3000) {
-                addLogBuf("altNotReady");
+                addLogBuf("%3.1f altNRdy", alt_change[9]);
                 return MODE_LANDING;
             }
             int8_t cnt = 0;
@@ -142,7 +142,7 @@ public:
                 //printf("isDetectRise: %d\n", cnt);
             }
             if (cnt > 4) {
-                addLogBuf("c:%1d %3f rise", cnt, alt_change[9]);
+                addLogBuf("%3.1f c%d Rise", alt_change[9], cnt);
                 isDetectRise = true;
             }
         }
@@ -154,7 +154,7 @@ public:
                 if ((alt_change[i-1] - alt_change[i]) > 0.05) cnt++;
             }
             if (cnt > 4) {
-                addLogBuf("cnt:%1d %3f fall", cnt, alt_change[9]);
+                addLogBuf("%3.1f c%d Fall", alt_change[9], cnt);
                 isDetectFall = true;
             }
             //return MODE_LANDING;
@@ -173,7 +173,7 @@ public:
             s /= 10;
             printf("alt: %f, s: %f\n", alt_change[9], s);
             if (s < 0.06) {
-                addLogBuf("s:%1.2f a:%.0f land", s, avg);
+                addLogBuf("%3.1f s%1.2f a%3.0f Land");
                 return MODE_NICHROME;
             }
         } else {
@@ -181,9 +181,10 @@ public:
             // 300s
             if (landingCnt > (300*SEC2CNT)) {
                 if (abs(alt_change[9]-alt_ref) < 10) {
-                    addLogBuf("la:%4d");
+                    addLogBuf("lcnt%4d Land", landingCnt);
                     return MODE_NICHROME;
                 } else if (landingCnt > (500*SEC2CNT)) {
+                    addLogBuf("lcnt%4d Land", landingCnt);
                     return MODE_NICHROME;
                 }
             } else {
@@ -197,21 +198,19 @@ public:
         if (expansionCnt > (3*SEC2CNT)) {
             expansionCnt = 0;
             gpio_put(pin_nichrome_left, 0);
-            addLogBuf("n c:%d d", expansionCnt);
+            addLogBuf("NC %d Done", expansionCnt);
             printf("nichrome done\n");
             return MODE_GNSS;
         } else {
             gpio_put(pin_nichrome_left, 1);
-            addLogBuf("n c:%d", expansionCnt);
+            addLogBuf("NC %d Heat", expansionCnt);
             expansionCnt++;
             return MODE_NICHROME;
         }
     }
 
     int8_t gnss() {
-        static int8_t cnt = 10;
         static float distlog[20] = {0};
-        static bool is_stack = false;
         static int8_t stack_cnt = 0;
         static bool stack_left = true;
         float euler[3] = {0};
@@ -221,7 +220,7 @@ public:
             //printf("gps ready\n");
             float dist = gps.getDistance();
 
-            for (int i = 0; i < 20-1; i++) distlog[i] = distlog[i+1];
+            for (int8_t i = 0; i < 20-1; i++) distlog[i] = distlog[i+1];
             distlog[19] = dist;
             int8_t dcnt = 0;
             if (abs(distlog[0]-distlog[10]) < 0.15) dcnt++;
@@ -230,18 +229,19 @@ public:
                 is_stack = true;
                 if (stack_left) {
                     stack_left = false;
-                    motor.forward(1023);
-                    addLogBuf("st! %3.1f l", dist);
+                    motor.forward(1023, 0);
+                    addLogBuf("stack left");
                 } else {
                     stack_left = true;
                     motor.backward(1023);
-                    addLogBuf("st! %3.1f r", dist);
+                    addLogBuf("stack right");
                 }
             }
             if (is_stack) {
                 if (stack_cnt > 5*SEC2CNT) {
                     motor.stop();
                     is_stack = false;
+                    addLogBuf("release stack cnt");
                 } else {
                     stack_cnt++;
                     return MODE_GNSS;
@@ -300,82 +300,57 @@ public:
 
             memset(red_area, 0, sizeof(red_area));
             JRESULT res = tjpg.prepare(cam.image_buf, size);
-            if (res == JDR_OK)
-            {
+            if (res == JDR_OK) {
                 printf("Image size is %u x %u.\n%u bytes of work area is free.\n", tjpg.jdec.width, tjpg.jdec.height, tjpg.jdec.sz_pool);
                 res = tjpg.decomp(my_out_func, 3);
                 // 160x120 -> (1/2^3) -> 20x15
-                if (res == JDR_OK)
-                {
+                if (res == JDR_OK) {
                     printf("\rDecompression succeeded.\n");
                     count_vert(vert, red_area);
                     printf("count: %d %d %d %d %d\n", vert[4], vert[3], vert[2], vert[1], vert[0]);
-                }
-                else
-            {
+                } else {
                     printf("jd_decomp() failed (rc=%d)\n", res);
                 }
-            }
-            else
-        {
+            } else {
                 printf("jd_prepare() failed (rc=%d)\n", res);
             }
 
             int8_t dire = 0;
             int8_t most = vert[0];
 
-            for (int8_t q = 0; q < 5; q++)
-            {
-                if (vert[q] > most)
-                {
+            for (int8_t q = 0; q < 5; q++) {
+                if (vert[q] > most) {
                     most=vert[q];
                     dire = q;
                 }
             }
 
-            switch (dire)
-            {
+            switch (dire) {
                 case 0:
-
-                    if (vert[0] == 0)
-                    {
+                    if (vert[0] == 0) {
                         printf("ゴールは見当たりません");
                         motor.forward(1023, 700);
-                    }
-                    else
-                {
+                    } else {
                         motor.forward(1023, 800);
                         printf("右前方ゴールです\n");
                     }
                     if (most > 20) return MODE_GOAL;
                     break;
-
                 case 1:
-
                     printf("少し右前方ゴールです\n");
-
                     motor.forward(1023, 900);
                     break;
-
                 case 2:
-
                     printf("前方ゴールです\n");
-
                     motor.forward(1023);
                     break;
-
                 case 3:
-
                     motor.forward(900, 1023);
                     printf("少し左前方ゴールです\n");
-
                     break;
-
                 case 4:
-
                     motor.forward(700, 1023);
                     printf("左前方ゴールです\n");
-
                     break;
             }
         }
@@ -400,7 +375,8 @@ public:
                 printf("d:%2.0fm ok", dist);
                 printf("goal\n");
                 is_goal = true;
-
+                cam.capture();
+                logging.storeImg(cam.image_buf, cam.getJpegSize());
             } else {
                 printf("onlyGnss\n");
                 isOnlyGnss = true;
@@ -415,7 +391,7 @@ public:
         printf("press s to show\n");
         while (1) {
             if ((c = getchar_timeout_us(1000)) == 's') {
-                //logging.showAll();
+                logging.showAll();
             }
             sleep_ms(10);
         }
@@ -443,7 +419,7 @@ bool rtCallback(repeating_timer_t* rt) {
     static int16_t i = 0;
     //    printf("%d-", time_us_32()/1000);
     imu.update();
-    if (i == 10) {
+    if (i == 25) {
         rt_flag = true;
         i = 0;
         aupdate();
@@ -625,12 +601,11 @@ int main(void) {
 
     // imu
     bool st = imu.init();
-    if (st) printf("IMU init success");
-    else printf("IMU init fails");
-
+    printf("IMU init %s\n", st?"ok":"fail");
 
     // prs
-    prs.init();
+    st = prs.init();
+    printf("Press init %s\n", st?"ok":"fail");
     for (int8_t i = 0; i < 10; i++) {
         prs.getAltM();
         sleep_ms(50);
@@ -654,10 +629,24 @@ int main(void) {
     cam.enableJpeg();
 
     // logging
+    bool ret = logging.init();
+    printf("logging: %s\n", ret?"ok":"fail");
 
     // imu calibration
-    printf("calibrate!\n");
+    #ifdef ALWAYS_CALIB
+    printf("always calibrate mode. calibrating...\n");
     imu.calibration();
+    logging.storeCalibData(imu.co);
+    #else
+    ret = logging.readCalibData(imu.co);
+    if (!ret) {
+        printf("no calibration data found. calibrating...\n");
+        imu.calibration();
+        logging.storeCalibData(imu.co);
+    } else {
+        printf("found calibration data\n");
+    }
+    #endif
 
     add_repeating_timer_ms(-20, &rtCallback, NULL, &timer);
 

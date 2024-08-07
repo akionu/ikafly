@@ -3,13 +3,13 @@
 #include "pico/stdlib.h"
 
 enum {
-    MODE_WAIT = 1,
-    MODE_LANDING = 2,
-    MODE_GNSS = 3,
-    MODE_CAM = 4,
-    MODE_GOAL = 5,
-    MODE_SHOWLOG = 9,
-    MODE_NICHROME = 10,
+    MODE_WAIT,
+    MODE_LANDING,
+    MODE_GNSS,
+    MODE_CAM,
+    MODE_GOAL,
+    MODE_SHOWLOG,
+    MODE_NICHROME,
 };
 
 #define SEC2CNT 2

@@ -8,7 +8,7 @@
 
 #include "littlefs.hpp"
 
-class Log : LFS {
+class Log : LFS{
     public:
         Log(uint8_t code);
         bool init();
@@ -31,9 +31,16 @@ class Log : LFS {
                    uint8_t* motor_right, uint8_t* motor_left,
                    uint8_t* seq, bool* stack,
                    uint8_t buf[17]);
+        bool storeCalibData(double co[4]);
+        bool readCalibData(double co[4]);
+        bool storeImg(uint8_t* img, int32_t size);
+        bool readImg(uint8_t* dst, int16_t* read_size, int32_t max_size);
     private:
         datetime_t time;
         uint8_t code;
         uint8_t wbuf[32];
+//        static LFS lfs;
         lfs_file_t file_log;
+        lfs_file_t file_calib;
+        lfs_file_t file_img;
 };

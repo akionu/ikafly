@@ -14,18 +14,20 @@
 #include "littlefs.hpp"
 #include <cstring>
 
+#ifdef LFS_THREADSAFE
 SemaphoreHandle_t LFS::flashMutex;
+#endif
 struct lfs_config LFS::pico_cfg;
 
 // public functions
 int LFS::init() {
-    LFS::flashMutex = xSemaphoreCreateMutex();
 
     pico_cfg.read = &flash_fs_read;
     pico_cfg.prog = &flash_fs_prog;
     pico_cfg.erase = &flash_fs_erase;
     pico_cfg.sync = &flash_fs_sync;
 #ifdef LFS_THREADSAFE
+    LFS::flashMutex = xSemaphoreCreateMutex();
     pico_cfg.lock = &flash_fs_lock;
     pico_cfg.unlock = &flash_fs_unlock;
 #endif
@@ -39,8 +41,12 @@ int LFS::init() {
     pico_cfg.cache_size = 256;
     pico_cfg.lookahead_size = 32;
 
+#ifdef LFS_THREADSAFE
     if (LFS::flashMutex != NULL) return LFS_ERR_OK;
     else return (-1);
+#else
+    return true;
+#endif
 }
 
 // public LFS functions
@@ -241,6 +247,7 @@ int LFS::flash_fs_sync(const struct lfs_config* config) {
     return LFS_ERR_OK;
 }
 
+#ifdef LFS_THREADSAFE
 int LFS::flash_fs_lock(const struct lfs_config* config) {
     if (xSemaphoreTake(LFS::flashMutex, (TickType_t)20) == pdTRUE) {
         return LFS_ERR_OK;
@@ -256,3 +263,4 @@ int LFS::flash_fs_unlock(const struct lfs_config* config) {
         return -1;
     }
 }
+#endif
