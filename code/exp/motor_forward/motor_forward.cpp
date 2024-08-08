@@ -23,7 +23,7 @@ int main(void) {
 	
 	// 正回転（両方とも）
 	// 引数は回転速度pwm（0<=pwm<=1023）
-	motor.forward(1023);
+	motor.forward(1023, 900);
 
 	while (1) {
 		tight_loop_contents();

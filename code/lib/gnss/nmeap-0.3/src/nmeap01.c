@@ -619,6 +619,8 @@ int nmeap_gprmc(nmeap_context_t *context,nmeap_sentence_t *sentence)
 
     /* if the sentence has a callout, call it */
     if (sentence->callout != 0) {
+       printf("gps ok: ");
+       printf("lat: %f, long: %f\n", rmc->latitude, rmc->longitude);
         (*sentence->callout)(context,rmc,context->user_data);
     }
     

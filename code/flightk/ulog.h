@@ -13,11 +13,13 @@ class Log : LFS{
         Log(uint8_t code);
         bool init();
         void showAll();
+        void showLine(uint8_t buf[32]);
         bool addLog(int32_t lat, int32_t lon, float dist,
                 float yaw, float roll, float pitch, float yaw_goal,// deg -180~180
                 int16_t motor_left, int16_t motor_right,
                 uint8_t seq, bool stack,
                 uint8_t buf[17]);
+        bool addLog(uint8_t src[32]);
         void encodeLine(uint8_t dst[32],
                 int32_t lat, int32_t lon, float dist,
                 float yaw, float roll, float pitch, float yaw_goal,// deg -180~180

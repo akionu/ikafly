@@ -22,11 +22,13 @@ class IMU
 		void update(); // call this 50ms each for get attitude
 		void getAttQuat(float q[4]);
 		void getAttEuler(float euler[3]); // roll, pitch, yaw
+//        float getYawmag();
 		float getAttEulerRoll();
 
 		void getAccel_g(float accel[3]); // x,y,z
 		void getGyro_dps(float gyro[3]); // x,y,z
 		void getMag_mG(float mag[3]); // x,y,z
+//        void getMagRaw(float mag[3]);
 
 		void setAccelOffset(uint8_t offset[3]); // x,y,z, [mg]
 		
@@ -45,6 +47,7 @@ class IMU
 		int16_t gyro_raw[3];
 		int16_t mag_raw[3];
 		uint8_t accel_offset[3] = {0};
+        double yawmag;
 		stmdev_ctx_t lsm6dso;
 		stmdev_ctx_t lis3mdl;
 };

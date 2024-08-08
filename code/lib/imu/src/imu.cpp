@@ -5,7 +5,7 @@
 #include "../../../../lib/freertos/FreeRTOS-Kernel/include/task.h"
 
 IMU::IMU(i2c_inst_t* i2c) {
-	madgwick_data.beta = 1;
+	madgwick_data.beta = 1.5f;
 	madgwick_data.q[0] = 1.0f;
 	madgwick_data.q[1] = 0.0f;
 	madgwick_data.q[2] = 0.0f;
@@ -117,39 +117,38 @@ bool IMU::init() {
 	return true;
 }
 
-double co[3];
 void IMU::calibration(){
-	printf("start calibration\n");
+    printf("start calibration\n");
     double dx, dy, dz, f;
-	double lr=0.000000001;
-	int i;
-	co[0]=0.0;
-	co[1]=0.0;
-	co[2]=0.0;
-	co[3]=1.0;
+    double lr=0.000000001;
+    int i;
+    co[0]=0.0;
+    co[1]=0.0;
+    co[2]=0.0;
+    co[3]=1.0;
     uint8_t reg = 0;
-	for(i=0;i<=100000;i++){	
-	lis3mdl_mag_data_ready_get(&lis3mdl, &reg);
-	if (reg) {
-	memset(mag_raw, 0x00, 3 * sizeof(int16_t));
-	lis3mdl_magnetic_raw_get(&lis3mdl, mag_raw);
+    for(i = 0; i < 80*15; i++){	
+        lis3mdl_mag_data_ready_get(&lis3mdl, &reg);
+        if (reg) {
+            memset(mag_raw, 0x00, 3 * sizeof(int16_t));
+            lis3mdl_magnetic_raw_get(&lis3mdl, mag_raw);
 
-	dx=mag_raw[0]-co[0];
-	dy=mag_raw[1]-co[1];
-	dz=mag_raw[2]-co[2];
+            dx= mag_raw[0] - co[0];
+            dy= mag_raw[1] - co[1];
+            dz= mag_raw[2] - co[2];
 
-  f = dx*dx + dy*dy + dz*dz - co[3]*co[3];
-  co[0] = co[0] + 4 * lr * f * dx;
-  co[1] = co[1] + 4 * lr * f * dy;
-  co[2] = co[2] + 4 * lr * f * dz;
-  co[3] = co[3] + 4 * lr * f * co[3];   
+            f = dx*dx + dy*dy + dz*dz - co[3]*co[3];
+            co[0] = co[0] + 4 * lr * f * dx;
+            co[1] = co[1] + 4 * lr * f * dy;
+            co[2] = co[2] + 4 * lr * f * dz;
+            co[3] = co[3] + 4 * lr * f * co[3];   
         }
-}
-printf("done calibration");
+        sleep_ms(13); // around 80Hz
+    }
+    printf("done calibration\n");
 }
 void IMU::update() {
 	uint8_t reg;
-	double distance_2,distance;
 
 #ifdef IMU_FIFO
     uint16_t num = 0;
@@ -226,11 +225,11 @@ void IMU::update() {
 		memset(mag_raw, 0x00, 3 * sizeof(int16_t));
 		lis3mdl_magnetic_raw_get(&lis3mdl, mag_raw);
 		mag_mG[1] = -1000 * lis3mdl_from_fs16_to_gauss(
-				mag_raw[0]-co[0]);
+				mag_raw[0]-this->co[0]);
 		mag_mG[0] = -1000 * lis3mdl_from_fs16_to_gauss(
-				mag_raw[1]-co[1]);
+				mag_raw[1]-this->co[1]);
 		mag_mG[2] = 1000 * lis3mdl_from_fs16_to_gauss(
-				mag_raw[2]-co[2]);
+				mag_raw[2]-this->co[2]);
 		//		printf("Magnetic field [mG]:%4.2f %4.2f %4.2f\n", mag_mG[0], mag_mG[1], mag_mG[2]);
 	}
 
@@ -290,9 +289,25 @@ void IMU::update() {
 				mag_mG[0], mag_mG[1], mag_mG[2]);
 	}
 //	MadgwickAHRSupdateIMU(&madgwick_data, gyro_dps[0], gyro_dps[1], gyro_dps[2], accel_g[0], accel_g[1], accel_g[2]);
+//    float etmp[3];
+//    this->getAttEuler(etmp);
+//    yawmag = atan((
+//        mag_mG[0]*cos(etmp[1])
+//        +mag_mG[1]*sin(etmp[1])*sin(etmp[0])
+//        +mag_mG[2]*sin(etmp[1])*cos(etmp[0])
+//    )/(
+//        mag_mG[1]*cos(etmp[0])
+//        -mag_mG[2]*sin(etmp[0])
+//    ));
 	MadgwickAHRSupdate(&madgwick_data, gyro_dps[0], gyro_dps[1], gyro_dps[2], accel_g[0], accel_g[1], accel_g[2], mag_mG[0], mag_mG[1], mag_mG[2]);
 //	if (debug) printf("%3.2f %3.2f %3.2f %3.2f\n", madgwick_data.q[0], madgwick_data.q[1], madgwick_data.q[2], madgwick_data.q[3]);
 }
+
+//void IMU::getMagRaw(float mag[3]) {
+//    mag[0] = mag_raw[0];
+//    mag[1] = mag_raw[1];
+//    mag[2] = mag_raw[2];
+//}
 
 void IMU::getAttQuat(float q[4]) {
 	q[0] = madgwick_data.q[0];
@@ -328,6 +343,10 @@ void IMU::getMag_mG(float mag[3]) {
 void IMU::setDebugPrint(bool enable) {
 	debug = enable;
 }
+
+//float IMU::getYawmag() {
+//    return ((float)yawmag);
+//}
 
 bool IMU::isFreeFallNow() {
     lsm6dso_all_sources_t intr;

@@ -20,6 +20,8 @@ class GPS {
         float getDistance();
         int32_t getLatitude();
         int32_t getLongitude();
+        float getSpeed_mps();
+        float getCource_rad();
         int32_t goal_latitude;
         int32_t goal_longitude;
 
@@ -29,7 +31,8 @@ class GPS {
         //void callout(nmeap_context_t *context, void *data, void *user_data);
         //void on_uart1_rx();
         int32_t approxDistance(int32_t dx, int32_t dy);
-        nmeap_gga_t gga;
+//        nmeap_gga_t gga;
+        nmeap_rmc_t rmc;
         uint16_t long_per_res;
         uint16_t lat_per_res;
         double (*fx)(double);

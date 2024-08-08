@@ -42,18 +42,24 @@ bool Log::init() {
 }
 
 bool Log::addLog(int32_t lat, int32_t lon, float dist,
-                float yaw, float roll, float pitch, float yaw_goal,// deg -180~180
-                int16_t motor_left, int16_t motor_right,
-                uint8_t seq, bool stack,
-                uint8_t buf[17]) {
+                 float yaw, float roll, float pitch, float yaw_goal,// deg -180~180
+                 int16_t motor_left, int16_t motor_right,
+                 uint8_t seq, bool stack,
+                 uint8_t buf[17]) {
+    encodeLine(wbuf, lat, lon, dist, yaw, roll, pitch, yaw_goal,
+               motor_left, motor_right, seq, stack, buf);
+    bool err = addLog(wbuf);
+    return (err);
+}
+
+bool Log::addLog(uint8_t src[32]) {
     static bool is_first = true;
+    memcpy(wbuf, src, 32);
     LFS::file_open(&file_log, "logging", LFS_O_RDWR | LFS_O_APPEND);
     if (is_first) {
         LFS::file_rewind(&file_log);
         is_first = false;
     }
-    encodeLine(wbuf, lat, lon, dist, yaw, roll, pitch, yaw_goal,
-               motor_left, motor_right, seq, stack, buf);
     // write to LFS file
     assert(sizeof(wbuf) == 32);
     int err = LFS::file_write(&file_log, wbuf, sizeof(wbuf));
@@ -62,11 +68,11 @@ bool Log::addLog(int32_t lat, int32_t lon, float dist,
 }
 
 void Log::encodeLine(uint8_t dst[32],
-                int32_t lat, int32_t lon, float dist,
-                float yaw, float roll, float pitch, float yaw_goal,// deg -180~180
-                int16_t motor_left, int16_t motor_right,
-                uint8_t seq, bool stack,
-                uint8_t buf[17]) {
+                     int32_t lat, int32_t lon, float dist,
+                     float yaw, float roll, float pitch, float yaw_goal,// deg -180~180
+                     int16_t motor_left, int16_t motor_right,
+                     uint8_t seq, bool stack,
+                     uint8_t buf[17]) {
     uint8_t mleft = (uint8_t)((float)abs(motor_left) * (4.0/1023.0)) & 0b0011;
     uint8_t mright = (uint8_t)((float)abs(motor_right) * (4.0/1023.0)) & 0b0011;
     //uint8_t buf[12] = {' '};
@@ -116,38 +122,42 @@ void Log::encodeLine(uint8_t dst[32],
 
 void Log::showAll() {
     uint8_t buf[32] {'\0'};
-    int32_t lat, lon;
-    uint8_t code, min, sec, mleft, mright, seq, dist;
-    uint8_t cdata[17];
-    float yaw, roll, pitch, yaw_goal;
-    bool stack;
     int32_t head = 0;
     LFS::file_open(&file_log, "logging", LFS_O_RDONLY);
     printf("code,min.sec,lat,lon,dist,yaw,roll,pitch,yaw_to_goal,motor_left,motor_right,stack,seq,data\n");
     int32_t size = LFS::file_size(&file_log);
     while (head < size) {
         LFS::file_read(&file_log, buf, sizeof(buf));
-        // get data in buf
-        this->decodeLine(buf, &code, &min, &sec, &lat, &lon, &dist, 
-                       &yaw, &roll, &pitch, &yaw_goal,
-                       &mleft, &mright, &seq, &stack, cdata);
-        printf("%u,%u.%u,%d,%d,%u,%3.2f,%3.1f,%3.1f,%3.1f,%u,%u,%d,%u,",
-               code, min, sec, lat, lon, dist, yaw, roll, pitch, yaw_goal,
-               mleft, mright, stack, seq);
-        for (int8_t i = 0; i < 17; i++) printf("%c", cdata[i]);
-        printf("\n");
+        this->showLine(buf);
         head += 32;
         LFS::file_seek(&file_log, head, LFS_SEEK_SET);
     }
 }
 
+void Log::showLine(uint8_t buf[32]) {
+    int32_t lat, lon;
+    uint8_t code, min, sec, mleft, mright, seq, dist;
+    uint8_t cdata[17];
+    float yaw, roll, pitch, yaw_goal;
+    bool stack;
+    this->decodeLine(buf, &code, &min, &sec, &lat, &lon, &dist, 
+                     &yaw, &roll, &pitch, &yaw_goal,
+                     &mleft, &mright, &seq, &stack, cdata);
+    printf("%u,%u.%u,%d,%d,%u,%3.2f,%3.1f,%3.1f,%3.1f,%u,%u,%d,%u,",
+           code, min, sec, lat, lon, dist, yaw, roll, pitch, yaw_goal,
+           mleft, mright, stack, seq);
+    for (int8_t i = 0; i < 17; i++) printf("%c", cdata[i]);
+    printf("\n");
+
+}
+
 void Log::decodeLine(uint8_t raw[32],
-                   uint8_t* code, uint8_t* min, uint8_t* sec,
-                   int32_t* lat, int32_t* lon, uint8_t* dist,
-                   float* yaw, float* roll, float* pitch, float* yaw_goal,
-                   uint8_t* motor_left, uint8_t* motor_right,
-                   uint8_t* seq, bool* stack,
-                   uint8_t buf[17]) {
+                     uint8_t* code, uint8_t* min, uint8_t* sec,
+                     int32_t* lat, int32_t* lon, uint8_t* dist,
+                     float* yaw, float* roll, float* pitch, float* yaw_goal,
+                     uint8_t* motor_left, uint8_t* motor_right,
+                     uint8_t* seq, bool* stack,
+                     uint8_t buf[17]) {
     uint8_t tmp = 0;
     *code = raw[0] >> 4;
     *min = (raw[0] << 4) | (raw[1] >> 4);

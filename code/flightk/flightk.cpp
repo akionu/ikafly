@@ -18,10 +18,12 @@
 #include "nmeap.h"
 #include "../lib/ikafly_pin.h"
 //#include "imgcone.h"
-#include "ulog.h"
-#include "ugps.h"
 #include "tjpg.hpp"
 #include "cam.h"
+
+#include "ulog.h"
+#include "ugps.h"
+#include "angle.h"
 
 #include "config.h"
 
@@ -46,18 +48,41 @@ Motor motor;
 Press prs(i2c1, 0x77);
 IMU imu(i2c1);
 //IMGCONE imgcone;
-Log logging(0);
+Log logging(CODE);
+Radio rf(pin_rf_mosi, pin_rf_miso);
+
 static int my_out_func(JDEC *jdec, void *bitmap, JRECT *rect);
 void count_vert(uint8_t vert[5], uint32_t area[15]);
 void aupdate();
 // NSE19(8/16) lat: 40.142646, long: 139.987610
 // NSE19(8/17) lat: 40.142647, long: 139.987595
 // 3448.09403,N,13546.25752,
+// 34801609, 135770979
 GPS gps(
-    34801609, // goal_lat
-    135770979, // goal_long
+    GOAL_LAT, // goal_lat
+    GOAL_LONG, // goal_long
     111, 92, // noshiro
+#if CODE==1
     [](double x) {return (x);}
+#elif CODE==2
+    [](double x) {return (x*x);}
+#elif CODE==3
+    [](double x) {return (x*(2-x));}
+#elif CODE==4
+    [](double x) {return ((x*x)*(3-2*x));}
+#elif CODE==5
+    [](double x) {return (x);}
+#elif CODE==6
+    [](double x) {return (x*x);}
+#elif CODE==7
+    [](double x) {return (x*(2-x));}
+#elif CODE==8
+    [](double x) {return ((x*x)*(3-2*x));}
+#elif CODE==9
+    [](double x) {return (x);}
+#elif CODE==10
+    [](double x) {return (x*x);}
+#endif
 );
 
 //#ifdef CODE_A
@@ -73,6 +98,7 @@ GPS gps(
 //#endif //CODE_C
 
 uint8_t logbuf[17];
+uint8_t rsvdata[32];
 bool rt_flag = false;
 
 //bool bnoIsEnoughAccuracy() {
@@ -138,7 +164,7 @@ public:
             int8_t cnt = 0;
             for (int8_t i = 1; i < 10; i++) {
                 // さっきより高度が高い=より上にいる
-                if ((alt_change[i] - alt_change[i-1]) > 0.04) cnt++;
+                if ((alt_change[i] - alt_change[i-1]) > RISE_TH) cnt++;
                 //printf("isDetectRise: %d\n", cnt);
             }
             if (cnt > 4) {
@@ -151,7 +177,7 @@ public:
             int8_t cnt = 0;
             for (int8_t i = 1; i < 10; i++) {
                 // さっきより高度が低い=より下にいる（地面に近い）
-                if ((alt_change[i-1] - alt_change[i]) > 0.05) cnt++;
+                if ((alt_change[i-1] - alt_change[i]) > FALL_TH) cnt++;
             }
             if (cnt > 4) {
                 addLogBuf("%3.1f c%d Fall", alt_change[9], cnt);
@@ -226,6 +252,7 @@ public:
             if (abs(distlog[0]-distlog[10]) < 0.15) dcnt++;
             if (abs(distlog[11]-distlog[19]) < 0.15) dcnt++;
             if (dcnt >= 2) {
+                // 左右・前後を切り替え
                 is_stack = true;
                 if (stack_left) {
                     stack_left = false;
@@ -248,35 +275,48 @@ public:
                 }
             }
 
-            if (dist < 5.0f) {
+            if (dist < 10.0f) {
                 gps.setFx([](double x) {return x;});                    
-            }
-            if (dist < 3.0f) {
-                forwardYaw = gps.getDirection();
             }
             if (dist < 4.0f) {
                 return MODE_CAM;
             }
+
             float dir = gps.getDirection();
-            imu.getAttEuler(euler);
+            imu.getAttEuler(euler); 
+//            angle_t vpi_d, vyaw, vgps, vcur;
+//            Angle::deg2vec(M_PI_2, &vpi_d);
+//            Angle::deg2vec(-euler[2], &vyaw);
+//            Angle::deg2vec(dir, &vgps);
+//            Angle::minus(vyaw, vpi_d, &vcur);
+//            float yaw = acos(vcur.ct);
+//            float theta = Angle::theta(vgps, vcur);
+
             float yaw = -euler[2];
-            printf("dist: %f, dir: %f, yaw: %f\n", dist, dir, yaw);
-            if ((yaw > dir-angle_th) && (yaw < dir+angle_th)) {
+//            float yaw = gps.getCource_rad();
+//            float speed = gps.getSpeed_mps();
+            float theta = Angle::theta(dir, yaw);
+
+            printf("dist: %f, dir: %3.2f, e2: %3.2f, yaw: %3.2f, theta: %3.2f\n", dist, dir*RAD2DEG, -euler[2]*RAD2DEG, yaw*RAD2DEG, theta*RAD2DEG);
+//            if (speed < 0.05) {
+//                printf("forward because too slow\n");
+//                addLogBuf("s%3.2f Forward", theta);
+//            } else 
+            if (abs(theta) < angle_th) {
                 printf("forward\n");
-                addLogBuf("%2.1f %3.0f f", dist, dir);
-                motor.forward(1023);
-            } 
-            else if (yaw < (dir-angle_th)) {
+                addLogBuf("t%3.2f Forward", theta);
+//                motor.forward(1023);
+            } else if (theta > 0) {
                 printf("rightM\n");
-                addLogBuf("%2.1f %3.0f r", dist, dir);
-                motor.forward(1023,700);
-            } else if (yaw > (dir+angle_th)) {
-                addLogBuf("%2.1f %3.0f l", dist, dir);
+                addLogBuf("t%3.2f Right", theta);
+//                motor.forward(1023, 880);
+            } else if (theta < 0) {
+                addLogBuf("t%3.2f Left", theta);
                 printf("leftM\n");
-                motor.forward(700, 1023);
+//                motor.forward(880, 1023);
             } else {
                 printf("sikatanaku rightM\n");
-                motor.forward(1023,700);
+//                motor.forward(1023,880);
             }
         }
         return MODE_GNSS;
@@ -327,30 +367,38 @@ public:
 
             switch (dire) {
                 case 0:
-                    if (vert[0] == 0) {
-                        printf("ゴールは見当たりません");
-                        motor.forward(1023, 700);
+                    if (vert[0] <= 2) {
+                        printf("Cam: No Goal Found\n");
+                        addLogBuf("%02d %02d %02d %02d %02dNO GOAL", vert[4], vert[3], vert[2], vert[1], vert[1], vert[0]);
+                        motor.forward(1023, 880);
                     } else {
+                        printf("Cam: Right\n");
+                        addLogBuf("%02d %02d %02d %02d %02dRight", vert[4], vert[3], vert[2], vert[1], vert[1], vert[0]);
                         motor.forward(1023, 800);
-                        printf("右前方ゴールです\n");
                     }
-                    if (most > 20) return MODE_GOAL;
                     break;
                 case 1:
-                    printf("少し右前方ゴールです\n");
-                    motor.forward(1023, 900);
+                    printf("Cam: a bit Right\n");
+                    addLogBuf("%02d %02d %02d %02d %02dsRight", vert[4], vert[3], vert[2], vert[1], vert[1], vert[0]);
+                    motor.forward(1023, 880);
+                    if (most > 20) return MODE_GOAL;
                     break;
                 case 2:
-                    printf("前方ゴールです\n");
+                    printf("Cam: Forward\n");
+                    addLogBuf("%02d %02d %02d %02d %02dForward", vert[4], vert[3], vert[2], vert[1], vert[1], vert[0]);
                     motor.forward(1023);
+                    if (most > 20) return MODE_GOAL;
                     break;
                 case 3:
-                    motor.forward(900, 1023);
-                    printf("少し左前方ゴールです\n");
+                    printf("Cam: a bit Left\n");
+                    addLogBuf("%02d %02d %02d %02d %02daLeft", vert[4], vert[3], vert[2], vert[1], vert[1], vert[0]);
+                    motor.forward(880, 1023);
+                    if (most > 20) return MODE_GOAL;
                     break;
                 case 4:
-                    motor.forward(700, 1023);
-                    printf("左前方ゴールです\n");
+                    printf("Cam: Left\n");
+                    addLogBuf("%02d %02d %02d %02d %02daLeft", vert[4], vert[3], vert[2], vert[1], vert[1], vert[0]);
+                    motor.forward(800, 1023);
                     break;
             }
         }
@@ -372,13 +420,14 @@ public:
         if (gps.isReady()) {
             float dist = 0;
             if ((dist = gps.getDistance()) < 5.0f) {
-                printf("d:%2.0fm ok", dist);
+                printf("%2.0f GOAL!", dist);
                 printf("goal\n");
                 is_goal = true;
                 cam.capture();
                 logging.storeImg(cam.image_buf, cam.getJpegSize());
             } else {
                 printf("onlyGnss\n");
+                addLogBuf("Goal: OnlyGNSS");
                 isOnlyGnss = true;
                 return MODE_GNSS;
             }
@@ -401,17 +450,12 @@ public:
         return (is_stack);
     }
 private:
-    // landing
     float alt_change[10];
     bool isDetectRise;
     bool isDetectFall;
     uint16_t landingCnt;
-    // expansion, fowardLanding
     uint16_t expansionCnt;
-    // tof dame
     bool isOnlyGnss;
-    // forwardTof
-    float forwardYaw;
     bool is_stack = false;
 } mode;
 
@@ -432,6 +476,7 @@ bool rtCallback(repeating_timer_t* rt) {
 
 void aupdate() {
     uint32_t before = time_us_32();
+    static uint8_t lbuf[32] = {0};
     printf("mode_now: %d\n", mode_now);
     static int8_t cnt = 0;
     static bool islog = false;
@@ -470,15 +515,17 @@ void aupdate() {
         float roll = euler[0]*RAD2DEG;
         float pitch = euler[1]*RAD2DEG;
         float yaw = -euler[2]*RAD2DEG;
-        logging.addLog(gps.getLatitude(), gps.getLongitude(), gps.getDistance(),
+        logging.encodeLine(lbuf, gps.getLatitude(), gps.getLongitude(), gps.getDistance(),
                        yaw, roll, pitch, gps.getDirection(),
                        motor.getPwmLeft(), motor.getPwmRight(),
                        mode_now, mode.isStack(),
                        logbuf);
+//        if (rf.is_air_clear()) rf.send(lbuf);
     }
     islog = (islog ? (false) : (true));
     uint32_t et = time_us_32() - before;
     printf("elapsed: %d ms\n", et / 1000);
+    printf("\n");
 }
 
 // dirty zone
@@ -579,6 +626,11 @@ void count_vert(uint8_t vert[5], uint32_t area[15])
     }
 }
 
+//void receiveCallback(uint gpio, uint32_t events) {
+//    rf.receive(rsvdata);
+//    logging.showLine(rsvdata);
+//}
+
 int main(void) {
     stdio_init_all();
     sleep_ms(2000);
@@ -592,7 +644,7 @@ int main(void) {
     motor.init(pin_motor1_a, pin_motor2_a);
     //
     //
-    motor.setDirForward(-1, 1);
+    motor.setDirForward(MLEFT, MRIGHT);
 
     // i2c1: prs, imu
     i2c_init(i2c1, 400 * 1000);
@@ -649,11 +701,11 @@ int main(void) {
     #endif
 
     add_repeating_timer_ms(-20, &rtCallback, NULL, &timer);
+//    gpio_set_irq_enabled_with_callback(pin_rf_miso, GPIO_IRQ_EDGE_FALL | GPIO_IRQ_LEVEL_LOW, true, &receiveCallback);
 
     while (1) {
         if (rt_flag) {
-            printf("r %d ", rt_flag);
-            //            aupdate();
+            //aupdate();
             rt_flag = false;
         }   
     }

@@ -1,11 +1,5 @@
 #include "rf.h"
 #include "hardware/timer.h"
-#include "pico/platform.h"
-#include "../../freertos/config/FreeRTOSConfig.h"
-#include "../../freertos/FreeRTOS-Kernel/include/FreeRTOS.h"
-#include "../../freertos/FreeRTOS-Kernel/include/task.h"
-
-
 
 #include <cstdint>
 
@@ -55,12 +49,12 @@ void Radio::sendByte(uint8_t data) {
 	}
 }
 
-
-
 uint8_t Radio::receive(uint8_t packet[32]) {
 	// デフォルトは1、ビットは反転してない
 	uint8_t r[16] = {0x7f}; // 簡単のため富豪的
 	uint8_t detect[2] = {0};
+
+    uint32_t timeout = time_us_32() + 500;
 	while (1) {
 		detect[0] = 0; detect[1] = 0;
 
@@ -75,18 +69,18 @@ uint8_t Radio::receive(uint8_t packet[32]) {
 			detect[1] |= (r[8+i]<<(7-i));
 		}
 
-		
-
-		if (detect[0] == 0x66 && detect[1] == 0x99) break;
-		printf("detect\n");
-		vTaskDelay(5000);
+        if (detect[0] == 0x66 && detect[1] == 0x99) break;
+        else if (time_us_32() > timeout) {
+            printf("rf rsv timeout\n");
+            return 0;
+        }
 	}
 
 	for (int16_t i = 0; i < 32; i++) {
 		packet[i] = receiveByte();
 	}
 	printf("detect signal:\n");
-	return 1;
+	return 32;
 }
 
 uint8_t Radio::receiveByte() {
