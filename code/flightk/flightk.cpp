@@ -109,14 +109,14 @@ bool rt_flag = false;
 //    else return false;
 //}
 #define H_MIN_1 0 // 固定
-#define H_MAX_1 60
-#define H_MIN_2 300
+#define H_MAX_1 20
+#define H_MIN_2 330
 #define H_MAX_2 360 // 固定
 // Satuation
-#define S_MIN 10
+#define S_MIN 25
 #define S_MAX 100
 // Value
-#define V_MIN 15
+#define V_MIN 30
 #define V_MAX 90
 
 // util funcs
@@ -324,12 +324,15 @@ public:
 
     int8_t camera() {
         static bool iscap = true;
+        const uint8_t goal_th = 40;
+        static uint16_t found_cnt = 0;
+
         if (iscap) {
-            printf("capture");
+            printf("capture\n");
             cam.capture();
             iscap = false;
         } else {
-            printf("no-capture");
+            printf("no-capture\n");
             iscap = true;
 
             uint32_t size = cam.getJpegSize();
@@ -365,42 +368,46 @@ public:
                 }
             }
 
+            if (most < 10) {
+                printf("Cam: No Goal Found\n");
+                addLogBuf("%02d %02d %02d %02d %02dNO GOAL", vert[4], vert[3], vert[2], vert[1], vert[1], vert[0]);
+                found_cnt = 0;
+                motor.forward(1023, 400);
+                return MODE_CAM;
+            } else {
+                found_cnt++;
+            }
+
             switch (dire) {
                 case 0:
-                    if (vert[0] <= 2) {
-                        printf("Cam: No Goal Found\n");
-                        addLogBuf("%02d %02d %02d %02d %02dNO GOAL", vert[4], vert[3], vert[2], vert[1], vert[1], vert[0]);
-                        motor.forward(1023, 880);
-                    } else {
-                        printf("Cam: Right\n");
-                        addLogBuf("%02d %02d %02d %02d %02dRight", vert[4], vert[3], vert[2], vert[1], vert[1], vert[0]);
-                        motor.forward(1023, 800);
-                    }
-                    break;
+                    printf("Cam: Right\n");
+                    addLogBuf("%02d %02d %02d %02d %02dRight", vert[4], vert[3], vert[2], vert[1], vert[1], vert[0]);
                 case 1:
                     printf("Cam: a bit Right\n");
                     addLogBuf("%02d %02d %02d %02d %02dsRight", vert[4], vert[3], vert[2], vert[1], vert[1], vert[0]);
-                    motor.forward(1023, 880);
-                    if (most > 20) return MODE_GOAL;
+                    motor.forward(1023, 800);
                     break;
                 case 2:
                     printf("Cam: Forward\n");
                     addLogBuf("%02d %02d %02d %02d %02dForward", vert[4], vert[3], vert[2], vert[1], vert[1], vert[0]);
                     motor.forward(1023);
-                    if (most > 20) return MODE_GOAL;
                     break;
                 case 3:
                     printf("Cam: a bit Left\n");
                     addLogBuf("%02d %02d %02d %02d %02daLeft", vert[4], vert[3], vert[2], vert[1], vert[1], vert[0]);
                     motor.forward(880, 1023);
-                    if (most > 20) return MODE_GOAL;
                     break;
                 case 4:
                     printf("Cam: Left\n");
                     addLogBuf("%02d %02d %02d %02d %02daLeft", vert[4], vert[3], vert[2], vert[1], vert[1], vert[0]);
-                    motor.forward(800, 1023);
-                    break;
+                    motor.forward(650, 1023);
             }
+
+                if ((found_cnt >= 5) && (most > goal_th)) {
+                    return MODE_GOAL;
+                } else {
+                    return MODE_CAM;
+                }
         }
 
         return MODE_CAM;
@@ -409,18 +416,21 @@ public:
     int8_t goal() {
         static bool is_first = true;
         static bool is_goal = false;
+        float dist = 0.0f;
 
         if (is_first) {
             is_first = false;
         }
         if (is_goal) {
             motor.stop();
+            addLogBuf("%2.0f GOAL!", dist);
             return MODE_GOAL;
         }
         if (gps.isReady()) {
-            float dist = 0;
-            if ((dist = gps.getDistance()) < 5.0f) {
+            if (true) { // 忘れずに書き換え！！！
+//            if ((dist = gps.getDistance()) < 5.0f) {
                 printf("%2.0f GOAL!", dist);
+                addLogBuf("%2.2f GOAL!", dist);
                 printf("goal\n");
                 is_goal = true;
                 cam.capture();
@@ -520,6 +530,7 @@ void aupdate() {
                        motor.getPwmLeft(), motor.getPwmRight(),
                        mode_now, mode.isStack(),
                        logbuf);
+        logging.addLog(lbuf);
 //        if (rf.is_air_clear()) rf.send(lbuf);
     }
     islog = (islog ? (false) : (true));

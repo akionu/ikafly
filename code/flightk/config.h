@@ -16,8 +16,8 @@ enum {
 
 // 初期モード
 //static uint mode_now = MODE_LANDING;
-static uint mode_now = MODE_GNSS;
-//static uint mode_now = MODE_CAM;
+//static uint mode_now = MODE_GNSS;
+static uint mode_now = MODE_CAM;
 
 const float angle_th = 0.39; //前45度，GPS誘導
 
