@@ -78,14 +78,14 @@ uint8_t Radio::receive(uint8_t packet[32]) {
 		
 
 		if (detect[0] == 0x66 && detect[1] == 0x99) break;
-		printf("detect\n");
-		vTaskDelay(5000);
+		//printf("detect\n");
+		vTaskDelay(2000);
 	}
 
 	for (int16_t i = 0; i < 32; i++) {
 		packet[i] = receiveByte();
 	}
-	printf("detect signal:\n");
+	//printf("detect signal:\n");
 	return 1;
 }
 

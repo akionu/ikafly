@@ -45,8 +45,8 @@ while(1){
         
         imu.update();
 		imu.getAttEuler(euler);
-        printf("%+03.2f %+03.2f %+03.2f\n", euler[0]*RAD2DEG, euler[1]*RAD2DEG, euler[2]*RAD2DEG);
-		sleep_ms(20);
+        printf("%+03.2f\n",euler[2]*RAD2DEG);
+		sleep_ms(2);
 		}
 }
 

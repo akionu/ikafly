@@ -179,6 +179,7 @@ void task_landing(void *landing)
         {
 
             alt_m = prs.getAltM();
+             xSemaphoreGive(xMutex);
 
             xQueueSend(press_q, &alt_m, 10);
             if (alt_m - alt_av <= 0.01 && alt_av - alt_m <= 0.01)
@@ -224,11 +225,12 @@ void task_landing(void *landing)
             }
 
             printf("press");
-            xSemaphoreGive(xMutex);
+           
         }
         vTaskDelayUntil(&llk_landing, pdMS_TO_TICKS(200));
     }
 }
+
 
 void task_log(void *log)
 {
@@ -246,9 +248,9 @@ void task_log(void *log)
 
     printf("task_log\n");
 
+    // for debug
     vTaskSuspend(NULL);
 
-    // for debug
     TickType_t llk_log;
     llk_log = xTaskGetTickCount();
 
@@ -258,7 +260,7 @@ void task_log(void *log)
     {
         if (gnss_q != NULL && press_q != NULL && imu_q != NULL)
         {
-            if (i % 10 == 0)
+            /*if (i % 10 == 0)
             {
                 xQueueReset(press_q);
                 xQueueReset(gnss_q);
@@ -266,7 +268,7 @@ void task_log(void *log)
                 xQueueReset(receive_q);
 
                 printf("q_reset");
-            }
+            }*/
 
             if (xQueueReceive(gnss_q, &gdata[1], 10) == 1)
             {
@@ -288,8 +290,8 @@ void task_log(void *log)
             {
                 vTaskResume(gcontrol_h);
                 vTaskResume(receive_h);
-                 vTaskResume(stuck_h);
-                 vTaskResume(send_h);
+                vTaskResume(stuck_h);
+                vTaskResume(send_h);
                 l++;
             }
 
@@ -321,7 +323,6 @@ double distance(double x1, double y1, double x2, double y2)
     return EARTH_RAD * acos(sin(y1 * rp) * sin(y2 * rp) + cos(y1 * rp) * cos(y2 * rp) * cos(x2 * rp - x1 * rp));
 }
 
-
 static void gpgga_callout(nmeap_context_t *context, void *data, void *user_data)
 {
     nmeap_gga_t *gga = (nmeap_gga_t *)data;
@@ -343,7 +344,8 @@ void task_gnss(void *gnss)
     double torig[4];
     float yaw;
 
-   
+    TickType_t llk_gnss;
+    llk_gnss = xTaskGetTickCount();
     gnss_q = xQueueCreate(32, sizeof(gga_s));
 
     gpio_init(25);
@@ -366,14 +368,9 @@ void task_gnss(void *gnss)
 
     printf("task_gnss");
 
-    vTaskSuspend(NULL);
-
     vTaskResume(imu_h);
     vTaskResume(log_h);
     vTaskResume(landing_h);
-
-     TickType_t llk_gnss;
-    llk_gnss = xTaskGetTickCount();
     while (1)
     {
         call_a = call;
@@ -401,7 +398,7 @@ void task_gnss(void *gnss)
             gdata[0].gns[1] = gga.longitude * 10000000;
             gdata[0].dis = distance(goal_longitude, goal_latitude, gga.longitude, gga.latitude);
 
-            printf("%d,%d",gdata[0].dis,gdata[0].arg);
+            printf("%d,%d", gdata[0].dis, gdata[0].arg);
 
             xQueueSend(gnss_q, &gdata[0], 0);
 
@@ -417,7 +414,6 @@ void task_imu(void *imu_t)
     float euler[3];
     // for debug
     printf("task_imu");
-
     vTaskSuspend(NULL);
 
     TickType_t llk_imu;
@@ -429,9 +425,10 @@ void task_imu(void *imu_t)
         {
             imu.update();
             imu.getAttEuler(euler);
-            xQueueSend(imu_q, &euler[2], 10);
-           // printf("imu");
             xSemaphoreGive(xMutex);
+            xQueueSend(imu_q, &euler[2], 10);
+            // printf("imu");
+          
         }
 
         vTaskDelayUntil(&llk_imu, pdMS_TO_TICKS(20));
@@ -522,8 +519,8 @@ void task_gcontrol(void *gcontrol)
                 }
             }
 
-            //for debug
-           /* s++;
+            // for debug
+            s++;
             if (s == 30)
             {
 
@@ -534,7 +531,7 @@ void task_gcontrol(void *gcontrol)
                 vTaskResume(ccontrol_h);
                 printf("done\n");
                 vTaskSuspend(NULL);
-            }*/
+            }
         }
         vTaskDelayUntil(&llk_gcontrol, pdMS_TO_TICKS(200));
 
@@ -648,7 +645,6 @@ void task_ccontrol(void *ccontrol)
     uint8_t vert[5] = {0};
 
     printf("task_ccontrol\n");
-
     vTaskSuspend(NULL);
 
     TickType_t llk_ccontrol;
@@ -656,7 +652,6 @@ void task_ccontrol(void *ccontrol)
 
     while (1)
     {
-        printf("wate");
         result = xEventGroupWaitBits(gcs_event, cbit, pdTRUE, pdTRUE, (TickType_t)0xffffff);
         if (result && cbit)
         {
@@ -664,7 +659,9 @@ void task_ccontrol(void *ccontrol)
             {
                 printf("%d: ", cnt++);
                 cam.capture();
-             vTaskDelayUntil(&llk_ccontrol,pdMS_TO_TICKS(1000));
+
+                vTaskDelayUntil(&llk_ccontrol, pdMS_TO_TICKS(500));
+                xSemaphoreGive(xMutex);
 
                 uint32_t size = cam.getJpegSize();
                 printf("last: ");
@@ -684,18 +681,18 @@ void task_ccontrol(void *ccontrol)
                     {
                         printf("\rDecompression succeeded.\n");
                         // print red_area (20x15)
-                       /* uint8_t bit;
-                        for (uint8_t y = 0; y < 15; y++)
-                        {
-                            //                   std::cout << std::bitset<32>(red_area[y]) << std::endl;
-                            for (int8_t i = 20 - 1; i >= 0; i--)
-                            {
-                                bit = (red_area[y] >> i) & 1;
-                                printf("%u", bit);
-                            }
-                            printf("\n");
-                        }*/
-                          count_vert(vert, red_area);
+                        /* uint8_t bit;
+                         for (uint8_t y = 0; y < 15; y++)
+                         {
+                             //                   std::cout << std::bitset<32>(red_area[y]) << std::endl;
+                             for (int8_t i = 20 - 1; i >= 0; i--)
+                             {
+                                 bit = (red_area[y] >> i) & 1;
+                                 printf("%u", bit);
+                             }
+                             printf("\n");
+                         }*/
+                        count_vert(vert, red_area);
 
                         if (vert[0] > 30 && vert[1] > 30 && vert[2] > 30 && vert[3] > 30 && vert[4] > 30)
                         {
@@ -768,16 +765,15 @@ void task_ccontrol(void *ccontrol)
 
                             motor.forward(800, 1023);
                         }
-                    }else{
+                    }
+                    else
+                    {
                         printf("残念");
                     }
                 }
-                xSemaphoreGive(xMutex);
             }
-            printf("WWWW");
-
         }
-        vTaskDelayUntil(&llk_ccontrol,pdMS_TO_TICKS(200));
+        vTaskDelayUntil(&llk_ccontrol, pdMS_TO_TICKS(200));
     }
 }
 
@@ -794,8 +790,6 @@ void task_send(void *send)
 
     TickType_t llk_send;
     llk_send = xTaskGetTickCount();
-
- 
 
     while (1)
     {
@@ -832,6 +826,7 @@ void task_receive(void *receive)
     uint32_t rec[2];
     uint8_t packet_r[32];
     printf("task_receive\n");
+
     vTaskSuspend(NULL);
 
     TickType_t llk_receive;
@@ -848,7 +843,7 @@ void task_receive(void *receive)
 
         xQueueSend(receive_q, &rec, 10);
 
-        vTaskDelayUntil(&llk_receive, pdMS_TO_TICKS(3000));
+        vTaskDelayUntil(&llk_receive, pdMS_TO_TICKS(1000));
         // vTaskDelay(3000);
     }
 }
@@ -861,9 +856,9 @@ void task_stuck(void *stuck)
     stuck_q = xQueueCreate(32, sizeof(stucking));
 
     printf("task_stucking\n");
-    vTaskSuspend(NULL);
 
     // for debug
+    vTaskSuspend(NULL);
 
     TickType_t llk_stuck;
     llk_stuck = xTaskGetTickCount();
@@ -880,6 +875,7 @@ void task_stuck(void *stuck)
                 {
                     gdata[5].dis = gdata[4].dis;
                     gdata[5].arg = gdata[4].arg;
+                    p++;
                 }
                 else
                 {
@@ -913,12 +909,12 @@ void task_stuck(void *stuck)
                     }
                     gdata[5].dis = gdata[4].dis;
                     gdata[5].arg = gdata[4].arg;
+                    xQueueSend(stuck_q, &stucking, 10);
                 }
             }
             printf("st\n");
         }
 
-        xQueueSend(stuck_q, &stucking, 10);
         vTaskDelayUntil(&llk_stuck, pdMS_TO_TICKS(10000));
         //  vTaskDelay(3000);
     }
@@ -944,15 +940,14 @@ int main(void)
     printf("init");
 
     xTaskCreate(task_gnss, "task_gnss", 1024 * 2, NULL, 2, &gnss_h);
-    xTaskCreate(task_imu, "task_imu", 1024 * 2, NULL, 3, &imu_h);
-    xTaskCreate(task_landing, "task_landing", 1024 * 2, NULL, 4, &landing_h);
-    xTaskCreate(task_gcontrol, "task_gcontrol", 1024 * 2, NULL, 5, &gcontrol_h);
-    xTaskCreate(task_ccontrol, "task_ccontrol", 1024 * 2, NULL, 6, &ccontrol_h);
-    xTaskCreate(task_receive, "task_receive", 1024*2, NULL,6 , &receive_h);
-    xTaskCreate(task_send, "task_send", 1024*2, NULL, 7, &send_h);
-    xTaskCreate(task_stuck, "task_stuck", 1024*2, NULL, 8, &stuck_h);
-    xTaskCreate(task_log, "task_log", 1024 * 2, NULL, 9, &log_h);
-
+    xTaskCreate(task_imu, "task_imu", 1024 * 2, NULL, 4, &imu_h);
+    xTaskCreate(task_landing, "task_landing", 1024 * 2, NULL, 5, &landing_h);
+    xTaskCreate(task_gcontrol, "task_gcontrol", 1024 * 2, NULL, 6, &gcontrol_h);
+    xTaskCreate(task_ccontrol, "task_ccontrol", 1024 * 2, NULL, 7, &ccontrol_h);
+    xTaskCreate(task_receive, "task_receive", 1024 * 2, NULL, 7, &receive_h);
+    xTaskCreate(task_send, "task_send", 1024 * 2, NULL, 8, &send_h);
+    xTaskCreate(task_stuck, "task_stuck", 1024 * 2, NULL, 9, &stuck_h);
+    xTaskCreate(task_log, "task_log", 1024 * 2, NULL, 10, &log_h);
 
     vTaskStartScheduler();
     while (1)
