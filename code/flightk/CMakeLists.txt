@@ -101,7 +101,7 @@ target_compile_definitions(kflight_4 PUBLIC CODE=4 MLEFT=-1 MRIGHT=1)
 target_compile_definitions(kflight_5 PUBLIC CODE=5 MLEFT=-1 MRIGHT=1)
 target_compile_definitions(kflight_6 PUBLIC CODE=6 MLEFT=-1 MRIGHT=1)
 target_compile_definitions(kflight_7 PUBLIC CODE=7 MLEFT=-1 MRIGHT=1)
-target_compile_definitions(kflight_8 PUBLIC CODE=8 MLEFT=-1 MRIGHT=1)
+target_compile_definitions(kflight_8 PUBLIC CODE=8 MLEFT=1 MRIGHT=1)
 target_compile_definitions(kflight_9 PUBLIC CODE=9 MLEFT=-1 MRIGHT=1)
 target_compile_definitions(kflight_10 PUBLIC CODE=10 MLEFT=-1 MRIGHT=1)
 

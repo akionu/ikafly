@@ -64,24 +64,24 @@ GPS gps(
     111, 92, // noshiro
 #if CODE==1
     [](double x) {return (x);}
-#elif CODE==2
-    [](double x) {return (x*x);}
+    #elif CODE==2
+       [](double x) {return (x*x);}
 #elif CODE==3
-    [](double x) {return (x*(2-x));}
+[](double x) {return (x*(2-x));}
 #elif CODE==4
-    [](double x) {return ((x*x)*(3-2*x));}
+[](double x) {return ((x*x)*(3-2*x));}
 #elif CODE==5
-    [](double x) {return (x);}
+[](double x) {return (x);}
 #elif CODE==6
-    [](double x) {return (x*x);}
+[](double x) {return (x*x);}
 #elif CODE==7
-    [](double x) {return (x*(2-x));}
+[](double x) {return (x*(2-x));}
 #elif CODE==8
-    [](double x) {return ((x*x)*(3-2*x));}
+[](double x) {return ((x*x)*(3-2*x));}
 #elif CODE==9
-    [](double x) {return (x);}
+[](double x) {return (x);}
 #elif CODE==10
-    [](double x) {return (x*x);}
+[](double x) {return (x*x);}
 #endif
 );
 
@@ -109,15 +109,15 @@ bool rt_flag = false;
 //    else return false;
 //}
 #define H_MIN_1 0 // 固定
-#define H_MAX_1 20
-#define H_MIN_2 330
+#define H_MAX_1 30
+#define H_MIN_2 300
 #define H_MAX_2 360 // 固定
 // Satuation
-#define S_MIN 25
+#define S_MIN 10
 #define S_MAX 100
 // Value
-#define V_MIN 30
-#define V_MAX 90
+#define V_MIN 20
+#define V_MAX 100
 
 // util funcs
 #define min(a, b) (((a) < (b)) ? (a) : (b))
@@ -205,11 +205,11 @@ public:
         } else {
             //landingCnt = 0;
             // 300s
-            if (landingCnt > (300*SEC2CNT)) {
+            if (landingCnt > (CNT_LAND_ALTREF*SEC2CNT)) {
                 if (abs(alt_change[9]-alt_ref) < 10) {
                     addLogBuf("lcnt%4d Land", landingCnt);
                     return MODE_NICHROME;
-                } else if (landingCnt > (500*SEC2CNT)) {
+                } else if (landingCnt > (CNT_LAND_NOALT*SEC2CNT)) {
                     addLogBuf("lcnt%4d Land", landingCnt);
                     return MODE_NICHROME;
                 }
@@ -240,11 +240,12 @@ public:
         static int8_t stack_cnt = 0;
         static bool stack_left = true;
         float euler[3] = {0};
+        static float dist = 0, dir = 0;
         if (gps.isReady()) {
 
             gps.calc();
             //printf("gps ready\n");
-            float dist = gps.getDistance();
+            dist = gps.getDistance();
 
             for (int8_t i = 0; i < 20-1; i++) distlog[i] = distlog[i+1];
             distlog[19] = dist;
@@ -261,7 +262,7 @@ public:
                 } else {
                     stack_left = true;
                     motor.backward(1023);
-                    addLogBuf("stack right");
+                    addLogBuf("stack back");
                 }
             }
             if (is_stack) {
@@ -276,55 +277,56 @@ public:
             }
 
             if (dist < 10.0f) {
-                gps.setFx([](double x) {return x;});                    
+                gps.setFx([](double x) {return x;});
             }
             if (dist < 4.0f) {
                 return MODE_CAM;
             }
 
-            float dir = gps.getDirection();
-            imu.getAttEuler(euler); 
-//            angle_t vpi_d, vyaw, vgps, vcur;
-//            Angle::deg2vec(M_PI_2, &vpi_d);
-//            Angle::deg2vec(-euler[2], &vyaw);
-//            Angle::deg2vec(dir, &vgps);
-//            Angle::minus(vyaw, vpi_d, &vcur);
-//            float yaw = acos(vcur.ct);
-//            float theta = Angle::theta(vgps, vcur);
+            dir = gps.getDirection();
+        }
+        imu.getAttEuler(euler); 
+        //            angle_t vpi_d, vyaw, vgps, vcur;
+        //            Angle::deg2vec(M_PI_2, &vpi_d);
+        //            Angle::deg2vec(-euler[2], &vyaw);
+        //            Angle::deg2vec(dir, &vgps);
+        //            Angle::minus(vyaw, vpi_d, &vcur);
+        //            float yaw = acos(vcur.ct);
+        //            float theta = Angle::theta(vgps, vcur);
 
-            float yaw = -euler[2];
-//            float yaw = gps.getCource_rad();
-//            float speed = gps.getSpeed_mps();
-            float theta = Angle::theta(dir, yaw);
+        float yaw = euler[2];
+        //            float yaw = gps.getCource_rad();
+        //            float speed = gps.getSpeed_mps();
+        float theta = Angle::theta(dir, yaw);
 
-            printf("dist: %f, dir: %3.2f, e2: %3.2f, yaw: %3.2f, theta: %3.2f\n", dist, dir*RAD2DEG, -euler[2]*RAD2DEG, yaw*RAD2DEG, theta*RAD2DEG);
-//            if (speed < 0.05) {
-//                printf("forward because too slow\n");
-//                addLogBuf("s%3.2f Forward", theta);
-//            } else 
-            if (abs(theta) < angle_th) {
-                printf("forward\n");
-                addLogBuf("t%3.2f Forward", theta);
-//                motor.forward(1023);
-            } else if (theta > 0) {
-                printf("rightM\n");
-                addLogBuf("t%3.2f Right", theta);
-//                motor.forward(1023, 880);
-            } else if (theta < 0) {
-                addLogBuf("t%3.2f Left", theta);
-                printf("leftM\n");
-//                motor.forward(880, 1023);
-            } else {
-                printf("sikatanaku rightM\n");
-//                motor.forward(1023,880);
-            }
+        printf("dist: %f, dir: %3.2f, yaw: %3.2f, theta: %3.2f\n", dist, dir*RAD2DEG, yaw*RAD2DEG, theta*RAD2DEG);
+        //            printf("dist: %f, dir: %3.2f, e2: %3.2f, yaw: %3.2f, theta: %3.2f\n", dist, dir*RAD2DEG, -euler[2]*RAD2DEG,yaw*RAD2DEG, theta*RAD2DEG);
+        //            if (speed < 0.05) {
+        //                printf("forward because too slow\n");
+        //                addLogBuf("s%3.2f Forward", theta);
+        //            } else 
+        if (abs(theta) < angle_th) {
+            printf("forward\n");
+            addLogBuf("t%3.2f Forward", theta);
+            motor.forward(1023);
+        } else if (theta > 0) {
+            printf("rightM\n");
+            addLogBuf("t%3.2f Right", theta);
+            motor.forward(1023, 550);
+        } else if (theta < 0) {
+            addLogBuf("t%3.2f Left", theta);
+            printf("leftM\n");
+            motor.forward(550, 1023);
+        } else {
+            printf("sikatanaku rightM\n");
+            motor.forward(1023,700);
         }
         return MODE_GNSS;
     }
 
     int8_t camera() {
         static bool iscap = true;
-        const uint8_t goal_th = 40;
+        const uint8_t goal_th = 30;
         static uint16_t found_cnt = 0;
 
         if (iscap) {
@@ -403,14 +405,32 @@ public:
                     motor.forward(650, 1023);
             }
 
-                if ((found_cnt >= 5) && (most > goal_th)) {
-                    return MODE_GOAL;
-                } else {
-                    return MODE_CAM;
-                }
+            if ((found_cnt >= 5) && (most > goal_th)) {
+                return MODE_FORWARD_CAM;
+            } else {
+                return MODE_CAM;
+            }
         }
-
         return MODE_CAM;
+    }
+
+    int8_t forwardCam() {
+        static bool is_first = true;
+        static int8_t cnt = 0;
+
+        addLogBuf("forwardCam %d", cnt);
+        if (is_first) {
+            is_first = false;
+            cnt = 0;
+            return MODE_FORWARD_CAM;
+        } else if (cnt < 4*SEC2CNT){
+            cnt++;
+            motor.forward(1023);
+            return MODE_FORWARD_CAM;
+        } else {
+            is_first = true;
+            return MODE_GOAL;
+        }
     }
 
     int8_t goal() {
@@ -423,13 +443,13 @@ public:
         }
         if (is_goal) {
             motor.stop();
-            addLogBuf("%2.0f GOAL!", dist);
+            addLogBuf("%2.2f GOAL!", dist);
             return MODE_GOAL;
         }
         if (gps.isReady()) {
-            if (true) { // 忘れずに書き換え！！！
-//            if ((dist = gps.getDistance()) < 5.0f) {
-                printf("%2.0f GOAL!", dist);
+            //            if (true) { // 忘れずに書き換え！！！
+            if ((dist = gps.getDistance()) < 5.0f) {
+                printf("%2.1f GOAL!", dist);
                 addLogBuf("%2.2f GOAL!", dist);
                 printf("goal\n");
                 is_goal = true;
@@ -471,10 +491,14 @@ private:
 
 bool rtCallback(repeating_timer_t* rt) {
     static int16_t i = 0;
+    static float euler[3];
     //    printf("%d-", time_us_32()/1000);
     imu.update();
     if (i == 25) {
+        motor.stop();
         rt_flag = true;
+//        imu.getAttEuler(euler);
+        //		printf("%+03.2f %+03.2f %+03.2f\n", euler[0]*RAD2DEG, euler[1]*RAD2DEG, euler[2]*RAD2DEG);
         i = 0;
         aupdate();
     } else {
@@ -524,14 +548,20 @@ void aupdate() {
         imu.getAttEuler(euler);
         float roll = euler[0]*RAD2DEG;
         float pitch = euler[1]*RAD2DEG;
-        float yaw = -euler[2]*RAD2DEG;
+        float yaw = euler[2]*RAD2DEG;
         logging.encodeLine(lbuf, gps.getLatitude(), gps.getLongitude(), gps.getDistance(),
-                       yaw, roll, pitch, gps.getDirection(),
-                       motor.getPwmLeft(), motor.getPwmRight(),
-                       mode_now, mode.isStack(),
-                       logbuf);
+                           yaw, roll, pitch, gps.getDirection(),
+                           motor.getPwmLeft(), motor.getPwmRight(),
+                           mode_now, mode.isStack(),
+                           logbuf);
+        //        printf("x,x.xx,%d,%d,%3.2f,%3.2f,%3.2f,%3.2f,%3.2f,%d,%d,%d,%d\n",
+        //               gps.getLatitude(), gps.getLongitude(), gps.getDistance(),
+        //               yaw, roll, pitch, gps.getDirection(),
+        //               motor.getPwmLeft(), motor.getPwmRight(),
+        //               mode.isStack(), mode_now);
+        logging.showLine(lbuf);
         logging.addLog(lbuf);
-//        if (rf.is_air_clear()) rf.send(lbuf);
+        //        if (rf.is_air_clear()) rf.send(lbuf);
     }
     islog = (islog ? (false) : (true));
     uint32_t et = time_us_32() - before;
@@ -696,11 +726,11 @@ int main(void) {
     printf("logging: %s\n", ret?"ok":"fail");
 
     // imu calibration
-    #ifdef ALWAYS_CALIB
+#ifdef ALWAYS_CALIB
     printf("always calibrate mode. calibrating...\n");
     imu.calibration();
     logging.storeCalibData(imu.co);
-    #else
+#else
     ret = logging.readCalibData(imu.co);
     if (!ret) {
         printf("no calibration data found. calibrating...\n");
@@ -709,10 +739,11 @@ int main(void) {
     } else {
         printf("found calibration data\n");
     }
-    #endif
+    printf("co: %f %f %f %f\n", imu.co[0], imu.co[1], imu.co[2], imu.co[3]);
+#endif
 
     add_repeating_timer_ms(-20, &rtCallback, NULL, &timer);
-//    gpio_set_irq_enabled_with_callback(pin_rf_miso, GPIO_IRQ_EDGE_FALL | GPIO_IRQ_LEVEL_LOW, true, &receiveCallback);
+    //    gpio_set_irq_enabled_with_callback(pin_rf_miso, GPIO_IRQ_EDGE_FALL | GPIO_IRQ_LEVEL_LOW, true, &receiveCallback);
 
     while (1) {
         if (rt_flag) {

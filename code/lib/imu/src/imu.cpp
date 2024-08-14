@@ -225,9 +225,9 @@ void IMU::update() {
 		memset(mag_raw, 0x00, 3 * sizeof(int16_t));
 		lis3mdl_magnetic_raw_get(&lis3mdl, mag_raw);
 		mag_mG[1] = -1000 * lis3mdl_from_fs16_to_gauss(
-				mag_raw[0]-this->co[0]);
-		mag_mG[0] = -1000 * lis3mdl_from_fs16_to_gauss(
 				mag_raw[1]-this->co[1]);
+		mag_mG[0] = 1000 * lis3mdl_from_fs16_to_gauss(
+				mag_raw[0]-this->co[0]);
 		mag_mG[2] = 1000 * lis3mdl_from_fs16_to_gauss(
 				mag_raw[2]-this->co[2]);
 		//		printf("Magnetic field [mG]:%4.2f %4.2f %4.2f\n", mag_mG[0], mag_mG[1], mag_mG[2]);

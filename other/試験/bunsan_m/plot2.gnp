@@ -1,0 +1,11 @@
+set xlabel "Wind [m/s]"
+set ylabel "Max Height [m]"
+set key right top
+set terminal png
+set terminal png font "Times New Roman,14"
+set datafile separator ","
+set grid
+set xtics 1, 1, 20
+
+set output "bunsan05.png"
+plot [][] "res05.csv" u 1:2 w l lw 2 

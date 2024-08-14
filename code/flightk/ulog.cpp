@@ -2,8 +2,8 @@
 
 //LFS LFS::
 
-#define YRP_DEG2DIV (0.0888888888888) // 32/360
-#define YRP_DIV2DEG (11.25) // 360/32
+#define YRP_DEG2DIV (0.0444444444444) // 32/720
+#define YRP_DIV2DEG (22.5) // 360/31
 
 Log::Log(uint8_t code) {
     this->code = code;
@@ -73,8 +73,10 @@ void Log::encodeLine(uint8_t dst[32],
                      int16_t motor_left, int16_t motor_right,
                      uint8_t seq, bool stack,
                      uint8_t buf[17]) {
-    uint8_t mleft = (uint8_t)((float)abs(motor_left) * (4.0/1023.0)) & 0b0011;
-    uint8_t mright = (uint8_t)((float)abs(motor_right) * (4.0/1023.0)) & 0b0011;
+    uint8_t mleft = (uint8_t)((float)abs(motor_left) * (3.0/1023.0) + 0.1) & 0b0011;
+    uint8_t mright = (uint8_t)((float)abs(motor_right) * (3.0/1023.0) + 0.1) & 0b0011;
+//    printf("encode: mleft: %u, mright: %u, ", mleft, mright);
+//    printf("motor_left: %d, motor_right: %d, al: %d, ar: %d\n", motor_left, motor_right, abs(motor_left), abs(motor_right));
     //uint8_t buf[12] = {' '};
     rtc_get_datetime(&time);
     // 機体コード
@@ -96,26 +98,30 @@ void Log::encodeLine(uint8_t dst[32],
     dst[10] = (lon & 0xff);
     // yaw
     // y5 y4 y3 y2 y1 r5 r4 r3
-    yaw += 180.0;
-    uint8_t tmp = (uint8_t)(yaw*YRP_DEG2DIV+0.5);
+    yaw += 360.0; roll += 360.0; pitch += 360.0; yaw_goal += 360.0;
+    uint8_t tmp = (float)(yaw*YRP_DEG2DIV+0.5);
+    //printf("yaw: %d, ", tmp);
     dst[11] = (tmp & 0b00011111) << 3;
     // roll
-    tmp = (uint8_t)(roll*YRP_DEG2DIV+0.5);
+    tmp = (float)(roll*YRP_DEG2DIV+0.5);
+    //printf("roll: %d, ", tmp);
     dst[11] |= (tmp & 0b00011100) >> 2;
     // r2 r1 p5 p4 p3 p2 p1 stack
     dst[12] = (tmp & 0b00000011) << 6;
     // pitch
-    tmp = (uint8_t)(pitch*YRP_DEG2DIV+0.5);
+    tmp = (float)(pitch*YRP_DEG2DIV+0.5);
+    //printf("pitch: %d, ", tmp);
     dst[12] |= (tmp & 0b00011111) << 1;
     dst[12] |= (stack?1:0) & 0x01;
     // goal yaw
     // y5 y4 y3 y2 y1 s3 s2 s1
-    tmp = (uint8_t)(yaw_goal*YRP_DEG2DIV+0.5);
+    tmp = (float)(yaw_goal*YRP_DEG2DIV+0.5);
     dst[13] = (tmp & 0b00011111) << 3;
     // seq number
     dst[13] |= (seq & 0b0111);
     // dist from goal
     dst[14] = (uint8_t)dist;
+    //printf("dist: %d, ", dst[14]);
     // data
     for (int i = 0; i < 17; i++) dst[i+15] = buf[i];
 }
@@ -137,13 +143,13 @@ void Log::showAll() {
 void Log::showLine(uint8_t buf[32]) {
     int32_t lat, lon;
     uint8_t code, min, sec, mleft, mright, seq, dist;
-    uint8_t cdata[17];
+    uint8_t cdata[17] = {' '};
     float yaw, roll, pitch, yaw_goal;
     bool stack;
     this->decodeLine(buf, &code, &min, &sec, &lat, &lon, &dist, 
                      &yaw, &roll, &pitch, &yaw_goal,
                      &mleft, &mright, &seq, &stack, cdata);
-    printf("%u,%u.%u,%d,%d,%u,%3.2f,%3.1f,%3.1f,%3.1f,%u,%u,%d,%u,",
+    printf("%u,%u.%u,%d,%d,%u,%3.1f,%3.1f,%3.1f,%3.1f,%u,%u,%d,%u",
            code, min, sec, lat, lon, dist, yaw, roll, pitch, yaw_goal,
            mleft, mright, stack, seq);
     for (int8_t i = 0; i < 17; i++) printf("%c", cdata[i]);
@@ -167,14 +173,14 @@ void Log::decodeLine(uint8_t raw[32],
     *lat = (raw[3] << 24) | (raw[4] << 16) | (raw[5] << 8) | raw[6];
     *lon = (raw[7] << 24) | (raw[8] << 16) | (raw[9] << 8) | raw[10];
     tmp = (raw[11] >> 3) & 0b00011111;
-    *yaw = YRP_DIV2DEG*(float)tmp;
+    *yaw = YRP_DIV2DEG*(float)tmp - 360.0;
     tmp = ((raw[11] << 2) & 0b00011100) | ((raw[12] >> 6) & 0b00000011);
-    *roll = YRP_DIV2DEG*(float)tmp;
+    *roll = YRP_DIV2DEG*(float)tmp - 360.0;
     tmp = (raw[12] >> 1) & 0b00011111;
-    *pitch = YRP_DIV2DEG*(float)tmp;
+    *pitch = YRP_DIV2DEG*(float)tmp - 360.0;
     *stack = (raw[12]&0x01)?true:false;
     tmp = (raw[13] >> 3) & 0b00011111;
-    *yaw_goal = YRP_DIV2DEG*(float)tmp;
+    *yaw_goal = YRP_DIV2DEG*(float)tmp - 360.0;
     *seq = (raw[13] & 0b0111);
     *dist = raw[14];
     for (int8_t i = 0; i < 17; i++) buf[i] = raw[i+15];
@@ -214,13 +220,13 @@ bool Log::storeImg(uint8_t* img, int32_t size) {
 
 bool Log::readImg(uint8_t* img, int16_t* read_size, int32_t max_size) {
     int16_t ret;
-    ret = LFS::file_open(&file_img, "img", LFS_O_RDWR | LFS_O_CREAT);
+    ret = LFS::file_open(&file_img, "img", LFS_O_RDONLY);
     if (ret < 0) return false;
     ret = LFS::file_read(&file_img, img, max_size);
-    if (ret < 0) return false;
+    if (ret <= 0) return false;
     else {
         *read_size = ret;
     }
     ret = LFS::file_close(&file_img);
-    return (ret >= 0);
+    return (ret > 0);
 }
