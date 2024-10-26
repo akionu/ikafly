@@ -1,0 +1,34 @@
+# echo "load 'plot.gnp'" | gnuplot
+set ylabel "Latitude [(1/10^6) deg]"
+set xlabel "Longitude [(1/10^6) deg]"
+set key right top
+set terminal png font "Times New Roman,14" size 1280, 960
+set datafile separator ","
+
+lon_th = 1.39*10**8
+lat_th = 3.9*10**7
+#lon_th = 1
+#lat_th = 3
+set pointsize 1.2
+
+set title "Ikafly Flight-3 GPS (All)"
+set output "flight3_gps.png"
+plot [][] "k11.csv" u (($4>lon_th)?$4:1/0):(($3>lat_th)?$3:1/0) pt 9 title "No.1", \
+"k3.csv" u (($4>lon_th)?$4:1/0):(($3>lat_th)?$3:1/0) pt 10 title "No.3", \
+"k4.csv" u (($4>lon_th)?$4:1/0):(($3>lat_th)?$3:1/0) pt 4 title "No.4", \
+"k5.csv" u (($4>lon_th)?$4:1/0):(($3>lat_th)?$3:1/0) pt 3 title "No.5", \
+"k8.csv" u (($4>lon_th)?$4:1/0):(($3>lat_th)?$3:1/0) pt 5 title "No.8", \
+"k9.csv" u (($4>lon_th)?$4:1/0):(($3>lat_th)?$3:1/0) pt 7 title "No.9", \
+"k10.csv" u (($4>lon_th)?$4:1/0):(($3>lat_th)?$3:1/0) pt 8 title "No.10", \
+"goal.csv" u 2:1 pt 22 ps 3  lc rgb "red" title "Goal"
+
+set title "Ikafly Flight-3 GPS (After Landing)"
+set output "flight3_gps_afterlanding.png"
+plot [][] "k11m.csv" u (($4>lon_th)?$4:1/0):(($3>lat_th)?$3:1/0) pt 9 title "No.1", \
+"k4m.csv" u (($4>lon_th)?$4:1/0):(($3>lat_th)?$3:1/0) pt 4 title "No.4", \
+"k5m.csv" u (($4>lon_th)?$4:1/0):(($3>lat_th)?$3:1/0) pt 3 title "No.5", \
+"k8m.csv" u (($4>lon_th)?$4:1/0):(($3>lat_th)?$3:1/0) pt 5 title "No.8", \
+"k9m.csv" u (($4>lon_th)?$4:1/0):(($3>lat_th)?$3:1/0) pt 7 title "No.9", \
+"k10m.csv" u (($4>lon_th)?$4:1/0):(($3>lat_th)?$3:1/0) pt 8 title "No.10", \
+"goal.csv" u 2:1 pt 22 ps 3  lc rgb "red" title "Goal"
+

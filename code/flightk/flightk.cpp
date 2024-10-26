@@ -147,6 +147,11 @@ public:
         isOnlyGnss = false;
     }
     int8_t landing() {
+        int8_t landed = 0;
+        logging.readLanded(&landed);
+        if (landed > 0) {
+            return MODE_NICHROME;
+        }
         for (int8_t i = 1; i < 10; i++) {
             alt_change[i-1] = alt_change[i];
         }
@@ -182,11 +187,11 @@ public:
             if (cnt > 4) {
                 addLogBuf("%3.1f c%d Fall", alt_change[9], cnt);
                 isDetectFall = true;
+                logging.storeLanded(1);
             }
             //return MODE_LANDING;
         } 
         if (isDetectRise && isDetectFall) {
-
             // 分散
             double avg = 0, s = 0;
             for (int8_t i = 0; i < 10; i++) {
@@ -221,9 +226,15 @@ public:
     }
 
     int8_t nichrome() {
-        if (expansionCnt > (3*SEC2CNT)) {
+        static bool is_first = true;
+        if (is_first) {
+            is_first = false;
+            logging.storeLanded(false);
+        }
+        if (expansionCnt > (7*SEC2CNT)) {
             expansionCnt = 0;
-            gpio_put(pin_nichrome_left, 0);
+            if ((expansionCnt == 7) || (expansionCnt == 8)) gpio_put(pin_nichrome_left, 1);
+            else gpio_put(pin_nichrome_left, 0);
             addLogBuf("NC %d Done", expansionCnt);
             printf("nichrome done\n");
             return MODE_GNSS;
@@ -241,6 +252,13 @@ public:
         static bool stack_left = true;
         float euler[3] = {0};
         static float dist = 0, dir = 0;
+        static bool ismove = true;
+        if (ismove) {
+            printf("ismove\n");
+            ismove = false;
+        } else {
+            ismove = true;
+        }
         if (gps.isReady()) {
 
             gps.calc();
@@ -305,21 +323,23 @@ public:
         //                printf("forward because too slow\n");
         //                addLogBuf("s%3.2f Forward", theta);
         //            } else 
-        if (abs(theta) < angle_th) {
-            printf("forward\n");
-            addLogBuf("t%3.2f Forward", theta);
-            motor.forward(1023);
-        } else if (theta > 0) {
-            printf("rightM\n");
-            addLogBuf("t%3.2f Right", theta);
-            motor.forward(1023, 550);
-        } else if (theta < 0) {
-            addLogBuf("t%3.2f Left", theta);
-            printf("leftM\n");
-            motor.forward(550, 1023);
-        } else {
-            printf("sikatanaku rightM\n");
-            motor.forward(1023,700);
+        if (ismove) {
+            if (abs(theta) < angle_th) {
+                printf("forward\n");
+                addLogBuf("t%3.2f Forward", theta);
+                motor.forward(1023);
+            } else if (theta > 0) {
+                printf("rightM\n");
+                addLogBuf("t%3.2f Right", theta);
+                motor.forward(1023, 550);
+            } else if (theta < 0) {
+                addLogBuf("t%3.2f Left", theta);
+                printf("leftM\n");
+                motor.forward(550, 1023);
+            } else {
+                printf("sikatanaku rightM\n");
+                motor.forward(1023,700);
+            }
         }
         return MODE_GNSS;
     }

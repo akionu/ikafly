@@ -37,6 +37,9 @@ class Log : LFS{
         bool readCalibData(double co[4]);
         bool storeImg(uint8_t* img, int32_t size);
         bool readImg(uint8_t* dst, int16_t* read_size, int32_t max_size);
+        bool storeLanded(int8_t landed);
+        bool readLanded(int8_t* landed);
+
     private:
         datetime_t time;
         uint8_t code;
@@ -45,4 +48,6 @@ class Log : LFS{
         lfs_file_t file_log;
         lfs_file_t file_calib;
         lfs_file_t file_img;
+        lfs_file_t file_landed;
+
 };

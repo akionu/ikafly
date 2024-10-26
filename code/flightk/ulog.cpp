@@ -207,6 +207,27 @@ bool Log::readCalibData(double co[4]) {
     ret = LFS::file_close(&file_calib);
     return (ret>=0);
 }
+bool Log::storeLanded(int8_t landed) {
+    int ret;
+    ret = LFS::file_open(&file_landed, "landed", LFS_O_RDWR | LFS_O_CREAT);
+    if (ret < 0) return false;
+    ret = LFS::file_rewind(&file_landed);
+    if (ret < 0) return false;
+    ret = LFS::file_write(&file_landed, &landed, sizeof(int8_t));
+    if (ret < 0) return false;
+    ret = LFS::file_close(&file_landed);
+    return (ret>=0);
+}
+
+bool Log::readLanded(int8_t* landed) {
+    int ret = LFS::file_open(&file_landed, "landed", LFS_O_RDONLY);
+    printf("Log: landed data %s\n", (ret>=0)?"found":"not found");
+    if (ret < 0) return false;
+    ret = LFS::file_read(&file_landed, &landed, sizeof(int8_t));
+    if (ret < 0) return false;
+    ret = LFS::file_close(&file_landed);
+    return (ret>=0);
+}
 
 bool Log::storeImg(uint8_t* img, int32_t size) {
     int ret;
@@ -223,7 +244,7 @@ bool Log::readImg(uint8_t* img, int16_t* read_size, int32_t max_size) {
     ret = LFS::file_open(&file_img, "img", LFS_O_RDONLY);
     if (ret < 0) return false;
     ret = LFS::file_read(&file_img, img, max_size);
-    if (ret <= 0) return false;
+    if (ret < 0) return false;
     else {
         *read_size = ret;
     }
